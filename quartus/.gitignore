@@ -1,0 +1,17 @@
+db/
+incremental_db/
+output_files/
+simulation/
+*.rpt
+*.qdf
+*.done
+*.dpf
+*.summary
+*.pin
+*.pof
+#*.qpf
+#*.qsf
+*.qws
+#*.sof
+*.smsg
+*.txt
