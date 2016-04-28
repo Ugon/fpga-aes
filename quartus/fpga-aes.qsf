@@ -536,7 +536,6 @@ set_global_assignment -name VHDL_FILE ../src/uart_tx.vhd
 set_global_assignment -name VHDL_FILE ../src/uart_prescaler.vhd
 set_global_assignment -name VHDL_FILE ../src/uart_rx.vhd
 set_global_assignment -name VHDL_FILE ../src/top.vhd
-set_global_assignment -name CDF_FILE programmer_chain.cdf
 set_global_assignment -name VECTOR_WAVEFORM_FILE ../test/uart_rx_test.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE ../test/uart_tx_test.vwf
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HPS_LED

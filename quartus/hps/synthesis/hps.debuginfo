@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="hps" kind="system" version="15.1" fabric="QSYS">
  <!-- Format version 15.1 185 (Future versions may contain additional information.) -->
- <!-- 2016.04.21.21:03:43 -->
+ <!-- 2016.04.28.22:55:19 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -53,7 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-  <value>1461265402</value>
+  <value>1461876889</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -152,7 +152,7 @@
 the requested settings for a module instance. -->
   <assignment>
    <name>cmsis.svd.file</name>
-   <value>C:/quartus-15.1/ip/altera/hps/altera_hps/altera_hps.svd</value>
+   <value>/home/ugon/development/tools/altera-lite/15.1/ip/altera/hps/altera_hps/altera_hps.svd</value>
   </assignment>
   <assignment>
    <name>cmsis.svd.suffix</name>
@@ -39123,5 +39123,5 @@ parameters are a RESULT of the module parameters. -->
   <version>15.1</version>
  </plugin>
  <reportVersion>15.1 185</reportVersion>
- <uniqueIdentifier>00000000000000E0000001543A34961B</uniqueIdentifier>
+ <uniqueIdentifier>305A3A02712A000001545EA74938</uniqueIdentifier>
 </EnsembleReport>

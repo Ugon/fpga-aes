@@ -9,19 +9,13 @@ use ieee.numeric_std.all;
 
 entity uart_tx is
 	generic (
-		number_of_bits : Integer := 8
-	);
+		number_of_bits : Integer := 8);
 	port (
 		reset_n     : in    std_logic;
 		clk         : in    std_logic; --16x baud rate
 		data        : in    std_logic_vector(number_of_bits - 1 downto 0);
 		available   : in    std_logic; --available on rising edge
-		
-		tx          : out   std_logic;
-		cnt         : out   Integer range 0 to 15;
-		db          : out   std_logic_vector(number_of_bits - 1 downto 0);
-		st          : out   Integer
-	);
+		tx          : out   std_logic);
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is
@@ -100,22 +94,6 @@ begin
 
 				end case;
 			end if;
-		cnt <= counter;
-	end process;
-
-	db <= data_buffer;
-
-	process(state) begin
-		case state is
-			when await_start => 
-				st <= 0;
-			when start => 
-				st <= 1;
-			when bits => 
-				st <= 2;
-			when stop => 
-				st <= 3;
-		end case;
 	end process;
 
 end uart_tx_impl;

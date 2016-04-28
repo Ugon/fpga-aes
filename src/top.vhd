@@ -29,35 +29,17 @@ entity top is
 		HPS_UART_RX             : inout std_logic;
 		HPS_UART_TX             : inout std_logic;
 		
-		HPS_LED             : inout std_logic;
-		HPS_KEY             : inout std_logic;
+		HPS_LED                 : inout std_logic;
+		HPS_KEY                 : inout std_logic;
 
 		oLEDR                   : out   std_logic_vector(9 downto 0);
-		iKEY                    : in    std_logic_vector(3  downto 0);
+		iKEY                    : in    std_logic_vector(3 downto 0);
 		iSW                     : in    std_logic_vector(9 downto 0)
 	);
 end top;
 
 architecture top_impl of top is
-
-	signal reset_n  : std_logic;
-
-	signal uart_clk : std_logic;
-	signal uart_rx  : std_logic;
-	signal uart_rx_available : std_logic;
-	signal uard_rx_data : std_logic_vector(7 downto 0);
-	signal uart_tx  : std_logic;
-
-	signal tmp     : std_logic;
-	signal started : std_logic;
 	
-	signal CONNECTED_TO_h2f_loan_io_in   : std_logic_vector(66 downto 0);
-	signal CONNECTED_TO_h2f_loan_io_out  : std_logic_vector(66 downto 0);
-	signal CONNECTED_TO_h2f_loan_io_oe   : std_logic_vector(66 downto 0);
-
-	signal hps_key_signal : std_logic;
-	signal hps_led_signal : std_logic;
-
 	component hps is
 		port (
 			h2f_loan_io_in                   : out   std_logic_vector(66 downto 0);
@@ -65,8 +47,8 @@ architecture top_impl of top is
 			h2f_loan_io_oe                   : in    std_logic_vector(66 downto 0);
 			hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic;
 			hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic;
-			hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO53
-			hps_io_hps_io_gpio_inst_LOANIO54 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO54
+			hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic;
+			hps_io_hps_io_gpio_inst_LOANIO54 : inout std_logic;
 			memory_mem_a                     : out   std_logic_vector(14 downto 0);
 			memory_mem_ba                    : out   std_logic_vector(2 downto 0);
 			memory_mem_ck                    : out   std_logic;
@@ -86,26 +68,34 @@ architecture top_impl of top is
 		);
 	end component hps;
 	
+	signal CONNECTED_TO_h2f_loan_io_in  : std_logic_vector(66 downto 0);
+	signal CONNECTED_TO_h2f_loan_io_out : std_logic_vector(66 downto 0);
+	signal CONNECTED_TO_h2f_loan_io_oe  : std_logic_vector(66 downto 0);
+
+	signal reset_n  : std_logic;
+
+	signal uart_clk          : std_logic;
+	signal uart_rx           : std_logic;
+	signal uard_rx_data      : std_logic_vector(7 downto 0);
+	signal uart_rx_available : std_logic;
+	signal uart_tx           : std_logic;
+	signal uard_tx_data      : std_logic_vector(7 downto 0);
+	signal uart_tx_available : std_logic;
+	
+	signal hps_key_signal : std_logic;
+	signal hps_led_signal : std_logic;
+	
 begin
 	
 	CONNECTED_TO_h2f_loan_io_oe(49) <= '0';
 	CONNECTED_TO_h2f_loan_io_oe(50) <= '1';
-	uart_rx <= CONNECTED_TO_h2f_loan_io_in(49);
-	CONNECTED_TO_h2f_loan_io_out(50) <= '0';
-
-	--uart_tx <= uart_rx;
-	--CONNECTED_TO_h2f_loan_io_out(50) <= CONNECTED_TO_h2f_loan_io_in(49);
-	--CONNECTED_TO_h2f_loan_io_out(50) <= uart_clk;
-
-
 	CONNECTED_TO_h2f_loan_io_oe(53) <= '1';
 	CONNECTED_TO_h2f_loan_io_oe(54) <= '0';
-	
+
+	CONNECTED_TO_h2f_loan_io_out(50) <= uart_tx;
+	uart_rx <= CONNECTED_TO_h2f_loan_io_in(49);
 	CONNECTED_TO_h2f_loan_io_out(53) <= hps_led_signal;
 	hps_key_signal <= CONNECTED_TO_h2f_loan_io_in(54);
-
-	 hps_led_signal <= '0';
-	 oLEDR(9) <= hps_key_signal;
 
 	hps0 : component hps
 		port map (
@@ -114,8 +104,8 @@ begin
 			h2f_loan_io_oe                   => CONNECTED_TO_h2f_loan_io_oe,
 			hps_io_hps_io_gpio_inst_LOANIO49 => HPS_UART_RX,
 			hps_io_hps_io_gpio_inst_LOANIO50 => HPS_UART_TX,
-			hps_io_hps_io_gpio_inst_LOANIO53 => HPS_LED, --            .hps_io_gpio_inst_LOANIO53
-			hps_io_hps_io_gpio_inst_LOANIO54 => HPS_KEY, --            .hps_io_gpio_inst_LOANIO54
+			hps_io_hps_io_gpio_inst_LOANIO53 => HPS_LED,
+			hps_io_hps_io_gpio_inst_LOANIO54 => HPS_KEY,
 			memory_mem_a                     => HPS_DDR3_ADDR,
 			memory_mem_ba                    => HPS_DDR3_BA,
 			memory_mem_ck                    => HPS_DDR3_CK_P,
@@ -165,17 +155,6 @@ begin
 	end process;
 
 	reset_n <= iKEY(0);
-
-
-	process (uart_tx) begin
-		if(rising_edge(uart_tx)) then
-			tmp <= not tmp;
-		end if;
-	end process;
-
-	oLEDR(8) <= not uart_tx;
-	--oLEDR(9) <= not uart_rx;
-
---	uart_tx <= uart_rx;
+	hps_led_signal <= hps_key_signal;
 
 end top_impl;

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="hps" kind="hps" version="1.0" fabric="QSYS">
  <!-- Format version 15.1 185 (Future versions may contain additional information.) -->
- <!-- 2016.04.21.21:03:22 -->
+ <!-- 2016.04.28.22:54:59 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1461265402</value>
+  <value>1461876889</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -70,7 +70,7 @@
 the requested settings for a module instance. -->
   <assignment>
    <name>cmsis.svd.file</name>
-   <value>C:/quartus-15.1/ip/altera/hps/altera_hps/altera_hps.svd</value>
+   <value>/home/ugon/development/tools/altera-lite/15.1/ip/altera/hps/altera_hps/altera_hps.svd</value>
   </assignment>
   <assignment>
    <name>cmsis.svd.suffix</name>

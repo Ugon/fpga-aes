@@ -14,12 +14,9 @@ entity uart_rx is
 	port (
 		reset_n     : in    std_logic;
 		clk         : in    std_logic; --16x baud rate
-		rx          : in    std_logic;
-		
 		data        : out   std_logic_vector(number_of_bits - 1 downto 0);
 		available   : out   std_logic; --available on rising edge
-		cnt         : out   Integer range 0 to 15
-	);
+		rx          : in    std_logic);
 end uart_rx;
 
 architecture uart_rx_impl of uart_rx is
@@ -34,17 +31,17 @@ architecture uart_rx_impl of uart_rx is
 begin
 
 	process (clk, reset_n) 
-		variable bit_position         : Integer range 0 to 7    := 0;
+		variable bit_position         : Integer range 0 to 7         := 0;
 		variable counter              : Integer range 0 to 15;
 		variable oversample_buffer    : std_logic_vector(2 downto 0) := (others => '0');
 	begin
 		if (reset_n = '0') then
-			state <= await_start;
-			available <= '0';
-			data <= (others => '0');
-			bit_position := 0;
+			bit_position      := 0;
+			counter           := 0;
+			available         <= '0';
+			data              <= (others => '0');
 			oversample_buffer := (others => '0');
-			counter := 0;
+			state             <= await_start;
 		elsif(rising_edge(clk)) then
 			case state is
 				when await_start =>
@@ -124,7 +121,6 @@ begin
 
 				end case;
 			end if;
-		cnt <= counter;
 	end process;
 
 end uart_rx_impl;
