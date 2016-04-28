@@ -31,7 +31,9 @@ module hps_hps #(
 		output wire [4:0]  mem_dm,                    //            .mem_dm
 		input  wire        oct_rzqin,                 //            .oct_rzqin
 		inout  wire        hps_io_gpio_inst_LOANIO49, //      hps_io.hps_io_gpio_inst_LOANIO49
-		inout  wire        hps_io_gpio_inst_LOANIO50  //            .hps_io_gpio_inst_LOANIO50
+		inout  wire        hps_io_gpio_inst_LOANIO50, //            .hps_io_gpio_inst_LOANIO50
+		inout  wire        hps_io_gpio_inst_LOANIO53, //            .hps_io_gpio_inst_LOANIO53
+		inout  wire        hps_io_gpio_inst_LOANIO54  //            .hps_io_gpio_inst_LOANIO54
 	);
 
 	wire   [8:0] fpga_interfaces_loanio_gpio_loanio2_oe; // fpga_interfaces:loanio_gpio_loanio2_oe -> hps_io:gpio_loanio_loanio2_oe
@@ -113,7 +115,9 @@ module hps_hps #(
 		.mem_dm                    (mem_dm),                                 //            .mem_dm
 		.oct_rzqin                 (oct_rzqin),                              //            .oct_rzqin
 		.hps_io_gpio_inst_LOANIO49 (hps_io_gpio_inst_LOANIO49),              //      hps_io.hps_io_gpio_inst_LOANIO49
-		.hps_io_gpio_inst_LOANIO50 (hps_io_gpio_inst_LOANIO50)               //            .hps_io_gpio_inst_LOANIO50
+		.hps_io_gpio_inst_LOANIO50 (hps_io_gpio_inst_LOANIO50),              //            .hps_io_gpio_inst_LOANIO50
+		.hps_io_gpio_inst_LOANIO53 (hps_io_gpio_inst_LOANIO53),              //            .hps_io_gpio_inst_LOANIO53
+		.hps_io_gpio_inst_LOANIO54 (hps_io_gpio_inst_LOANIO54)               //            .hps_io_gpio_inst_LOANIO54
 	);
 
 endmodule

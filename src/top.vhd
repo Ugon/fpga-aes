@@ -29,6 +29,9 @@ entity top is
 		HPS_UART_RX             : inout std_logic;
 		HPS_UART_TX             : inout std_logic;
 		
+		HPS_LED             : inout std_logic;
+		HPS_KEY             : inout std_logic;
+
 		oLEDR                   : out   std_logic_vector(9 downto 0);
 		iKEY                    : in    std_logic_vector(3  downto 0);
 		iSW                     : in    std_logic_vector(9 downto 0)
@@ -37,8 +40,13 @@ end top;
 
 architecture top_impl of top is
 
-	signal uart_rx : std_logic;
-	signal uart_tx : std_logic;
+	signal reset_n  : std_logic;
+
+	signal uart_clk : std_logic;
+	signal uart_rx  : std_logic;
+	signal uart_rx_available : std_logic;
+	signal uard_rx_data : std_logic_vector(7 downto 0);
+	signal uart_tx  : std_logic;
 
 	signal tmp     : std_logic;
 	signal started : std_logic;
@@ -47,6 +55,9 @@ architecture top_impl of top is
 	signal CONNECTED_TO_h2f_loan_io_out  : std_logic_vector(66 downto 0);
 	signal CONNECTED_TO_h2f_loan_io_oe   : std_logic_vector(66 downto 0);
 
+	signal hps_key_signal : std_logic;
+	signal hps_led_signal : std_logic;
+
 	component hps is
 		port (
 			h2f_loan_io_in                   : out   std_logic_vector(66 downto 0);
@@ -54,6 +65,8 @@ architecture top_impl of top is
 			h2f_loan_io_oe                   : in    std_logic_vector(66 downto 0);
 			hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic;
 			hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic;
+			hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO53
+			hps_io_hps_io_gpio_inst_LOANIO54 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO54
 			memory_mem_a                     : out   std_logic_vector(14 downto 0);
 			memory_mem_ba                    : out   std_logic_vector(2 downto 0);
 			memory_mem_ck                    : out   std_logic;
@@ -75,6 +88,25 @@ architecture top_impl of top is
 	
 begin
 	
+	CONNECTED_TO_h2f_loan_io_oe(49) <= '0';
+	CONNECTED_TO_h2f_loan_io_oe(50) <= '1';
+	uart_rx <= CONNECTED_TO_h2f_loan_io_in(49);
+	CONNECTED_TO_h2f_loan_io_out(50) <= '0';
+
+	--uart_tx <= uart_rx;
+	--CONNECTED_TO_h2f_loan_io_out(50) <= CONNECTED_TO_h2f_loan_io_in(49);
+	--CONNECTED_TO_h2f_loan_io_out(50) <= uart_clk;
+
+
+	CONNECTED_TO_h2f_loan_io_oe(53) <= '1';
+	CONNECTED_TO_h2f_loan_io_oe(54) <= '0';
+	
+	CONNECTED_TO_h2f_loan_io_out(53) <= hps_led_signal;
+	hps_key_signal <= CONNECTED_TO_h2f_loan_io_in(54);
+
+	 hps_led_signal <= '0';
+	 oLEDR(9) <= hps_key_signal;
+
 	hps0 : component hps
 		port map (
 			h2f_loan_io_in                   => CONNECTED_TO_h2f_loan_io_in,
@@ -82,6 +114,8 @@ begin
 			h2f_loan_io_oe                   => CONNECTED_TO_h2f_loan_io_oe,
 			hps_io_hps_io_gpio_inst_LOANIO49 => HPS_UART_RX,
 			hps_io_hps_io_gpio_inst_LOANIO50 => HPS_UART_TX,
+			hps_io_hps_io_gpio_inst_LOANIO53 => HPS_LED, --            .hps_io_gpio_inst_LOANIO53
+			hps_io_hps_io_gpio_inst_LOANIO54 => HPS_KEY, --            .hps_io_gpio_inst_LOANIO54
 			memory_mem_a                     => HPS_DDR3_ADDR,
 			memory_mem_ba                    => HPS_DDR3_BA,
 			memory_mem_ck                    => HPS_DDR3_CK_P,
@@ -100,28 +134,48 @@ begin
 			memory_oct_rzqin                 => HPS_DDR3_RZQ
 		);
 
-	CONNECTED_TO_h2f_loan_io_oe(49) <= '0';
-	CONNECTED_TO_h2f_loan_io_oe(50) <= '1';
-	uart_rx <= CONNECTED_TO_h2f_loan_io_in(49);
-	CONNECTED_TO_h2f_loan_io_out(50) <= uart_tx;
+	uart_prescaler0 : entity work.uart_prescaler
+		port map(
+			clk_in  => iCLK_50,
+			clk_out => uart_clk
+		);
 
-	oLEDR(9 downto 6) <= iKEY(3 downto 0);
-	
-	oLEDR(0) <= iCLK_50;
-	oLEDR(1) <= iCLK_50_2;
-	oLEDR(2) <= iCLK_50_3;
-	oLEDR(3) <= iCLK_50_4;
-	
-	uart_tx <= uart_rx;
-	
-	process (uart_rx) 
-	begin
-		if(rising_edge(uart_rx)) then
-			tmp <= not tmp;
-			started <= '1';
+	uart_rx0 : entity work.uart_rx
+		port map (
+			reset_n     => reset_n,
+			clk         => uart_clk,
+			rx          => uart_rx,
+			data        => uard_rx_data,
+			available   => uart_rx_available
+		);
+
+	uart_tx0 : entity work.uart_tx
+		port map(
+			reset_n     => reset_n,
+			clk         => uart_clk,
+			data        => iSW(7 downto 0),
+			available   => not iKEY(3),
+			tx          => uart_tx
+		);
+
+	process (uart_rx_available, uard_rx_data) begin
+		if(rising_edge(uart_rx_available)) then
+			oLEDR(7 downto 0) <= uard_rx_data;
 		end if;
 	end process;
-	oLEDR(5) <= tmp;
-	oLEDR(4) <= started;
+
+	reset_n <= iKEY(0);
+
+
+	process (uart_tx) begin
+		if(rising_edge(uart_tx)) then
+			tmp <= not tmp;
+		end if;
+	end process;
+
+	oLEDR(8) <= not uart_tx;
+	--oLEDR(9) <= not uart_rx;
+
+--	uart_tx <= uart_rx;
 
 end top_impl;

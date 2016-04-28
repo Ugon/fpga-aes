@@ -13,6 +13,8 @@ entity hps is
 		h2f_loan_io_oe                   : in    std_logic_vector(66 downto 0) := (others => '0'); --            .oe
 		hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic                     := '0';             --      hps_io.hps_io_gpio_inst_LOANIO49
 		hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic                     := '0';             --            .hps_io_gpio_inst_LOANIO50
+		hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic                     := '0';             --            .hps_io_gpio_inst_LOANIO53
+		hps_io_hps_io_gpio_inst_LOANIO54 : inout std_logic                     := '0';             --            .hps_io_gpio_inst_LOANIO54
 		memory_mem_a                     : out   std_logic_vector(14 downto 0);                    --      memory.mem_a
 		memory_mem_ba                    : out   std_logic_vector(2 downto 0);                     --            .mem_ba
 		memory_mem_ck                    : out   std_logic;                                        --            .mem_ck
@@ -60,6 +62,8 @@ architecture rtl of hps is
 			oct_rzqin                 : in    std_logic                     := 'X';             -- oct_rzqin
 			hps_io_gpio_inst_LOANIO49 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO49
 			hps_io_gpio_inst_LOANIO50 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO50
+			hps_io_gpio_inst_LOANIO53 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO53
+			hps_io_gpio_inst_LOANIO54 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO54
 			h2f_rst_n                 : out   std_logic                                         -- reset_n
 		);
 	end component hps_hps;
@@ -93,6 +97,8 @@ begin
 			oct_rzqin                 => memory_oct_rzqin,                 --            .oct_rzqin
 			hps_io_gpio_inst_LOANIO49 => hps_io_hps_io_gpio_inst_LOANIO49, --      hps_io.hps_io_gpio_inst_LOANIO49
 			hps_io_gpio_inst_LOANIO50 => hps_io_hps_io_gpio_inst_LOANIO50, --            .hps_io_gpio_inst_LOANIO50
+			hps_io_gpio_inst_LOANIO53 => hps_io_hps_io_gpio_inst_LOANIO53, --            .hps_io_gpio_inst_LOANIO53
+			hps_io_gpio_inst_LOANIO54 => hps_io_hps_io_gpio_inst_LOANIO54, --            .hps_io_gpio_inst_LOANIO54
 			h2f_rst_n                 => open                              --   h2f_reset.reset_n
 		);
 

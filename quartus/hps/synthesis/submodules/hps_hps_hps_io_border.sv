@@ -42,20 +42,27 @@ module hps_hps_hps_io_border(
 // hps_io
  ,inout wire [1 - 1 : 0 ] hps_io_gpio_inst_LOANIO49
  ,inout wire [1 - 1 : 0 ] hps_io_gpio_inst_LOANIO50
+ ,inout wire [1 - 1 : 0 ] hps_io_gpio_inst_LOANIO53
+ ,inout wire [1 - 1 : 0 ] hps_io_gpio_inst_LOANIO54
 );
 
 assign hps_io_gpio_inst_LOANIO49 = intermediate[1] ? intermediate[0] : 'z;
 assign hps_io_gpio_inst_LOANIO50 = intermediate[3] ? intermediate[2] : 'z;
+assign hps_io_gpio_inst_LOANIO53 = intermediate[5] ? intermediate[4] : 'z;
+assign hps_io_gpio_inst_LOANIO54 = intermediate[7] ? intermediate[6] : 'z;
 
-wire [4 - 1 : 0] intermediate;
+wire [8 - 1 : 0] intermediate;
 
-wire [60 - 1 : 0] floating;
+wire [66 - 1 : 0] floating;
 
 cyclonev_hps_peripheral_gpio gpio_inst(
  .GPIO1_PORTA_I({
-    hps_io_gpio_inst_LOANIO50[0:0] // 21:21
+    hps_io_gpio_inst_LOANIO54[0:0] // 25:25
+   ,hps_io_gpio_inst_LOANIO53[0:0] // 24:24
+   ,floating[1:0] // 23:22
+   ,hps_io_gpio_inst_LOANIO50[0:0] // 21:21
    ,hps_io_gpio_inst_LOANIO49[0:0] // 20:20
-   ,floating[19:0] // 19:0
+   ,floating[21:2] // 19:0
   })
 ,.LOANIO1_O({
     gpio_loanio_loanio1_o[28:0] // 28:0
@@ -67,9 +74,12 @@ cyclonev_hps_peripheral_gpio gpio_inst(
     gpio_loanio_loanio0_i[28:0] // 28:0
   })
 ,.GPIO1_PORTA_OE({
-    intermediate[3:3] // 21:21
+    intermediate[7:7] // 25:25
+   ,intermediate[5:5] // 24:24
+   ,floating[23:22] // 23:22
+   ,intermediate[3:3] // 21:21
    ,intermediate[1:1] // 20:20
-   ,floating[39:20] // 19:0
+   ,floating[43:24] // 19:0
   })
 ,.LOANIO2_O({
     gpio_loanio_loanio2_o[8:0] // 8:0
@@ -84,9 +94,12 @@ cyclonev_hps_peripheral_gpio gpio_inst(
     gpio_loanio_loanio2_oe[8:0] // 8:0
   })
 ,.GPIO1_PORTA_O({
-    intermediate[2:2] // 21:21
+    intermediate[6:6] // 25:25
+   ,intermediate[4:4] // 24:24
+   ,floating[45:44] // 23:22
+   ,intermediate[2:2] // 21:21
    ,intermediate[0:0] // 20:20
-   ,floating[59:40] // 19:0
+   ,floating[65:46] // 19:0
   })
 ,.LOANIO1_OE({
     gpio_loanio_loanio1_oe[28:0] // 28:0

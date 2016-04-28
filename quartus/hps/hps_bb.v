@@ -5,6 +5,8 @@ module hps (
 	h2f_loan_io_oe,
 	hps_io_hps_io_gpio_inst_LOANIO49,
 	hps_io_hps_io_gpio_inst_LOANIO50,
+	hps_io_hps_io_gpio_inst_LOANIO53,
+	hps_io_hps_io_gpio_inst_LOANIO54,
 	memory_mem_a,
 	memory_mem_ba,
 	memory_mem_ck,
@@ -27,6 +29,8 @@ module hps (
 	input	[66:0]	h2f_loan_io_oe;
 	inout		hps_io_hps_io_gpio_inst_LOANIO49;
 	inout		hps_io_hps_io_gpio_inst_LOANIO50;
+	inout		hps_io_hps_io_gpio_inst_LOANIO53;
+	inout		hps_io_hps_io_gpio_inst_LOANIO54;
 	output	[14:0]	memory_mem_a;
 	output	[2:0]	memory_mem_ba;
 	output		memory_mem_ck;

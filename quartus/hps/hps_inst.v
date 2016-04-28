@@ -4,6 +4,8 @@
 		.h2f_loan_io_oe                   (<connected-to-h2f_loan_io_oe>),                   //            .oe
 		.hps_io_hps_io_gpio_inst_LOANIO49 (<connected-to-hps_io_hps_io_gpio_inst_LOANIO49>), //      hps_io.hps_io_gpio_inst_LOANIO49
 		.hps_io_hps_io_gpio_inst_LOANIO50 (<connected-to-hps_io_hps_io_gpio_inst_LOANIO50>), //            .hps_io_gpio_inst_LOANIO50
+		.hps_io_hps_io_gpio_inst_LOANIO53 (<connected-to-hps_io_hps_io_gpio_inst_LOANIO53>), //            .hps_io_gpio_inst_LOANIO53
+		.hps_io_hps_io_gpio_inst_LOANIO54 (<connected-to-hps_io_hps_io_gpio_inst_LOANIO54>), //            .hps_io_gpio_inst_LOANIO54
 		.memory_mem_a                     (<connected-to-memory_mem_a>),                     //      memory.mem_a
 		.memory_mem_ba                    (<connected-to-memory_mem_ba>),                    //            .mem_ba
 		.memory_mem_ck                    (<connected-to-memory_mem_ck>),                    //            .mem_ck

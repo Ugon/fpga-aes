@@ -1,8 +1,59 @@
 # # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
 # 
-preplace inst unsaved.clk_0 -pg 1 -lvl 1 -y 30
-preplace inst unsaved -pg 1 -lvl 1 -y 40 -regy -20
-preplace netloc EXPORT<net_container>unsaved</net_container>(SLAVE)unsaved.reset,(SLAVE)clk_0.clk_in_reset) 1 0 1 NJ
-preplace netloc EXPORT<net_container>unsaved</net_container>(SLAVE)clk_0.clk_in,(SLAVE)unsaved.clk) 1 0 1 NJ
-levelinfo -pg 1 0 50 270
-levelinfo -hier unsaved 60 90 260
+preplace inst hps.hps.usb1 -pg 1
+preplace inst hps.hps.timer3 -pg 1
+preplace inst hps.hps.hps_io.border -pg 1
+preplace inst hps.hps.axi_sdram -pg 1
+preplace inst hps.hps.qspi -pg 1
+preplace inst hps.hps.i2c0 -pg 1
+preplace inst hps.hps.uart0 -pg 1
+preplace inst hps.hps.sdrctl -pg 1
+preplace inst hps.hps.sdmmc -pg 1
+preplace inst hps.hps.i2c1 -pg 1
+preplace inst hps.hps.uart1 -pg 1
+preplace inst hps.hps.scu -pg 1
+preplace inst hps.hps.i2c2 -pg 1
+preplace inst hps.hps.f2s_sdram_ref_clk -pg 1
+preplace inst hps.hps.gmac0 -pg 1
+preplace inst hps.hps.i2c3 -pg 1
+preplace inst hps.hps.L2 -pg 1
+preplace inst hps.hps.timer -pg 1
+preplace inst hps.hps.axi_ocram -pg 1
+preplace inst hps.hps.gmac1 -pg 1
+preplace inst hps.hps.bridges -pg 1
+preplace inst hps -pg 1 -lvl 1 -y 40 -regy -20
+preplace inst hps.hps.spim0 -pg 1
+preplace inst hps.hps.wd_timer0 -pg 1
+preplace inst hps.hps.spim1 -pg 1
+preplace inst hps.hps.nand0 -pg 1
+preplace inst hps.hps.gpio0 -pg 1
+preplace inst hps.hps.wd_timer1 -pg 1
+preplace inst hps.hps.l3regs -pg 1
+preplace inst hps.hps.gpio1 -pg 1
+preplace inst hps.hps.clk_0 -pg 1
+preplace inst hps.hps.hps_io -pg 1
+preplace inst hps.hps.fpga_interfaces -pg 1
+preplace inst hps.hps.gpio2 -pg 1
+preplace inst hps.hps.fpgamgr -pg 1
+preplace inst hps.hps.clkmgr -pg 1
+preplace inst hps.hps.arm_a9_0 -pg 1
+preplace inst hps.hps.dcan0 -pg 1
+preplace inst hps.hps.timer0 -pg 1
+preplace inst hps.hps.arm_a9_1 -pg 1
+preplace inst hps.hps.f2s_periph_ref_clk -pg 1
+preplace inst hps.hps.dcan1 -pg 1
+preplace inst hps.hps.timer1 -pg 1
+preplace inst hps.hps.sysmgr -pg 1
+preplace inst hps.hps.arm_gic_0 -pg 1
+preplace inst hps.hps.eosc1 -pg 1
+preplace inst hps.hps.usb0 -pg 1
+preplace inst hps.hps.timer2 -pg 1
+preplace inst hps.hps.rstmgr -pg 1
+preplace inst hps.hps.dma -pg 1
+preplace inst hps.hps.eosc2 -pg 1
+preplace inst hps.hps -pg 1 -lvl 1 -y 50
+preplace netloc EXPORT<net_container>hps</net_container>(SLAVE)hps.memory,(SLAVE)hps.memory) 1 0 1 NJ
+preplace netloc EXPORT<net_container>hps</net_container>(SLAVE)hps.hps_io,(SLAVE)hps.hps_io) 1 0 1 NJ
+preplace netloc EXPORT<net_container>hps</net_container>(SLAVE)hps.h2f_loan_io,(SLAVE)hps.h2f_loan_io) 1 0 1 NJ
+levelinfo -pg 1 0 80 330
+levelinfo -hier hps 90 180 320

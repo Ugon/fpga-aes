@@ -33,7 +33,9 @@ module hps_hps_hps_io (
 		output wire [4:0]  mem_dm,                    //            .mem_dm
 		input  wire        oct_rzqin,                 //            .oct_rzqin
 		inout  wire        hps_io_gpio_inst_LOANIO49, //      hps_io.hps_io_gpio_inst_LOANIO49
-		inout  wire        hps_io_gpio_inst_LOANIO50  //            .hps_io_gpio_inst_LOANIO50
+		inout  wire        hps_io_gpio_inst_LOANIO50, //            .hps_io_gpio_inst_LOANIO50
+		inout  wire        hps_io_gpio_inst_LOANIO53, //            .hps_io_gpio_inst_LOANIO53
+		inout  wire        hps_io_gpio_inst_LOANIO54  //            .hps_io_gpio_inst_LOANIO54
 	);
 
 	hps_hps_hps_io_border border (
@@ -63,7 +65,9 @@ module hps_hps_hps_io (
 		.mem_dm                    (mem_dm),                    //            .mem_dm
 		.oct_rzqin                 (oct_rzqin),                 //            .oct_rzqin
 		.hps_io_gpio_inst_LOANIO49 (hps_io_gpio_inst_LOANIO49), //      hps_io.hps_io_gpio_inst_LOANIO49
-		.hps_io_gpio_inst_LOANIO50 (hps_io_gpio_inst_LOANIO50)  //            .hps_io_gpio_inst_LOANIO50
+		.hps_io_gpio_inst_LOANIO50 (hps_io_gpio_inst_LOANIO50), //            .hps_io_gpio_inst_LOANIO50
+		.hps_io_gpio_inst_LOANIO53 (hps_io_gpio_inst_LOANIO53), //            .hps_io_gpio_inst_LOANIO53
+		.hps_io_gpio_inst_LOANIO54 (hps_io_gpio_inst_LOANIO54)  //            .hps_io_gpio_inst_LOANIO54
 	);
 
 endmodule

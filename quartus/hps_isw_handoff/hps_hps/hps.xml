@@ -109,6 +109,10 @@
     <pin_mux name='GPLMUX49' choice='LoanIO' value='0' />
     <pin_mux name='GENERALIO2' choice='GPIO/LoanIO' value='0' />
     <pin_mux name='GPLMUX50' choice='LoanIO' value='0' />
+    <pin_mux name='GENERALIO5' choice='GPIO/LoanIO' value='0' />
+    <pin_mux name='GPLMUX53' choice='LoanIO' value='0' />
+    <pin_mux name='GENERALIO6' choice='GPIO/LoanIO' value='0' />
+    <pin_mux name='GPLMUX54' choice='LoanIO' value='0' />
     <pin_mux name='GPLMUX0' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX1' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX2' choice='GPIO' value='1' />
@@ -160,8 +164,6 @@
     <pin_mux name='GPLMUX48' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX51' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX52' choice='GPIO' value='1' />
-    <pin_mux name='GPLMUX53' choice='GPIO' value='1' />
-    <pin_mux name='GPLMUX54' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX55' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX56' choice='GPIO' value='1' />
     <pin_mux name='GPLMUX57' choice='GPIO' value='1' />

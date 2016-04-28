@@ -5,6 +5,8 @@
 			h2f_loan_io_oe                   : in    std_logic_vector(66 downto 0) := (others => 'X'); -- oe
 			hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO49
 			hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO50
+			hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO53
+			hps_io_hps_io_gpio_inst_LOANIO54 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO54
 			memory_mem_a                     : out   std_logic_vector(14 downto 0);                    -- mem_a
 			memory_mem_ba                    : out   std_logic_vector(2 downto 0);                     -- mem_ba
 			memory_mem_ck                    : out   std_logic;                                        -- mem_ck
@@ -31,6 +33,8 @@
 			h2f_loan_io_oe                   => CONNECTED_TO_h2f_loan_io_oe,                   --            .oe
 			hps_io_hps_io_gpio_inst_LOANIO49 => CONNECTED_TO_hps_io_hps_io_gpio_inst_LOANIO49, --      hps_io.hps_io_gpio_inst_LOANIO49
 			hps_io_hps_io_gpio_inst_LOANIO50 => CONNECTED_TO_hps_io_hps_io_gpio_inst_LOANIO50, --            .hps_io_gpio_inst_LOANIO50
+			hps_io_hps_io_gpio_inst_LOANIO53 => CONNECTED_TO_hps_io_hps_io_gpio_inst_LOANIO53, --            .hps_io_gpio_inst_LOANIO53
+			hps_io_hps_io_gpio_inst_LOANIO54 => CONNECTED_TO_hps_io_hps_io_gpio_inst_LOANIO54, --            .hps_io_gpio_inst_LOANIO54
 			memory_mem_a                     => CONNECTED_TO_memory_mem_a,                     --      memory.mem_a
 			memory_mem_ba                    => CONNECTED_TO_memory_mem_ba,                    --            .mem_ba
 			memory_mem_ck                    => CONNECTED_TO_memory_mem_ck,                    --            .mem_ck
