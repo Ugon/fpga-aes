@@ -46,3 +46,6 @@ software/
 #ignore QSYS output
 hps/
 hps_isw_handoff/
+.qsys_edit/
+*.sopcinfo
+*.csv
