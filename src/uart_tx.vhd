@@ -9,11 +9,11 @@ use ieee.numeric_std.all;
 
 entity uart_tx is
 	generic (
-		number_of_bits : Integer := 8);
+		data_bits : Integer := 8);
 	port (
 		reset_n     : in    std_logic;
 		clk         : in    std_logic; --16x baud rate
-		data        : in    std_logic_vector(number_of_bits - 1 downto 0);
+		data        : in    std_logic_vector(data_bits - 1 downto 0);
 		available   : in    std_logic; --available on rising edge
 		tx          : out   std_logic);
 end uart_tx;
@@ -22,7 +22,7 @@ architecture uart_tx_impl of uart_tx is
 	type fsm is (await_start, start, bits, stop);
 	signal state : fsm := await_start;
 
-	signal data_buffer : std_logic_vector(7 downto 0) := (others => '0');
+	signal data_buffer : std_logic_vector(data_bits - 1 downto 0) := (others => '0');
 
 	signal available1 : std_logic := '0';
 	signal available2 : std_logic := '0';
@@ -41,7 +41,7 @@ begin
 	end process;
 
 	process (clk, data_buffer, reset_n) 
-		variable bit_position         : Integer range 0 to 7    := 0;
+		variable bit_position         : Integer range 0 to data_bits - 1    := 0;
 		variable counter              : Integer range 0 to 15;
 	begin
 		if (reset_n = '0') then
@@ -73,7 +73,7 @@ begin
 				when bits =>
 					if (counter = 15) then
 						counter := 0;
-						if (bit_position < 7) then
+						if (bit_position < data_bits - 1) then
 							bit_position := bit_position + 1;
 							tx <= data_buffer(bit_position);
 						else
@@ -92,8 +92,8 @@ begin
 						counter := counter + 1;
 					end if;
 
-				end case;
-			end if;
+			end case;
+		end if;
 	end process;
 
 end uart_tx_impl;

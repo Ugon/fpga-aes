@@ -9,12 +9,12 @@ use ieee.numeric_std.all;
 
 entity uart_rx is
 	generic (
-		number_of_bits : Integer := 8
+		data_bits : Integer := 8
 	);
 	port (
 		reset_n     : in    std_logic;
 		clk         : in    std_logic; --16x baud rate
-		data        : out   std_logic_vector(number_of_bits - 1 downto 0);
+		data        : out   std_logic_vector(data_bits - 1 downto 0);
 		available   : out   std_logic; --available on rising edge
 		rx          : in    std_logic);
 end uart_rx;
@@ -23,7 +23,7 @@ architecture uart_rx_impl of uart_rx is
 	type fsm is (await_start, confirm_start, receive_bits, await_stop);
 	signal state : fsm;
 
-	signal data_buffer : std_logic_vector(7 downto 0);
+	signal data_buffer : std_logic_vector(data_bits - 1 downto 0);
 
 	function vote(samples : in std_logic_vector(2 downto 0)) return std_logic is begin
 		return ((samples(0) and samples(1)) or (samples(1) and samples(2)) or (samples(0) and samples(2)));
@@ -31,7 +31,7 @@ architecture uart_rx_impl of uart_rx is
 begin
 
 	process (clk, reset_n) 
-		variable bit_position         : Integer range 0 to 7         := 0;
+		variable bit_position         : Integer range 0 to data_bits - 1         := 0;
 		variable counter              : Integer range 0 to 15;
 		variable oversample_buffer    : std_logic_vector(2 downto 0) := (others => '0');
 	begin
@@ -81,7 +81,7 @@ begin
 						when 9  => oversample_buffer(2) := rx;
 						when 15 => 
 							data_buffer(bit_position) <= vote(oversample_buffer);
-							if (bit_position < 7) then
+							if (bit_position < data_bits - 1) then
 								bit_position := bit_position + 1;
 								state <= receive_bits;
 							else 
@@ -119,8 +119,8 @@ begin
 						counter := 0;
 					end if;
 
-				end case;
-			end if;
+			end case;
+		end if;
 	end process;
 
 end uart_rx_impl;
