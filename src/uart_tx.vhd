@@ -11,11 +11,12 @@ entity uart_tx is
 	generic (
 		data_bits : Integer := 8);
 	port (
-		reset_n     : in    std_logic;
-		clk         : in    std_logic; --16x baud rate
-		data        : in    std_logic_vector(data_bits - 1 downto 0);
-		available   : in    std_logic; --available on rising edge
-		tx          : out   std_logic);
+		reset_n      : in    std_logic;
+		clk          : in    std_logic; --16x baud rate
+		data         : in    std_logic_vector(data_bits - 1 downto 0);
+		available    : in    std_logic; --available on rising edge
+		tx           : out   std_logic;
+		provide_next : out   std_logic);
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is
@@ -26,16 +27,23 @@ architecture uart_tx_impl of uart_tx is
 
 	signal available1 : std_logic := '0';
 	signal available2 : std_logic := '0';
+
+	signal ask_for_next1 : std_logic := '0';
+	signal ask_for_next2 : std_logic := '1';
 begin
+
+	provide_next <= (ask_for_next1 xor ask_for_next2) and clk;
 
 	process (available, reset_n) begin
 		if (reset_n = '0') then
 			data_buffer <= (others => '0');
 			available1 <= '0';
+			ask_for_next2 <= '1';
 		elsif (rising_edge(available)) then
-			if (state = await_start) then
+			if (state = await_start or state = stop) then
 				data_buffer <= data;
 				available1 <= not available2;
+				ask_for_next2 <= ask_for_next1;
 			end if;
 		end if;
 	end process;
@@ -50,10 +58,11 @@ begin
 			bit_position := 0;
 			counter := 0;
 			tx <= '1';
+			ask_for_next1 <= '0';
 		elsif(rising_edge(clk)) then
 			case state is
 				when await_start =>
-					if (available1 /= available2) then
+					if (available1 = not available2) then
 						available2 <= available1;
 						counter := 0;
 						tx <= '0';
@@ -85,9 +94,20 @@ begin
 					end if;
 
 				when stop =>
-					if (counter =  15) then 
+					if counter = 0 then
+						counter := 1;
+					elsif (counter = 14) then
+						ask_for_next1 <= not ask_for_next2;
+						counter := 15;
+					elsif (counter = 15) then 
 						counter := 0;
-						state <= await_start;
+						if (available1 = not available2) then
+							available2 <= available1;
+							tx <= '0';
+							state <= start;
+						else
+							state <= await_start;
+						end if;
 					else 
 						counter := counter + 1;
 					end if;
