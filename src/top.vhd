@@ -16,7 +16,7 @@ entity top is
 		HPS_DDR3_CKE            : out   std_logic;
 		HPS_DDR3_CS_N           : out   std_logic;
 		HPS_DDR3_RAS_N          : out   std_logic;
-		HPS_DDR3_CAS_N          : out   std_logic;
+		HPS_DDR3_CAS_N          : out   std_logic; 
 		HPS_DDR3_WE_N           : out   std_logic;
 		HPS_DDR3_RESET_N        : out   std_logic;
 		HPS_DDR3_DQ             : inout std_logic_vector(39 downto 0);
@@ -56,6 +56,11 @@ architecture top_impl of top is
 	
 	signal hps_key_signal : std_logic;
 	signal hps_led_signal : std_logic;
+
+	signal block_from_aes : std_logic_vector(127 downto 0);
+	signal block_to_aes : std_logic_vector(127 downto 0);
+
+	signal test_block : std_logic_vector(127 downto 0);
 	
 	--component hps is
 	--	port (
@@ -130,31 +135,40 @@ begin
 			clk_out => uart_clk
 		);
 
-	uart_rx0 : entity work.uart_rx
+	uart_communicator0 : entity work.uart_communicator
 		port map (
-			reset_n     => reset_n,
-			clk         => uart_clk,
-			rx          => uart_rx,
-			data        => uard_rx_data,
-			available   => uart_rx_available
+			reset_n                => reset_n,
+			clk_16                 => uart_clk,
+			rx                     => uart_rx,
+			tx                     => uart_tx,
+			block_modification_in  => block_from_aes,
+			block_modification_out => block_to_aes
 		);
 
-	uart_tx0 : entity work.uart_tx
-		port map(
-			reset_n     => reset_n,
-			clk         => uart_clk,
-			data        => iSW(7 downto 0),
-			available   => not iKEY(3),
-			tx          => uart_tx
-		);
+	uart_communicator1 : entity work.uart_communicator
+		port map (
+			reset_n                => reset_n,
+			clk_16                 => uart_clk,
+			rx                     => uart_tx,
+			block_modification_out => test_block,
+			block_modification_in  => test_block
+		);	
 
-	process (uart_rx_available, uard_rx_data) begin
-		if(rising_edge(uart_rx_available)) then
-			oLEDR(7 downto 0) <= uard_rx_data;
-		end if;
-	end process;
+	oLEDR(7 downto 0) <= test_block((to_integer(unsigned(iSW(4 downto 0))) + 1) * 8 - 1 downto to_integer(unsigned(iSW(4 downto 0))) * 8);
+
+
+	--process (uart_rx_available, uard_rx_data) begin
+		--if(rising_edge(uart_rx_available)) then
+			--oLEDR(7 downto 0) <= uard_rx_data;
+		--end if;
+	--end process;
+
+	block_from_aes <= block_to_aes;
+
+
 
 	reset_n <= iKEY(0);
 	hps_led_signal <= hps_key_signal;
 
+	
 end top_impl;

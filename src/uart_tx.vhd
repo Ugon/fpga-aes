@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.utils.all;
+
 --no parity bits
 --1 start bit
 --1 stop bit
@@ -9,71 +11,67 @@ use ieee.numeric_std.all;
 
 entity uart_tx is
 	generic (
-		data_bits : Integer := 8);
+		byte_bits : Integer := 8);
 	port (
-		reset_n      : in    std_logic;
-		clk          : in    std_logic; --16x baud rate
-		data         : in    std_logic_vector(data_bits - 1 downto 0);
-		available    : in    std_logic; --available on rising edge
-		tx           : out   std_logic;
-		provide_next : out   std_logic);
+		reset_n                   : in  std_logic;
+		clk_16                    : in  std_logic; --16x baud rate
+		tx                        : out std_logic                                := 'X';
+
+		byte_in                   : in  std_logic_vector(byte_bits - 1 downto 0);
+		start_transmitting_in     : in  std_logic;
+		finished_transmitting_out : out std_logic                                := 'X';
+
+		dbg_cnt                   : out Integer range 0 to 15;
+		dbg_state                 : out Integer range 0 to 3);
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is
-	type fsm is (await_start, start, bits, stop);
-	signal state : fsm := await_start;
+	type fsm is (await_pulse, start, bits, stop);
+	signal state : fsm := await_pulse;
 
-	signal data_buffer : std_logic_vector(data_bits - 1 downto 0) := (others => '0');
+	signal trigger_finished_action   : std_logic := '0';
+	signal trigger_finished_reaction : std_logic := '0';
 
-	signal available1 : std_logic := '0';
-	signal available2 : std_logic := '0';
+	signal byte_buffer : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
 
-	signal ask_for_next1 : std_logic := '0';
-	signal ask_for_next2 : std_logic := '1';
 begin
 
-	provide_next <= (ask_for_next1 xor ask_for_next2) and clk;
+	trigger0 : entity work.trigger
+		port map (
+			clk_16        => clk_16,
+			reset_n       => reset_n,
+			action        => trigger_finished_action,
+			reaction_in   => trigger_finished_reaction,
+			reaction_out  => trigger_finished_reaction,
+			pulse_signal  => finished_transmitting_out
+		);
 
-	process (available, reset_n) begin
-		if (reset_n = '0') then
-			data_buffer <= (others => '0');
-			available1 <= '0';
-			ask_for_next2 <= '1';
-		elsif (rising_edge(available)) then
-			if (state = await_start or state = stop) then
-				data_buffer <= data;
-				available1 <= not available2;
-				ask_for_next2 <= ask_for_next1;
-			end if;
-		end if;
-	end process;
-
-	process (clk, data_buffer, reset_n) 
-		variable bit_position         : Integer range 0 to data_bits - 1    := 0;
+	process (clk_16, byte_buffer, reset_n) 
+		variable bit_position         : Integer range 0 to byte_bits - 1    := 0;
 		variable counter              : Integer range 0 to 15;
 	begin
 		if (reset_n = '0') then
-			state <= await_start;
-			available2 <= '0';
-			bit_position := 0;
-			counter := 0;
-			tx <= '1';
-			ask_for_next1 <= '0';
-		elsif(rising_edge(clk)) then
+			state                   <= await_pulse;
+			bit_position            := 0;
+			counter                 := 0;
+			byte_buffer             <= (others => '0');
+			tx                      <= '1';
+			trigger_finished_action <= '0';
+		elsif(rising_edge(clk_16)) then
 			case state is
-				when await_start =>
-					if (available1 = not available2) then
-						available2 <= available1;
-						counter := 0;
+				when await_pulse =>
+					if (start_transmitting_in = '1') then
 						tx <= '0';
+						counter := 1;
+						byte_buffer <= byte_in;
 						state <= start;
 					end if;
 
 				when start =>
 					if (counter = 15) then
 						counter := 0;
-						bit_position := 0;
-						tx <= data_buffer(0);
+						bit_position := 1;
+						tx <= byte_buffer(0);
 						state <= bits;
 					else 
 						counter := counter + 1;
@@ -82,9 +80,9 @@ begin
 				when bits =>
 					if (counter = 15) then
 						counter := 0;
-						if (bit_position < data_bits - 1) then
+						if (bit_position < byte_bits - 1) then
+							tx <= byte_buffer(bit_position);
 							bit_position := bit_position + 1;
-							tx <= data_buffer(bit_position);
 						else
 							tx <= '1';
 							state <= stop;
@@ -94,26 +92,32 @@ begin
 					end if;
 
 				when stop =>
-					if counter = 0 then
-						counter := 1;
-					elsif (counter = 14) then
-						ask_for_next1 <= not ask_for_next2;
+					if (counter = 14) then
 						counter := 15;
-					elsif (counter = 15) then 
+						trigger(trigger_finished_action, trigger_finished_reaction);
+					elsif (counter = 15) then
 						counter := 0;
-						if (available1 = not available2) then
-							available2 <= available1;
-							tx <= '0';
-							state <= start;
-						else
-							state <= await_start;
-						end if;
+						state <= await_pulse;
 					else 
 						counter := counter + 1;
 					end if;
 
 			end case;
 		end if;
+
+		dbg_cnt <= counter;
 	end process;
 
+	process (state) begin
+		case state is
+			when await_pulse =>
+				dbg_state <= 0;
+			when start =>
+				dbg_state <= 1;
+			when bits =>
+				dbg_state <= 2;
+			when stop =>
+				dbg_state <= 3;
+		end case;
+	end process;
 end uart_tx_impl;

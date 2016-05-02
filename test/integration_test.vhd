@@ -46,44 +46,44 @@ begin
 	dbg_block_signal        <= block_signal;
 	dbg_provide_next_signal <= provide_next_signal;
 
-	uart_rx0 : entity work.uart_rx
-		port map (
-			reset_n   => reset_n,
-			clk       => clk,
-			data      => data_from_rx,
-			available => available_from_rx,
-			rx        => rx
-		);
+	--uart_rx0 : entity work.uart_rx
+	--	port map (
+	--		reset_n   => reset_n,
+	--		clk       => clk,
+	--		data      => data_from_rx,
+	--		available => available_from_rx,
+	--		rx        => rx
+	--	);
 
-	entity_tx0 : entity work.uart_tx
-		port map (
-			reset_n      => reset_n,
-			clk          => clk,
-			data         => data_to_tx,
-			available    => available_to_tx, 
-			tx           => tx,
-			provide_next => provide_next_signal
-		);
+	--entity_tx0 : entity work.uart_tx
+	--	port map (
+	--		reset_n      => reset_n,
+	--		clk          => clk,
+	--		data         => data_to_tx,
+	--		available    => available_to_tx, 
+	--		tx           => tx,
+	--		provide_next => provide_next_signal
+	--	);
 
-	block_deserializer0 : entity work.block_deserializer
-		port map (
-			clk           => clk,
-			reset_n       => reset_n,
-			data_in       => data_from_rx,
-			available_in  => available_from_rx,
-			block_out     => block_signal,
-			available_out => available_between
-		);
+	--block_deserializer0 : entity work.block_deserializer
+	--	port map (
+	--		clk           => clk,
+	--		reset_n       => reset_n,
+	--		data_in       => data_from_rx,
+	--		available_in  => available_from_rx,
+	--		block_out     => block_signal,
+	--		available_out => available_between
+	--	);
 
-	block_serializer0 : entity work.block_serializer 
-		port map (
-			provide_next  => provide_next_signal,
-			reset_n       => reset_n,
-			data_out      => data_to_tx,
-			available_out => available_to_tx,
-			block_in      => not block_signal,
-			available_in  => available_between
-		);
+	--block_serializer0 : entity work.block_serializer 
+	--	port map (
+	--		provide_next  => provide_next_signal,
+	--		reset_n       => reset_n,
+	--		data_out      => data_to_tx,
+	--		available_out => available_to_tx,
+	--		block_in      => block_signal,
+	--		available_in  => available_between
+	--	);
 
 
 
