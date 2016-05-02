@@ -1003,36 +1003,6 @@ SIGNAL("dbg_tx0_start_transmitting_in")
 	PARENT = "";
 }
 
-SIGNAL("dbg_sender_state")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = BUS;
-	WIDTH = 2;
-	LSB_INDEX = 0;
-	DIRECTION = OUTPUT;
-	PARENT = "";
-}
-
-SIGNAL("dbg_sender_state[1]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = OUTPUT;
-	PARENT = "dbg_sender_state";
-}
-
-SIGNAL("dbg_sender_state[0]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = OUTPUT;
-	PARENT = "dbg_sender_state";
-}
-
 SIGNAL("dbg_receiver_state")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -1163,6 +1133,36 @@ SIGNAL("dbg_cnt_tx[0]")
 	PARENT = "dbg_cnt_tx";
 }
 
+SIGNAL("dbg_transmitter_state")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 2;
+	LSB_INDEX = 0;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("dbg_transmitter_state[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_transmitter_state";
+}
+
+SIGNAL("dbg_transmitter_state[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_transmitter_state";
+}
+
 TRANSITION_LIST("clk_16")
 {
 	NODE
@@ -1208,10 +1208,12 @@ TRANSITION_LIST("rx")
 		LEVEL 1 FOR 160.0;
 		LEVEL 0 FOR 320.0;
 		LEVEL 1 FOR 160.0;
-		LEVEL 0 FOR 960.0;
+		LEVEL 0 FOR 160.0;
+		LEVEL 1 FOR 160.0;
+		LEVEL 0 FOR 800.0;
 		LEVEL 1 FOR 160.0;
 		LEVEL 0 FOR 160.0;
-		LEVEL 1 FOR 320.0;
+		LEVEL 1 FOR 160.0;
 		LEVEL 0 FOR 960.0;
 		LEVEL 1 FOR 320.0;
 		LEVEL 0 FOR 160.0;
@@ -2046,24 +2048,6 @@ TRANSITION_LIST("dbg_tx0_start_transmitting_in")
 	}
 }
 
-TRANSITION_LIST("dbg_sender_state[1]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL X FOR 100000.0;
-	}
-}
-
-TRANSITION_LIST("dbg_sender_state[0]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL X FOR 100000.0;
-	}
-}
-
 TRANSITION_LIST("dbg_receiver_state[1]")
 {
 	NODE
@@ -2146,6 +2130,24 @@ TRANSITION_LIST("dbg_cnt_tx[1]")
 }
 
 TRANSITION_LIST("dbg_cnt_tx[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_transmitter_state[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_transmitter_state[0]")
 {
 	NODE
 	{
@@ -3213,9 +3215,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_sender_state";
+	CHANNEL = "dbg_transmitter_state";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Binary;
 	TREE_INDEX = 107;
 	TREE_LEVEL = 0;
 	CHILDREN = 108, 109;
@@ -3223,9 +3225,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_sender_state[1]";
+	CHANNEL = "dbg_transmitter_state[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Binary;
 	TREE_INDEX = 108;
 	TREE_LEVEL = 1;
 	PARENT = 107;
@@ -3233,9 +3235,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_sender_state[0]";
+	CHANNEL = "dbg_transmitter_state[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Binary;
 	TREE_INDEX = 109;
 	TREE_LEVEL = 1;
 	PARENT = 107;

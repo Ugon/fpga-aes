@@ -70,7 +70,7 @@ begin
 				when start =>
 					if (counter = 15) then
 						counter := 0;
-						bit_position := 1;
+						bit_position := 0;
 						tx <= byte_buffer(0);
 						state <= bits;
 					else 
@@ -81,8 +81,8 @@ begin
 					if (counter = 15) then
 						counter := 0;
 						if (bit_position < byte_bits - 1) then
-							tx <= byte_buffer(bit_position);
 							bit_position := bit_position + 1;
+							tx <= byte_buffer(bit_position);
 						else
 							tx <= '1';
 							state <= stop;

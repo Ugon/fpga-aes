@@ -7,10 +7,10 @@ use work.utils.all;
 entity block_deserializer is
 	generic (
 		byte_bits    : Integer := 8;
-		--block_bytes  : Integer := 4;   --test
-		--block_bits   : Integer := 32); --test
-		block_bytes  : Integer := 16;
-		block_bits   : Integer := 128);
+		block_bytes  : Integer := 4;   --test
+		block_bits   : Integer := 32); --test
+		--block_bytes  : Integer := 16;
+		--block_bits   : Integer := 128);
 	port (
 		reset_n                   : in  std_logic;
 		clk_16                    : in  std_logic; --16x baud rate
@@ -59,7 +59,9 @@ begin
 	finished_listening_out_extended <= (others => rx_finished_listening and forward_finished);
 	finished_listening_out          <= finished_listening_out_extended(0);
 	rx_start_listening              <= (start_listening_in and forward_start) or start_next_byte;
-
+----------------TMP
+	correct_out <= finished_listening_out;
+----------------TMP
 	block_out(block_bits - 1 downto block_bits - byte_bits) <= rx_byte and 
 		finished_listening_out_extended(block_bits - 1 downto block_bits - byte_bits);
 

@@ -33,7 +33,7 @@ dbg_serializer0_start_transmitting_in     : out std_logic;
 dbg_serializer0_finished_transmitting_out : out std_logic;
 
 dbg_receiver_state                        : out Integer range 0 to 3;  
-dbg_sender_state                          : out Integer range 0 to 3;
+dbg_transmitter_state                     : out Integer range 0 to 3;
 
 dbg_cnt_rx                                : out Integer range 0 to 15;
 dbg_cnt_tx                                : out Integer range 0 to 15
@@ -77,7 +77,7 @@ begin
 			dbg_serializer0_finished_transmitting_out => dbg_serializer0_finished_transmitting_out,
 
 			dbg_receiver_state                        => dbg_receiver_state,
-			dbg_sender_state                          => dbg_sender_state,
+			dbg_transmitter_state                     => dbg_transmitter_state,
 
 			dbg_cnt_rx                                => dbg_cnt_rx,
 			dbg_cnt_tx                                => dbg_cnt_tx
