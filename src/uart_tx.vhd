@@ -21,8 +21,10 @@ entity uart_tx is
 		start_transmitting_in     : in  std_logic;
 		finished_transmitting_out : out std_logic                                := 'X';
 
-		dbg_cnt                   : out Integer range 0 to 15;
-		dbg_state                 : out Integer range 0 to 3);
+dbg_cnt                   : out Integer range 0 to 15;
+dbg_state                 : out Integer range 0 to 3
+
+		);
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is

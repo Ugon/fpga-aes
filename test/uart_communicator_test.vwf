@@ -1003,36 +1003,6 @@ SIGNAL("dbg_tx0_start_transmitting_in")
 	PARENT = "";
 }
 
-SIGNAL("dbg_receiver_state")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = BUS;
-	WIDTH = 2;
-	LSB_INDEX = 0;
-	DIRECTION = OUTPUT;
-	PARENT = "";
-}
-
-SIGNAL("dbg_receiver_state[1]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = OUTPUT;
-	PARENT = "dbg_receiver_state";
-}
-
-SIGNAL("dbg_receiver_state[0]")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = OUTPUT;
-	PARENT = "dbg_receiver_state";
-}
-
 SIGNAL("dbg_cnt_rx")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -1133,7 +1103,7 @@ SIGNAL("dbg_cnt_tx[0]")
 	PARENT = "dbg_cnt_tx";
 }
 
-SIGNAL("dbg_transmitter_state")
+SIGNAL("dbg_state")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
 	SIGNAL_TYPE = BUS;
@@ -1143,24 +1113,134 @@ SIGNAL("dbg_transmitter_state")
 	PARENT = "";
 }
 
-SIGNAL("dbg_transmitter_state[1]")
+SIGNAL("dbg_state[1]")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
 	SIGNAL_TYPE = SINGLE_BIT;
 	WIDTH = 1;
 	LSB_INDEX = -1;
 	DIRECTION = OUTPUT;
-	PARENT = "dbg_transmitter_state";
+	PARENT = "dbg_state";
 }
 
-SIGNAL("dbg_transmitter_state[0]")
+SIGNAL("dbg_state[0]")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
 	SIGNAL_TYPE = SINGLE_BIT;
 	WIDTH = 1;
 	LSB_INDEX = -1;
 	DIRECTION = OUTPUT;
-	PARENT = "dbg_transmitter_state";
+	PARENT = "dbg_state";
+}
+
+SIGNAL("dbg_mux_rx0_enable_custom")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("dbg_mux_tx0_enable_custom")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("dbg_serializer0_tx_byte")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 8;
+	LSB_INDEX = 0;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[7]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[6]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[5]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[4]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[3]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
+}
+
+SIGNAL("dbg_serializer0_tx_byte[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_serializer0_tx_byte";
 }
 
 TRANSITION_LIST("clk_16")
@@ -2048,24 +2128,6 @@ TRANSITION_LIST("dbg_tx0_start_transmitting_in")
 	}
 }
 
-TRANSITION_LIST("dbg_receiver_state[1]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL X FOR 100000.0;
-	}
-}
-
-TRANSITION_LIST("dbg_receiver_state[0]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL X FOR 100000.0;
-	}
-}
-
 TRANSITION_LIST("dbg_cnt_rx[3]")
 {
 	NODE
@@ -2138,7 +2200,7 @@ TRANSITION_LIST("dbg_cnt_tx[0]")
 	}
 }
 
-TRANSITION_LIST("dbg_transmitter_state[1]")
+TRANSITION_LIST("dbg_state[1]")
 {
 	NODE
 	{
@@ -2147,7 +2209,97 @@ TRANSITION_LIST("dbg_transmitter_state[1]")
 	}
 }
 
-TRANSITION_LIST("dbg_transmitter_state[0]")
+TRANSITION_LIST("dbg_state[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_mux_rx0_enable_custom")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_mux_tx0_enable_custom")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[7]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[6]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[5]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[4]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[3]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_serializer0_tx_byte[0]")
 {
 	NODE
 	{
@@ -3215,9 +3367,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_transmitter_state";
+	CHANNEL = "dbg_state";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 107;
 	TREE_LEVEL = 0;
 	CHILDREN = 108, 109;
@@ -3225,9 +3377,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_transmitter_state[1]";
+	CHANNEL = "dbg_state[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 108;
 	TREE_LEVEL = 1;
 	PARENT = 107;
@@ -3235,9 +3387,9 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_transmitter_state[0]";
+	CHANNEL = "dbg_state[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 109;
 	TREE_LEVEL = 1;
 	PARENT = 107;
@@ -3245,32 +3397,110 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_receiver_state";
+	CHANNEL = "dbg_mux_rx0_enable_custom";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Binary;
 	TREE_INDEX = 110;
 	TREE_LEVEL = 0;
-	CHILDREN = 111, 112;
 }
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_receiver_state[1]";
+	CHANNEL = "dbg_mux_tx0_enable_custom";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Binary;
 	TREE_INDEX = 111;
-	TREE_LEVEL = 1;
-	PARENT = 110;
+	TREE_LEVEL = 0;
 }
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_receiver_state[0]";
+	CHANNEL = "dbg_serializer0_tx_byte";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
+	RADIX = Hexadecimal;
 	TREE_INDEX = 112;
+	TREE_LEVEL = 0;
+	CHILDREN = 113, 114, 115, 116, 117, 118, 119, 120;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[7]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 113;
 	TREE_LEVEL = 1;
-	PARENT = 110;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[6]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 114;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[5]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 115;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[4]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 116;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[3]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 117;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[2]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 118;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[1]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 119;
+	TREE_LEVEL = 1;
+	PARENT = 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_serializer0_tx_byte[0]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Hexadecimal;
+	TREE_INDEX = 120;
+	TREE_LEVEL = 1;
+	PARENT = 112;
 }
 
 TIME_BAR

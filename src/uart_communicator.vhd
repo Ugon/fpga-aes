@@ -36,22 +36,25 @@ dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 
 dbg_serializer0_start_transmitting_in     : out std_logic;
 dbg_serializer0_finished_transmitting_out : out std_logic;
 
-dbg_receiver_state                        : out Integer range 0 to 3;  
-dbg_transmitter_state                          : out Integer range 0 to 3;
+dbg_state                                 : out Integer range 0 to 2;
 
 dbg_cnt_rx                                : out Integer range 0 to 15;
-dbg_cnt_tx                                : out Integer range 0 to 15
+dbg_cnt_tx                                : out Integer range 0 to 15;
+
+dbg_mux_rx0_enable_custom                 : out std_logic;
+dbg_mux_tx0_enable_custom                 : out std_logic;
+
+dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0);
+
+dbg_start_error           : out std_logic;
+dbg_stop_error            : out std_logic
 
 );
 end uart_communicator;
 
 architecture uart_communicator_impl of uart_communicator is
-	type r_fsm is (r_start, r_exchange_block, r_exchange_ack, r_sync2);
-	signal receiver_state : r_fsm := r_start;
-
-	type t_fsm is (t_start, t_exchange_block, t_sync1, t_exchange_ack, t_sync2);
-	--signal transmitter_state   : s_fsm := t_exchange_block;
-	signal transmitter_state : t_fsm := t_start;
+	type fsm is (start, blocks, acks);
+	signal state : fsm := start;
 
 	constant  ACK : std_logic_vector(7 downto 0) := "01000001";
 	constant NACK : std_logic_vector(7 downto 0) := "01001110";
@@ -83,22 +86,23 @@ architecture uart_communicator_impl of uart_communicator is
 
 
 	--CUSTOM CONNECTION SIGNALS
-	signal custom0_rx_byte                       : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal custom0_rx_start_listening            : std_logic                                 := '0';
-	signal custom0_rx_finished_listening         : std_logic                                 := '0';
+	signal custom0_rx_byte                  : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
+	signal custom0_rx_start_listening       : std_logic                                 := '0';
+	signal custom0_rx_finished_listening    : std_logic                                 := '0';
 
-	signal custom0_tx_byte                       : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal custom0_tx_start_transmitting         : std_logic                                 := '0';
-	signal custom0_tx_finished_transmitting      : std_logic                                 := '0';
-
+	signal custom0_tx_byte                  : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
+	signal custom0_tx_start_transmitting    : std_logic                                 := '0';
+	signal custom0_tx_finished_transmitting : std_logic                                 := '0';
 
 	--RX TX SIGNAL MUX
-	signal mux_rx0_enable_custom : std_logic := '0';
+	signal mux_rx0_enable_custom : std_logic := '1';
 	signal mux_tx0_enable_custom : std_logic := '0';
 
-	signal mux_rx_switch_combined : std_logic := '1';
+	signal mux_rx_switch_combined : std_logic := '0';
 	signal mux_tx_switch_combined : std_logic := '0';
 
+	signal next_custom0_tx_byte      : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
+	signal next_serializer0_block_in : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 
 	--START PULSE TRIGGERS
 	signal trigger_deserializer0_start_listening_action    : std_logic := '0';
@@ -135,6 +139,11 @@ dbg_serializer0_block_in                  <= serializer0_block_in;
 dbg_serializer0_start_transmitting_in     <= serializer0_start_transmitting_in;
 dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_out;
 
+dbg_mux_rx0_enable_custom                 <= mux_rx0_enable_custom;
+dbg_mux_tx0_enable_custom                 <= mux_tx0_enable_custom;
+
+dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
+
 	uart_rx0 : entity work.uart_rx
 		generic map (
 			byte_bits                 => byte_bits)
@@ -146,7 +155,10 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 			byte_out                  => rx0_byte_out,
 			start_listening_in        => rx0_start_listening_in,
 			finished_listening_out    => rx0_finished_listening_out,
-			dbg_cnt                   => dbg_cnt_rx
+			
+			dbg_cnt                   => dbg_cnt_rx,
+			dbg_start_error           => dbg_start_error,
+			dbg_stop_error            => dbg_stop_error
 		);
 
 	entity_tx0 : entity work.uart_tx
@@ -272,7 +284,7 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 
 	mux_rx_switch_combined <= deserializer0_start_listening_in or custom0_rx_start_listening;
 
-	mux_rx0_switch : process (reset_n, deserializer0_start_listening_in, custom0_rx_start_listening) begin
+	mux_rx0_switch : process (reset_n, mux_rx_switch_combined) begin
 		if(reset_n = '0') then
 			mux_rx0_enable_custom <= '1';
 		elsif(rising_edge(mux_rx_switch_combined)) then
@@ -290,274 +302,100 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 		end if;
 	end process;
 
-
-
-	receiver_flow : process (clk_16, reset_n) 
-		variable process_started : boolean                := false;
-	begin
+	tx_byte_set : process (reset_n, custom0_tx_start_transmitting) begin
 		if (reset_n = '0') then
-			receiver_state                                <= r_start;
-			process_started                               := false;
-			transmit_success                                  <= '0';
-			receive_success                               <= '0';
-			--mux_rx0_enable_custom                         <= '0';
-			trigger_custom0_rx_start_listening_action     <= '0';
-			trigger_deserializer0_start_listening_action  <= '0';
-			block_modification_out                        <= (others => '0');
-
-		elsif (rising_edge(clk_16)) then
-
-			case receiver_state is
-				when r_start =>
-					receiver_state <= r_exchange_block;
-
-					--trigger block receive
-					--mux_rx0_enable_custom             <= '0';
-					trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
-				
-
-				when r_exchange_block =>
-					if (deserializer0_finished_listening_out = '1') then
-						--next state
-						receiver_state                    <= r_exchange_ack;
-
-						--read block
-						block_modification_out            <= deserializer0_block_out;
-						receive_success                   <= deserializer0_correct_out;
-
-						--trigger ack receive
-						--mux_rx0_enable_custom             <= '1';
-						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
-					end if;
-
-
-				when r_exchange_ack =>
-					if(custom0_rx_finished_listening = '1') then
-						--read ack
-						if (custom0_rx_byte = ACK) then
-							transmit_success                  <= '1';
-						else
-							transmit_success                  <= '0';
-						end if;
-
-						--if transmitter already synced or both finished at the same time then skip sync2 state
-						--else wait for sync2
-						if(transmitter_state = t_sync2 or custom0_tx_finished_transmitting = '1') then
-							--next state
-							receiver_state                <= r_exchange_block;
-	
-							--trigger block receive
-							--mux_rx0_enable_custom         <= '0';
-							trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
-						else
-							--next state
-							receiver_state                <= r_sync2;
-						end if;
-					end if;
-
-
-				when r_sync2 =>
-					if(transmitter_state = t_sync2 or custom0_tx_finished_transmitting = '1') then
-						--next state
-						receiver_state                    <= r_exchange_block;
-
-						--trigger block receive
-						--mux_rx0_enable_custom             <= '0';
-						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
-					end if;
-
-			end case;
-
+			custom0_tx_byte <= (others => '0');
+		elsif (rising_edge(custom0_tx_start_transmitting)) then
+			custom0_tx_byte <= next_custom0_tx_byte;
 		end if;
 	end process;
-	
 
-	transmitter_flow : process (clk_16, reset_n) 
-		variable process_started      : boolean   := false;
-		variable tmp_receive_success  : std_logic := '0';
-		variable tmp_transmit_success : std_logic := '0';
+	serializer_byte_set : process (reset_n, serializer0_start_transmitting_in) begin
+		if (reset_n = '0') then
+			serializer0_block_in <= (others => '0');
+		elsif (rising_edge(serializer0_start_transmitting_in)) then
+			serializer0_block_in <= next_serializer0_block_in;
+		end if;
+	end process;
+
+	communication_flow : process (clk_16, reset_n)
+		variable received_correct_block : std_logic := '0';
 	begin
 		if (reset_n = '0') then
-			--transmitter_state                                  <= t_exchange_block;                      
-			transmitter_state                                  <= t_sync1;                      
-			process_started                               := false;                                                      
-			tmp_receive_success                           := '0';
-			tmp_transmit_success                          := '0';
-			--mux_tx0_enable_custom                         <= '0';
+			state                                         <= start;
+			received_correct_block                        := '0';
+			next_custom0_tx_byte                          <= (others => '0');
+			next_serializer0_block_in                     <= (others => '0');
+			block_modification_out                        <= (others => '0');
+			trigger_custom0_rx_start_listening_action     <= '0';
+			trigger_deserializer0_start_listening_action  <= '0';
 			trigger_custom0_tx_start_transmitting_action  <= '0';
 			trigger_serializer0_start_transmitting_action <= '0';
-			custom0_tx_byte                               <= (others => '0');
-			serializer0_block_in                          <= (others => '0');
-
 		elsif (rising_edge(clk_16)) then
+			case state is
+				when start =>
+					state                                 <= blocks;
 
-			case transmitter_state is
-
-				when t_start =>
-					transmitter_state <= t_sync1;	
-					
-					serializer0_block_in              <= (others => '0');
-					--trigger block send
-					--mux_tx0_enable_custom             <= '0';
-					--trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
-
-
-				when t_exchange_block =>
-					if (serializer0_finished_transmitting_out = '1') then
-						--if receiver finished first or both finished at the same time then skip sync1
-						--else wait for sync1
-						--NOTE: receiver probably could not have finished first (not proven yet)
-						if (receiver_state = r_exchange_ack or receiver_state = r_sync2 or deserializer0_finished_listening_out = '1') then
-							--next state
-							transmitter_state                      <= t_exchange_ack;
-							
-							--if finished at same time then take success straight from deserializer
-							if (deserializer0_finished_listening_out = '1') then
-								tmp_receive_success := deserializer0_correct_out;
-							else
-								tmp_receive_success := receive_success;
-							end if;
-
-							--write ack
-							if (tmp_receive_success = '1') then
-								custom0_tx_byte               <= ACK;
-							else 
-								custom0_tx_byte               <= NACK;
-							end if;
-
-							--trigger ack send
-							--mux_tx0_enable_custom             <= '1';
-							trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
-						else
-							--next state
-							transmitter_state                      <= t_sync1;
-						end if;						
-					end if;
-
-
-				when t_sync1 =>
-					--wait for received block
-					if (receiver_state = r_exchange_ack or receiver_state = r_sync2 or deserializer0_finished_listening_out = '1') then
-						--next state
-						transmitter_state                      <= t_exchange_ack;
-						
-						--if finished at same time then take success straight from deserializer
-						if (deserializer0_finished_listening_out = '1') then
-							tmp_receive_success := deserializer0_correct_out;
-						else
-							tmp_receive_success := receive_success;
-						end if;
-
-						--write ack
-						if (tmp_receive_success = '1') then
-							custom0_tx_byte               <= ACK;
-						else 
-							custom0_tx_byte               <= NACK;
-						end if;
-
-						--trigger ack send
-						--mux_tx0_enable_custom             <= '1';
-						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);			
-					end if;
-
-
-				when t_exchange_ack =>
-					if(custom0_tx_finished_transmitting = '1') then
-						--if receiver finished first or both finished at the same time then skip sync2
-						--else wait for sync2
-						if(receiver_state = r_sync2 or custom0_rx_finished_listening = '1') then
-							--next state
-							transmitter_state                      <= t_exchange_block;
-							
-							--if finished at same time then take success straight from custom
-							if (custom0_rx_finished_listening = '1') then
-								if (custom0_rx_byte = ACK) then
-									tmp_transmit_success                  := '1';
-								else
-									tmp_transmit_success                  := '0';
-								end if;
-							else 
-								tmp_transmit_success := transmit_success;
-							end if;
-
-							--write block
-							--if exchange successful then discard old block and latch new
-							--else discard new block and repeat exchange
-							if (tmp_transmit_success = '1' and receive_success = '1') then
-								serializer0_block_in          <= block_modification_in;
-							else
-								serializer0_block_in          <= serializer0_block_in;
-							end if;
+					--trigger receiver start listening
+					trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 	
-							--trigger block send	
-							--mux_tx0_enable_custom             <= '0';
-							trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
-						else
-							--next state
-							transmitter_state                      <= t_sync2;
-						end if;
+				when blocks =>
+ 					--if receiver finished (transmitter is guaranteed to finish first or at the same time)
+					if (deserializer0_finished_listening_out = '1') then
+						state                             <= acks;
+
+						--read receiver output
+						block_modification_out            <= deserializer0_block_out;
+						received_correct_block            := deserializer0_correct_out;
+				
+						--set transmitter input
+						if (deserializer0_correct_out = '1') then
+							next_custom0_tx_byte          <= ACK;
+						else 
+							next_custom0_tx_byte          <= NACK;
+						end if;			
+
+						--trigger receiver start listening
+						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
+
+						--trigger transmitter start transmitting
+						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
 					end if;
 
+				when acks =>
+ 					--if receiver finished (transmitter is guaranteed to finish first or at the same time)
+					if(custom0_rx_finished_listening = '1') then
+						state                             <= blocks;
 
-				when t_sync2 =>
-					if(receiver_state = r_sync2 or custom0_rx_finished_listening = '1') then
-						--next state
-						transmitter_state                      <= t_exchange_block;
-
-						--if finished at same time then take success straight from custom
-						if (custom0_rx_finished_listening = '1') then
-							if (custom0_rx_byte = ACK) then
-								tmp_transmit_success                  := '1';
-							else
-								tmp_transmit_success                  := '0';
-							end if;
-						else 
-							tmp_transmit_success := transmit_success;
-						end if;
-
-						--write block
-						--if exchange successful then discard old block and latch new
-						--else discard new block and repeat exchange
-						if (tmp_transmit_success = '1' and receive_success = '1') then
-							serializer0_block_in          <= block_modification_in;
+						--read receiver output and set transmitter input
+						if (received_correct_block = '1' and custom0_rx_byte = ACK) then
+							--if both directions successful
+							next_serializer0_block_in     <= block_modification_in;					
 						else
-							serializer0_block_in          <= serializer0_block_in;
+							--if some direction failed
+							next_serializer0_block_in     <= serializer0_block_in;							
 						end if;
 
-						--trigger block send	
-						--mux_tx0_enable_custom             <= '0';
+						--trigger receiver start listening
+						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
+						
+						--trigger transmitter start transmitting
 						trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
 					end if;
 
 			end case;
-
 		end if;
 	end process;
 
 
-	process (transmitter_state) begin
-		case transmitter_state is
-			when t_exchange_block =>
-				dbg_transmitter_state <= 0;
-			when t_sync1 =>
-				dbg_transmitter_state <= 1;
-			when t_exchange_ack =>
-				dbg_transmitter_state <= 2;
-			when t_sync2 =>
-				dbg_transmitter_state <= 3;
-			when others =>
-		end case;
-	end process;
-
-	process (receiver_state) begin
-		case receiver_state is
-			when r_exchange_block =>
-				dbg_receiver_state <= 0;
-			when r_exchange_ack =>
-				dbg_receiver_state <= 2;
-			when r_sync2 =>
-				dbg_receiver_state <= 3;
-			when others =>
+	process (state) begin
+		case state is
+			when start =>
+				dbg_state <= 0;
+			when blocks =>
+				dbg_state <= 1;
+			when acks =>
+				dbg_state <= 2;
 		end case;
 	end process;
 

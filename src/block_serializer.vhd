@@ -7,10 +7,10 @@ use work.utils.all;
 entity block_serializer is
 	generic (
 		byte_bits    : Integer := 8;
-		--block_bytes  : Integer := 4;   --test
-		--block_bits   : Integer := 32); --test
-		block_bytes  : Integer := 16;
-		block_bits   : Integer := 128);
+		block_bytes  : Integer := 4;   --test
+		block_bits   : Integer := 32); --test
+		--block_bytes  : Integer := 16;
+		--block_bits   : Integer := 128);
 	port (
 		reset_n                   : in  std_logic;
 		clk_16                    : in  std_logic; --16x baud rate
@@ -34,14 +34,14 @@ architecture block_serializer_impl of block_serializer is
 	type fsm is (await_pulse, transmit_bytes);
 	signal state : fsm;
 
-	signal byte_position    : Integer range 0 to block_bytes - 1        := 0;
-	signal byte_prepared    : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
+	signal byte_position          : Integer range 0 to block_bytes - 1  := 0;
+	signal byte_position_latched  : Integer range 0 to block_bytes - 1  := 0;
 
 	signal forward_start    : std_logic                                 := '1';
 	signal forward_finished : std_logic                                 := '0';
 	signal block_buffer     : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 
-	signal tx_start_transmitting_extended   : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
+	signal tx_start_transmitting_internal   : std_logic := '0';
 
 	signal trigger_start_next_byte_action   : std_logic := '0';
 	signal trigger_start_next_byte_reaction : std_logic := '0';
@@ -59,16 +59,22 @@ begin
 		);
 
 	finished_transmitting_out      <= tx_finished_transmitting and forward_finished;
+	tx_start_transmitting_internal <= (start_transmitting_in and forward_start) or start_next_byte;
+	tx_start_transmitting          <= tx_start_transmitting_internal;
 
-	tx_start_transmitting_extended <= (others => (start_transmitting_in and forward_start) or start_next_byte);
-	tx_start_transmitting          <= tx_start_transmitting_extended(0);
-	tx_byte                        <= byte_prepared and tx_start_transmitting_extended;
-
-	process (byte_position, block_in, block_buffer) begin
-		if (byte_position = 0) then
-			byte_prepared <= block_in(byte_bits - 1 downto 0);
+	process (start_transmitting_in, block_in, block_buffer, byte_position_latched) begin
+		if (start_transmitting_in = '1') then
+			tx_byte <= block_in(byte_bits - 1 downto 0);
 		else
-			byte_prepared <= block_buffer((byte_position + 1) * byte_bits - 1 downto byte_position * byte_bits);
+			tx_byte <= block_buffer((byte_position_latched + 1) * byte_bits - 1 downto byte_position_latched * byte_bits);
+		end if;
+	end process;
+
+	process (reset_n, tx_start_transmitting_internal) begin
+		if (reset_n = '0') then
+			byte_position_latched <= 0;
+		elsif (rising_edge(tx_start_transmitting_internal)) then
+			byte_position_latched <= byte_position;
 		end if;
 	end process;
 

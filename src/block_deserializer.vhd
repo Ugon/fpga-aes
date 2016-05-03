@@ -34,11 +34,13 @@ architecture block_deserializer_impl of block_deserializer is
 	type fsm is (await_pulse, receive_bytes);
 	signal state : fsm;
 
-	signal forward_start    : std_logic                                             := '1';
-	signal forward_finished : std_logic                                             := '0';
-	signal block_buffer     : std_logic_vector(block_bits - byte_bits - 1 downto 0) := (others => '0');
+	signal forward_start      : std_logic                                             := '1';
+	signal forward_finished   : std_logic                                             := '0';
+	signal finished_listening : std_logic                                             := '0';
+	signal block_buffer       : std_logic_vector(block_bits - 1 downto 0)             := (others => '0');
 
-	signal finished_listening_out_extended  : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+	signal most_significant_byte   : std_logic_vector(byte_bits - 1 downto 0)              := (others => '0');
+	signal least_significant_bytes : std_logic_vector(block_bits - byte_bits - 1 downto 0) := (others => '0');
 
 	signal trigger_start_next_byte_action   : std_logic := '0';
 	signal trigger_start_next_byte_reaction : std_logic := '0';
@@ -55,17 +57,32 @@ begin
 			pulse_signal  => start_next_byte
 		);
 
-	finished_listening_out_extended <= (others => rx_finished_listening and forward_finished);
-	finished_listening_out          <= finished_listening_out_extended(0);
+	finished_listening              <= rx_finished_listening and forward_finished;
+	finished_listening_out          <= finished_listening;
 	rx_start_listening              <= (start_listening_in and forward_start) or start_next_byte;
 ----------------TMP
 	correct_out <= finished_listening_out;
 ----------------TMP
-	block_out(block_bits - 1 downto block_bits - byte_bits) <= rx_byte and 
-		finished_listening_out_extended(block_bits - 1 downto block_bits - byte_bits);
+	
 
-	block_out(block_bits - byte_bits - 1 downto 0) <= block_buffer and
-		finished_listening_out_extended(block_bits - byte_bits - 1 downto 0);
+	block_out(block_bits - 1 downto block_bits - byte_bits) <= most_significant_byte;
+	block_out(block_bits - byte_bits - 1 downto 0) <= least_significant_bytes;
+
+	process (finished_listening, rx_byte, block_buffer) begin
+		if (finished_listening = '1') then
+			most_significant_byte <= rx_byte;
+		else
+			most_significant_byte <= block_buffer(block_bits - 1 downto block_bits - byte_bits);
+		end if;
+	end process;
+
+	process (reset_n, finished_listening) begin
+		if (reset_n = '0') then
+			least_significant_bytes <= (others => '0');
+		elsif (rising_edge(finished_listening)) then
+			least_significant_bytes <= block_buffer(block_bits - byte_bits - 1 downto 0);
+		end if;
+	end process;
 
 	process (clk_16, reset_n) 
 		variable byte_position            : Integer range 0 to block_bytes - 1 := 0;
@@ -105,6 +122,7 @@ begin
 							trigger(trigger_start_next_byte_action, trigger_start_next_byte_reaction);
 						else 
 							state <= await_pulse;
+							block_buffer(block_bits - 1 downto block_bits - byte_bits) <= rx_byte;
 							forward_start <= '1';
 						end if;
 					end if;

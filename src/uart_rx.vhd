@@ -21,7 +21,10 @@ entity uart_rx is
 		start_listening_in        : in  std_logic;
 		finished_listening_out    : out std_logic                                := '0';
 
-		dbg_cnt                   : out Integer range 0 to 15);
+dbg_cnt                   : out Integer range 0 to 15;
+dbg_start_error           : out std_logic;
+dbg_stop_error            : out std_logic
+		);
 end uart_rx;
 
 architecture uart_rx_impl of uart_rx is
@@ -30,6 +33,7 @@ architecture uart_rx_impl of uart_rx is
 
 	signal trigger_finished_action   : std_logic := '0';
 	signal trigger_finished_reaction : std_logic := '0';
+	signal finished_listening        : std_logic := '0';
 
 	signal byte_buffer : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
 
@@ -39,28 +43,40 @@ architecture uart_rx_impl of uart_rx is
 
 begin
 
+	finished_listening_out <= finished_listening;
+
 	trigger0 : entity work.trigger
 		port map (
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_finished_action,
 			reaction      => trigger_finished_reaction,
-			pulse_signal  => finished_listening_out
+			pulse_signal  => finished_listening
 		);
 
+	process (reset_n, finished_listening) begin
+		if (reset_n = '0') then
+			byte_out <= (others => '0');
+		elsif (rising_edge(finished_listening)) then
+			byte_out <= byte_buffer;
+		end if;
+
+	end process;
+
 	process (clk_16, reset_n) 
-		variable bit_position         : Integer range 0 to byte_bits - 1         := 0;
-		variable counter              : Integer range 0 to 15;
-		variable oversample_buffer    : std_logic_vector(2 downto 0) := (others => '0');
+		variable bit_position      : Integer range 0 to byte_bits - 1         := 0;
+		variable counter           : Integer range 0 to 15;
+		variable oversample_buffer : std_logic_vector(2 downto 0) := (others => '0');
 	begin
 		if (reset_n = '0') then
 			state                   <= await_start;
 			bit_position            := 0;
 			counter                 := 0;
 			oversample_buffer       := (others => '0');
-			byte_out                <= (others => '0');
 			byte_buffer             <= (others => '0');
 			trigger_finished_action <= '0';
+dbg_start_error <= '0';
+dbg_stop_error <= '0';
 		elsif(rising_edge(clk_16)) then
 			case state is
 				when await_pulse =>
@@ -91,6 +107,7 @@ begin
 								bit_position := 0;
 							else
 								--start bit error
+dbg_start_error <= '1';
 								state <= await_pulse;
 								trigger(trigger_finished_action, trigger_finished_reaction);
 							end if;
@@ -131,12 +148,12 @@ begin
 						when 8  => oversample_buffer(1) := rx;
 						when 9  => oversample_buffer(2) := rx;
 						when 14 =>
-							byte_out <= byte_buffer;
 							trigger(trigger_finished_action, trigger_finished_reaction);
 
-							--if (vote(oversample_buffer) = '0') then 
+							if (vote(oversample_buffer) = '0') then 
 							--	stop bit error
-							--end if;
+dbg_stop_error <= '1';
+							end if;
 						when 15 => 
 							state <= await_pulse;
 						when others =>

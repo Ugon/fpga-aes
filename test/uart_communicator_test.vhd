@@ -32,11 +32,16 @@ dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 
 dbg_serializer0_start_transmitting_in     : out std_logic;
 dbg_serializer0_finished_transmitting_out : out std_logic;
 
-dbg_receiver_state                        : out Integer range 0 to 3;  
-dbg_transmitter_state                     : out Integer range 0 to 3;
+dbg_state                                 : out Integer range 0 to 2;  
 
 dbg_cnt_rx                                : out Integer range 0 to 15;
-dbg_cnt_tx                                : out Integer range 0 to 15
+dbg_cnt_tx                                : out Integer range 0 to 15;
+
+dbg_mux_rx0_enable_custom                 : out std_logic;
+dbg_mux_tx0_enable_custom                 : out std_logic;
+
+dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0)
+
 	);
 end uart_communicator_test;
 
@@ -76,11 +81,15 @@ begin
 			dbg_serializer0_start_transmitting_in     => dbg_serializer0_start_transmitting_in,
 			dbg_serializer0_finished_transmitting_out => dbg_serializer0_finished_transmitting_out,
 
-			dbg_receiver_state                        => dbg_receiver_state,
-			dbg_transmitter_state                     => dbg_transmitter_state,
+			dbg_state                                 => dbg_state,
 
 			dbg_cnt_rx                                => dbg_cnt_rx,
-			dbg_cnt_tx                                => dbg_cnt_tx
+			dbg_cnt_tx                                => dbg_cnt_tx,
+
+			dbg_mux_rx0_enable_custom                 => dbg_mux_rx0_enable_custom,
+			dbg_mux_tx0_enable_custom                 => dbg_mux_tx0_enable_custom,
+
+			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte
 		);
 	
 end uart_communicator_test_impl;
