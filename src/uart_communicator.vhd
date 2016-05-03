@@ -209,8 +209,7 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_deserializer0_start_listening_action,
-			reaction_in   => trigger_deserializer0_start_listening_reaction,
-			reaction_out  => trigger_deserializer0_start_listening_reaction,
+			reaction      => trigger_deserializer0_start_listening_reaction,
 			pulse_signal  => deserializer0_start_listening_in
 		);
 
@@ -219,8 +218,7 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_custom0_rx_start_listening_action,
-			reaction_in   => trigger_custom0_rx_start_listening_reaction,
-			reaction_out  => trigger_custom0_rx_start_listening_reaction,
+			reaction      => trigger_custom0_rx_start_listening_reaction,
 			pulse_signal  => custom0_rx_start_listening
 		);
 
@@ -229,8 +227,7 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_serializer0_start_transmitting_action,
-			reaction_in   => trigger_serializer0_start_transmitting_reaction,
-			reaction_out  => trigger_serializer0_start_transmitting_reaction,
+			reaction      => trigger_serializer0_start_transmitting_reaction,
 			pulse_signal  => serializer0_start_transmitting_in
 		);
 
@@ -239,8 +236,7 @@ dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_o
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_custom0_tx_start_transmitting_action,
-			reaction_in   => trigger_custom0_tx_start_transmitting_reaction,
-			reaction_out  => trigger_custom0_tx_start_transmitting_reaction,
+			reaction      => trigger_custom0_tx_start_transmitting_reaction,
 			pulse_signal  => custom0_tx_start_transmitting
 		);
 

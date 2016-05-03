@@ -51,8 +51,7 @@ begin
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_start_next_byte_action,
-			reaction_in   => trigger_start_next_byte_reaction,
-			reaction_out  => trigger_start_next_byte_reaction,
+			reaction      => trigger_start_next_byte_reaction,
 			pulse_signal  => start_next_byte
 		);
 

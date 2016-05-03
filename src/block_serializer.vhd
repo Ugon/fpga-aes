@@ -7,10 +7,10 @@ use work.utils.all;
 entity block_serializer is
 	generic (
 		byte_bits    : Integer := 8;
-		block_bytes  : Integer := 4;   --test
-		block_bits   : Integer := 32); --test
-		--block_bytes  : Integer := 16;
-		--block_bits   : Integer := 128);
+		--block_bytes  : Integer := 4;   --test
+		--block_bits   : Integer := 32); --test
+		block_bytes  : Integer := 16;
+		block_bits   : Integer := 128);
 	port (
 		reset_n                   : in  std_logic;
 		clk_16                    : in  std_logic; --16x baud rate
@@ -54,8 +54,7 @@ begin
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_start_next_byte_action,
-			reaction_in   => trigger_start_next_byte_reaction,
-			reaction_out  => trigger_start_next_byte_reaction,
+			reaction      => trigger_start_next_byte_reaction,
 			pulse_signal  => start_next_byte
 		);
 

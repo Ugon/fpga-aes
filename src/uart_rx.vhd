@@ -44,8 +44,7 @@ begin
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_finished_action,
-			reaction_in   => trigger_finished_reaction,
-			reaction_out  => trigger_finished_reaction,
+			reaction      => trigger_finished_reaction,
 			pulse_signal  => finished_listening_out
 		);
 
