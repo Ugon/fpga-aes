@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity uart_communicator_test is
+entity communicator_test is
 	generic (
 		byte_bits    : Integer := 8;
 		block_bytes  : Integer := 4;
@@ -43,15 +43,15 @@ dbg_mux_tx0_enable_custom                 : out std_logic;
 dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0)
 
 	);
-end uart_communicator_test;
+end communicator_test;
 
-architecture uart_communicator_test_impl of uart_communicator_test is
+architecture communicator_test_impl of communicator_test is
 
 	signal loopback : std_logic_vector(block_bits - 1 downto 0);
 	
 begin
 
-	uart_communicator0 : entity work.uart_communicator
+	communicator0 : entity work.communicator
 		generic map (
 			byte_bits              => byte_bits,
 			block_bytes            => block_bytes,
@@ -92,4 +92,4 @@ begin
 			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte
 		);
 	
-end uart_communicator_test_impl;
+end communicator_test_impl;

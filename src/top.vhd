@@ -135,7 +135,7 @@ begin
 			clk_out => uart_clk
 		);
 
-	uart_communicator0 : entity work.uart_communicator
+	communicator0 : entity work.communicator
 		port map (
 			reset_n                => reset_n,
 			clk_16                 => uart_clk,
