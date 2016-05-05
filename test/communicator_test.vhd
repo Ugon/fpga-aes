@@ -32,7 +32,7 @@ dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 
 dbg_serializer0_start_transmitting_in     : out std_logic;
 dbg_serializer0_finished_transmitting_out : out std_logic;
 
-dbg_state                                 : out Integer range 0 to 2;  
+dbg_state                                 : out Integer range 0 to 7;  
 
 dbg_cnt_rx                                : out Integer range 0 to 15;
 dbg_cnt_tx                                : out Integer range 0 to 15;

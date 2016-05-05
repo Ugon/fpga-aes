@@ -70,6 +70,8 @@ architecture top_impl of top is
 	signal dbg_start_error : std_logic;
 	signal dbg_stop_error : std_logic;
 	signal dbg_cnt_rx : Integer range 0 to 15;
+	signal dbg_rx0_start_listening_in : std_logic;
+	signal dbg_rx0_finished_listening_out : std_logic;
 	
 	component hps is
 		port (
@@ -155,7 +157,9 @@ begin
 			
 			dbg_cnt_rx             => dbg_cnt_rx,
 			dbg_start_error        => dbg_start_error,
-			dbg_stop_error         => dbg_stop_error
+			dbg_stop_error         => dbg_stop_error,
+			dbg_rx0_start_listening_in => dbg_rx0_start_listening_in,
+			dbg_rx0_finished_listening_out => dbg_rx0_finished_listening_out
 		);
 
 	oLEDR(9) <= dbg_start_error;
@@ -163,9 +167,10 @@ begin
 
 	oLEDR(7 downto 0) <= block_from_aes((to_integer(unsigned(iSW(4 downto 0))) + 1) * 8 - 1 downto to_integer(unsigned(iSW(4 downto 0))) * 8);
 
-	probe(0) <= uart_clk;
-	probe(1) <= uart_rx;
-	probe(2) <= uart_tx;
+	--probe(0) <= uart_clk;
+	probe(0) <= uart_rx;
+	probe(1) <= dbg_rx0_start_listening_in;
+	probe(2) <= dbg_rx0_finished_listening_out;
 	probe(3) <= dbg_start_error or dbg_stop_error;
 	probe(7 downto 4) <= std_logic_vector(to_unsigned(dbg_cnt_rx, 4));
 

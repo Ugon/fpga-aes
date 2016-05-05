@@ -147,19 +147,20 @@ dbg_start_error <= '1';
 						when 7  => oversample_buffer(0) := rx;
 						when 8  => oversample_buffer(1) := rx;
 						when 9  => oversample_buffer(2) := rx;
-						when 14 =>
+						--when 14 =>
 							trigger(trigger_finished_action, trigger_finished_reaction);
 
 							if (vote(oversample_buffer) = '0') then 
 							--	stop bit error
 dbg_stop_error <= '1';
 							end if;
-						when 15 => 
+						--when 15 => 
+
 							state <= await_pulse;
 						when others =>
 					end case;
 					
-					if (counter < 15) then 
+					if (counter < 9) then 
 						counter := counter + 1;
 					else 
 						counter := 0;

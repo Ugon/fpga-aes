@@ -36,7 +36,7 @@ dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 
 dbg_serializer0_start_transmitting_in     : out std_logic;
 dbg_serializer0_finished_transmitting_out : out std_logic;
 
-dbg_state                                 : out Integer range 0 to 2;
+dbg_state                                 : out Integer range 0 to 7;
 
 dbg_cnt_rx                                : out Integer range 0 to 15;
 dbg_cnt_tx                                : out Integer range 0 to 15;
@@ -53,7 +53,7 @@ dbg_stop_error            : out std_logic
 end communicator;
 
 architecture communicator_impl of communicator is
-	type fsm is (start, blocks, acks);
+	type fsm is (start, blocks, blocks_r_finished_t_waiting, blocks_r_waiting_t_finished, acks, acks_r_finished_t_waiting, acks_r_waiting_t_finished);
 	signal state : fsm := start;
 
 	constant  ACK : std_logic_vector(7 downto 0) := "01000001";
@@ -319,7 +319,47 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 	end process;
 
 	communication_flow : process (clk_16, reset_n)
-		variable received_correct_block : std_logic := '0';
+		variable received_correct_block    : std_logic        := '0';
+
+		procedure handle_deserializer_finished (
+			signal p_deserializer0_block_out   : in  std_logic_vector;
+			signal p_block_modification_out    : out std_logic_vector;
+			signal p_next_custom0_tx_byte      : out std_logic_vector;
+			p_received_correct_block           : out std_logic;
+			p_deserializer0_correct_out        : in  std_logic) is
+
+		variable p_tmp_received_correct_block  : std_logic := '0';
+		begin
+			--read receiver output
+			p_block_modification_out            <= p_deserializer0_block_out;
+			p_tmp_received_correct_block        := p_deserializer0_correct_out;
+			p_received_correct_block            := p_tmp_received_correct_block;
+				
+			--set transmitter input
+			if (p_tmp_received_correct_block = '1') then
+				p_next_custom0_tx_byte          <= ACK;
+			else 
+				p_next_custom0_tx_byte          <= NACK;
+			end if;
+		end;
+
+		procedure handle_customr_rx_finished (
+			signal p_block_if_success          : in  std_logic_vector;
+			signal p_block_if_failure          : in  std_logic_vector;
+			signal p_next_serializer0_block_in : out std_logic_vector;
+			signal p_custom0_rx_byte           : in  std_logic_vector;
+			p_received_correct_block           : in  std_logic) is
+
+		variable p_tmp_received_correct_block  : std_logic := '0';
+		begin
+			--read receiver output and set transmitter input
+			if (p_received_correct_block = '1' and p_custom0_rx_byte = ACK) then
+				p_next_serializer0_block_in     <= p_block_if_success;					
+			else 
+				p_next_serializer0_block_in     <= p_block_if_failure;							
+			end if;
+		end;
+
 	begin
 		if (reset_n = '0') then
 			state                                         <= start;
@@ -334,54 +374,123 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 		elsif (rising_edge(clk_16)) then
 			case state is
 				when start =>
-					state                                 <= blocks;
+					state                                 <= blocks_r_waiting_t_finished;
 
-					--trigger receiver start listening
 					trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 	
+
 				when blocks =>
- 					--if receiver finished (transmitter is guaranteed to finish first or at the same time)
-					if (deserializer0_finished_listening_out = '1') then
+ 					--if receiver and transmitter finished at the same time
+ 					if (deserializer0_finished_listening_out = '1' and serializer0_finished_transmitting_out = '1') then
 						state                             <= acks;
 
-						--read receiver output
-						block_modification_out            <= deserializer0_block_out;
-						received_correct_block            := deserializer0_correct_out;
-				
-						--set transmitter input
-						if (deserializer0_correct_out = '1') then
-							next_custom0_tx_byte          <= ACK;
-						else 
-							next_custom0_tx_byte          <= NACK;
-						end if;			
+						handle_deserializer_finished(
+							p_deserializer0_block_out   => deserializer0_block_out,
+							p_block_modification_out    => block_modification_out,
+							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_received_correct_block    => received_correct_block,
+							p_next_custom0_tx_byte      => next_custom0_tx_byte);
 
-						--trigger receiver start listening
 						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
+						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
 
-						--trigger transmitter start transmitting
+					--if receiver finished first
+					elsif (deserializer0_finished_listening_out = '1') then
+						state <= blocks_r_finished_t_waiting;
+
+						handle_deserializer_finished(
+							p_deserializer0_block_out   => deserializer0_block_out,
+							p_block_modification_out    => block_modification_out,
+							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_received_correct_block    => received_correct_block,
+							p_next_custom0_tx_byte      => next_custom0_tx_byte);
+
+					--if transmitter finished first
+					elsif (serializer0_finished_transmitting_out = '1') then
+						state <= blocks_r_waiting_t_finished;
+					end if;
+
+
+				when blocks_r_finished_t_waiting =>
+					if (serializer0_finished_transmitting_out = '1') then
+						state <= acks;
+
+						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
 						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
 					end if;
 
+
+				when blocks_r_waiting_t_finished =>
+					if (deserializer0_finished_listening_out = '1') then
+						state <= acks;
+
+						handle_deserializer_finished(
+							p_deserializer0_block_out   => deserializer0_block_out,
+							p_block_modification_out    => block_modification_out,
+							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_received_correct_block    => received_correct_block,
+							p_next_custom0_tx_byte      => next_custom0_tx_byte);
+
+						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
+						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
+					end if;
+
+
 				when acks =>
- 					--if receiver finished (transmitter is guaranteed to finish first or at the same time)
-					if(custom0_rx_finished_listening = '1') then
+					if(custom0_rx_finished_listening = '1' and custom0_tx_finished_transmitting = '1') then
 						state                             <= blocks;
 
-						--read receiver output and set transmitter input
-						if (received_correct_block = '1' and custom0_rx_byte = ACK) then
-							--if both directions successful
-							next_serializer0_block_in     <= block_modification_in;					
-						else
-							--if some direction failed
-							next_serializer0_block_in     <= serializer0_block_in;							
-						end if;
+						handle_customr_rx_finished (
+							p_block_if_success          => block_modification_in,
+							p_block_if_failure          => serializer0_block_in,
+							p_next_serializer0_block_in => next_serializer0_block_in,
+							p_custom0_rx_byte           => custom0_rx_byte,
+							p_received_correct_block    => received_correct_block);
 
-						--trigger receiver start listening
 						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
-						
-						--trigger transmitter start transmitting
+						trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
+
+					--if receiver finished first
+					elsif (custom0_rx_finished_listening = '1') then
+						state <= acks_r_finished_t_waiting;
+
+						handle_customr_rx_finished (
+							p_block_if_success          => block_modification_in,
+							p_block_if_failure          => serializer0_block_in,
+							p_next_serializer0_block_in => next_serializer0_block_in,
+							p_custom0_rx_byte           => custom0_rx_byte,
+							p_received_correct_block    => received_correct_block);
+
+					--if transmitter finished first
+					elsif (custom0_tx_finished_transmitting = '1') then
+						state <= acks_r_waiting_t_finished;
+					end if;
+
+				
+				when acks_r_finished_t_waiting =>
+					if (custom0_tx_finished_transmitting = '1') then
+						state <= blocks;
+					
+						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 						trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
 					end if;
+
+
+				when acks_r_waiting_t_finished =>
+					if (custom0_rx_finished_listening = '1') then
+						state <= blocks;
+
+						handle_customr_rx_finished (
+							p_block_if_success          => block_modification_in,
+							p_block_if_failure          => serializer0_block_in,
+							p_next_serializer0_block_in => next_serializer0_block_in,
+							p_custom0_rx_byte           => custom0_rx_byte,
+							p_received_correct_block    => received_correct_block);
+
+						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
+						trigger(trigger_serializer0_start_transmitting_action, trigger_serializer0_start_transmitting_reaction);
+					end if;
+
 
 			end case;
 		end if;
@@ -394,8 +503,16 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 				dbg_state <= 0;
 			when blocks =>
 				dbg_state <= 1;
-			when acks =>
+			when blocks_r_finished_t_waiting =>
 				dbg_state <= 2;
+			when blocks_r_waiting_t_finished =>
+				dbg_state <= 3;
+			when acks =>
+				dbg_state <= 4;
+			when acks_r_finished_t_waiting =>
+				dbg_state <= 5;
+			when acks_r_waiting_t_finished =>
+				dbg_state <= 6;
 		end case;
 	end process;
 
