@@ -7,8 +7,8 @@ entity trigger is
 		clk_16       : in    std_logic;
 		reset_n      : in    std_logic; 
 		action       : in    std_logic;
-		reaction     : out   std_logic;
-		pulse_signal : out   std_logic);
+		reaction     : out   std_logic := '0';
+		pulse_signal : out   std_logic := '0');
 end trigger;
 
 architecture trigger_impl of trigger is
