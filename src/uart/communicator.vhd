@@ -47,8 +47,8 @@ dbg_mux_tx0_enable_custom                 : out std_logic;
 dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0);
 
 dbg_start_error           : out std_logic;
-dbg_stop_error            : out std_logic
-
+dbg_stop_error            : out std_logic;
+dbg_rx_state              : out Integer range 0 to 3
 );
 end communicator;
 
@@ -158,7 +158,8 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 			
 			dbg_cnt                   => dbg_cnt_rx,
 			dbg_start_error           => dbg_start_error,
-			dbg_stop_error            => dbg_stop_error
+			dbg_stop_error            => dbg_stop_error,
+			dbg_rx_state              => dbg_rx_state
 		);
 
 	entity_tx0 : entity work.uart_tx
@@ -322,13 +323,12 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 		variable received_correct_block    : std_logic        := '0';
 
 		procedure handle_deserializer_finished (
-			signal p_deserializer0_block_out   : in  std_logic_vector;
-			signal p_block_modification_out    : out std_logic_vector;
-			signal p_next_custom0_tx_byte      : out std_logic_vector;
-			p_received_correct_block           : out std_logic;
-			p_deserializer0_correct_out        : in  std_logic) is
-
-		variable p_tmp_received_correct_block  : std_logic := '0';
+			signal p_deserializer0_block_out      : in  std_logic_vector;
+			signal p_block_modification_out       : out std_logic_vector;
+			signal p_next_custom0_tx_byte         : out std_logic_vector;
+			p_received_correct_block              : out std_logic;
+			p_deserializer0_correct_out           : in  std_logic) is
+			variable p_tmp_received_correct_block :     std_logic := '0';
 		begin
 			--read receiver output
 			p_block_modification_out            <= p_deserializer0_block_out;
@@ -344,13 +344,12 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 		end;
 
 		procedure handle_customr_rx_finished (
-			signal p_block_if_success          : in  std_logic_vector;
-			signal p_block_if_failure          : in  std_logic_vector;
-			signal p_next_serializer0_block_in : out std_logic_vector;
-			signal p_custom0_rx_byte           : in  std_logic_vector;
-			p_received_correct_block           : in  std_logic) is
-
-		variable p_tmp_received_correct_block  : std_logic := '0';
+			signal p_block_if_success             : in  std_logic_vector;
+			signal p_block_if_failure             : in  std_logic_vector;
+			signal p_next_serializer0_block_in    : out std_logic_vector;
+			signal p_custom0_rx_byte              : in  std_logic_vector;
+			p_received_correct_block              : in  std_logic) is
+			variable p_tmp_received_correct_block :     std_logic := '0';
 		begin
 			--read receiver output and set transmitter input
 			if (p_received_correct_block = '1' and p_custom0_rx_byte = ACK) then
@@ -437,6 +436,7 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 
 
 				when acks =>
+ 					--if receiver and transmitter finished at the same time
 					if(custom0_rx_finished_listening = '1' and custom0_tx_finished_transmitting = '1') then
 						state                             <= blocks;
 
@@ -496,23 +496,15 @@ dbg_serializer0_tx_byte                   <= serializer0_tx_byte;
 		end if;
 	end process;
 
-
 	process (state) begin
 		case state is
-			when start =>
-				dbg_state <= 0;
-			when blocks =>
-				dbg_state <= 1;
-			when blocks_r_finished_t_waiting =>
-				dbg_state <= 2;
-			when blocks_r_waiting_t_finished =>
-				dbg_state <= 3;
-			when acks =>
-				dbg_state <= 4;
-			when acks_r_finished_t_waiting =>
-				dbg_state <= 5;
-			when acks_r_waiting_t_finished =>
-				dbg_state <= 6;
+			when start                       =>	dbg_state <= 0;
+			when blocks                      =>	dbg_state <= 0;
+			when blocks_r_finished_t_waiting =>	dbg_state <= 1;
+			when blocks_r_waiting_t_finished =>	dbg_state <= 1;
+			when acks                        =>	dbg_state <= 2;
+			when acks_r_finished_t_waiting   =>	dbg_state <= 3;
+			when acks_r_waiting_t_finished   =>	dbg_state <= 3;
 		end case;
 	end process;
 

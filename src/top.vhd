@@ -72,6 +72,10 @@ architecture top_impl of top is
 	signal dbg_cnt_rx : Integer range 0 to 15;
 	signal dbg_rx0_start_listening_in : std_logic;
 	signal dbg_rx0_finished_listening_out : std_logic;
+	signal dbg_tx0_start_transmitting_in : std_logic;
+	signal dbg_tx0_finished_transmitting_out : std_logic;
+	signal dbg_state : Integer range 0 to 7;
+	signal dbg_rx_state : Integer range 0 to 3;
 	
 	component hps is
 		port (
@@ -102,6 +106,8 @@ architecture top_impl of top is
 	end component hps;
 	
 begin
+	
+	
 	
 	CONNECTED_TO_h2f_loan_io_oe(49) <= '0';
 	CONNECTED_TO_h2f_loan_io_oe(50) <= '1';
@@ -159,20 +165,30 @@ begin
 			dbg_start_error        => dbg_start_error,
 			dbg_stop_error         => dbg_stop_error,
 			dbg_rx0_start_listening_in => dbg_rx0_start_listening_in,
-			dbg_rx0_finished_listening_out => dbg_rx0_finished_listening_out
+			dbg_tx0_start_transmitting_in => dbg_tx0_start_transmitting_in,
+			dbg_tx0_finished_transmitting_out => dbg_tx0_finished_transmitting_out,
+			dbg_rx0_finished_listening_out => dbg_rx0_finished_listening_out,
+			dbg_state => dbg_state,
+			dbg_rx_state => dbg_rx_state
 		);
 
-	oLEDR(9) <= dbg_start_error;
-	oLEDR(8) <= dbg_stop_error;
+	oLEDR(9) <= dbg_start_error or dbg_stop_error;
+	--oLEDR(8) <= dbg_funky_state_reached;
 
 	oLEDR(7 downto 0) <= block_from_aes((to_integer(unsigned(iSW(4 downto 0))) + 1) * 8 - 1 downto to_integer(unsigned(iSW(4 downto 0))) * 8);
 
 	--probe(0) <= uart_clk;
 	probe(0) <= uart_rx;
-	probe(1) <= dbg_rx0_start_listening_in;
-	probe(2) <= dbg_rx0_finished_listening_out;
-	probe(3) <= dbg_start_error or dbg_stop_error;
+	probe(1) <= uart_tx;
+	--probe(1) <= uart_tx;
+	probe(3 downto 2) <= std_logic_vector(to_unsigned(dbg_rx_state, 2));
+	--probe(2) <= dbg_rx0_start_listening_in;
+	--probe(3) <= dbg_rx0_finished_listening_out;
+	--probe(4) <= dbg_tx0_start_transmitting_in;
+	--probe(5) <= dbg_tx0_finished_transmitting_out;
+	--probe(3) <= dbg_start_error or dbg_stop_error;
 	probe(7 downto 4) <= std_logic_vector(to_unsigned(dbg_cnt_rx, 4));
+	--probe(7 downto 6) <= std_logic_vector(to_unsigned(dbg_state, 2));
 
 	--process (uart_rx_available, uard_rx_data) begin
 		--if(rising_edge(uart_rx_available)) then

@@ -3,12 +3,15 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.utils.all;
+use work.crc16.all;
 
 entity block_deserializer is
 	generic (
 		byte_bits    : Integer := 8;
 		block_bytes  : Integer := 4;   --test
-		block_bits   : Integer := 32); --test
+		block_bits   : Integer := 32;  --test
+		crc_bytes    : Integer := 2;
+		crc_bits     : Integer := 16);
 		--block_bytes  : Integer := 16;
 		--block_bits   : Integer := 128);
 	port (
@@ -27,26 +30,32 @@ entity block_deserializer is
 		correct_out               : out std_logic                                 := 'X';
 
 dbg_forward_start      : out std_logic;
-dbg_forward_finished   : out std_logic);
+dbg_forward_finished   : out std_logic;
+dbg_crc_accumulator    : out std_logic_vector(crc_bits - 1 downto 0)
+);
 end block_deserializer;
 
 architecture block_deserializer_impl of block_deserializer is
-	type fsm is (await_pulse, receive_bytes);
+	type fsm is (await_pulse, receive_block, receive_crc);
 	signal state : fsm;
 
-	signal forward_start      : std_logic                                             := '1';
-	signal forward_finished   : std_logic                                             := '0';
-	signal finished_listening : std_logic                                             := '0';
-	signal block_buffer       : std_logic_vector(block_bits - 1 downto 0)             := (others => '0');
+	signal forward_start      : std_logic := '1';
+	signal forward_finished   : std_logic := '0';
+	signal finished_listening : std_logic := '0';
+	signal correct_latched    : std_logic := '0';
 
-	signal most_significant_byte   : std_logic_vector(byte_bits - 1 downto 0)              := (others => '0');
-	signal least_significant_bytes : std_logic_vector(block_bits - byte_bits - 1 downto 0) := (others => '0');
-
+	signal block_buffer       : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+	signal crc_accumulator    : std_logic_vector(crc_bits - 1 downto 0)   := (others => '0');
+	
 	signal trigger_start_next_byte_action   : std_logic := '0';
 	signal trigger_start_next_byte_reaction : std_logic := '0';
 	signal start_next_byte                  : std_logic := '0';
 
 begin
+
+	finished_listening     <= rx_finished_listening and forward_finished;
+	finished_listening_out <= finished_listening;
+	rx_start_listening     <= (start_listening_in and forward_start) or start_next_byte;
 
 	trigger0 : entity work.trigger
 		port map (
@@ -57,37 +66,27 @@ begin
 			pulse_signal  => start_next_byte
 		);
 
-	finished_listening              <= rx_finished_listening and forward_finished;
-	finished_listening_out          <= finished_listening;
-	rx_start_listening              <= (start_listening_in and forward_start) or start_next_byte;
-----------------TMP
-	correct_out <= finished_listening_out;
-----------------TMP
-	
-
-	block_out(block_bits - 1 downto block_bits - byte_bits) <= most_significant_byte;
-	block_out(block_bits - byte_bits - 1 downto 0) <= least_significant_bytes;
-
-	process (finished_listening, rx_byte, block_buffer) begin
+	process (finished_listening, rx_byte, correct_latched, crc_accumulator) begin
 		if (finished_listening = '1') then
-			most_significant_byte <= rx_byte;
+			correct_out <= crc_verify(crc_add_data(crc_accumulator, rx_byte));
 		else
-			most_significant_byte <= block_buffer(block_bits - 1 downto block_bits - byte_bits);
+			correct_out <= correct_latched;
 		end if;
 	end process;
 
 	process (reset_n, finished_listening) begin
 		if (reset_n = '0') then
-			least_significant_bytes <= (others => '0');
+			block_out <= (others => '0');
 		elsif (rising_edge(finished_listening)) then
-			least_significant_bytes <= block_buffer(block_bits - byte_bits - 1 downto 0);
+			block_out <= block_buffer;
 		end if;
 	end process;
 
 	process (clk_16, reset_n) 
-		variable byte_position            : Integer range 0 to block_bytes - 1 := 0;
-		variable delayed_forward_start    : boolean                            := false;
-		variable delayed_forward_finished : boolean                            := false;
+		variable byte_position            : Integer range 0 to block_bytes - 1     := 0;
+		variable crc_position             : Integer range 0 to crc_bytes   - 1     := 0;
+		variable delayed_forward_start    : boolean                                := false;
+		variable delayed_forward_finished : boolean                                := false;
 	begin
 		if (reset_n = '0') then
 			state                          <= await_pulse;
@@ -97,7 +96,9 @@ begin
 			delayed_forward_start          := false;
 			delayed_forward_finished       := false;
 			byte_position                  := 0;
+			crc_position                   := 0;
 			block_buffer                   <= (others => '0');
+			crc_accumulator                <= (others => '0');
 
 		elsif(rising_edge(clk_16)) then
 			case state is
@@ -106,37 +107,58 @@ begin
 					delayed_forward_finished := false;
 
 					if (delayed_forward_start) then
-						state <= receive_bytes;
-						byte_position := 0;
+						state <= receive_block;
+						byte_position := block_bytes - 1;
+						crc_accumulator <= crc_init;
 						forward_start <= '0';
 						delayed_forward_start := false;
 					elsif (start_listening_in = '1') then
 						delayed_forward_start := true;
 					end if;
 
-				when receive_bytes =>
+				when receive_block =>
 					if (rx_finished_listening = '1') then
-						if (byte_position < block_bytes - 1) then
-							block_buffer((byte_position + 1) * byte_bits - 1 downto byte_position * byte_bits) <= rx_byte;
-							byte_position := byte_position + 1;
-							trigger(trigger_start_next_byte_action, trigger_start_next_byte_reaction);
-						else 
-							state <= await_pulse;
-							block_buffer(block_bits - 1 downto block_bits - byte_bits) <= rx_byte;
-							forward_start <= '1';
+						block_buffer((byte_position + 1) * byte_bits - 1 downto byte_position * byte_bits) <= rx_byte;
+						crc_accumulator <= crc_add_data(crc_accumulator, rx_byte);
+						trigger(trigger_start_next_byte_action, trigger_start_next_byte_reaction);
+
+						if (byte_position = 0) then
+							state <= receive_crc;
+							crc_position := crc_bytes - 1;
+						else
+							byte_position := byte_position - 1;
 						end if;
 					end if;
 
+				when receive_crc =>
+					if (rx_finished_listening = '1') then
+						if (crc_position > 0) then
+							crc_accumulator <= crc_add_data(crc_accumulator, rx_byte);
+							trigger(trigger_start_next_byte_action, trigger_start_next_byte_reaction);
+						else 				
+							correct_latched <= crc_verify(crc_add_data(crc_accumulator, rx_byte));
+							forward_start <= '1';
+						end if;
+
+						if (crc_position = 0) then
+							state <= await_pulse;
+						else
+							crc_position := crc_position - 1;
+						end if;
+					end if;			
+
 					if (delayed_forward_finished) then
 						forward_finished <= '1';
-					elsif (byte_position = block_bytes - 1) then
+					elsif (crc_position = 0) then
 						delayed_forward_finished := true;
 					end if;
+
 			end case;
 		end if;
 	end process;
 
 	dbg_forward_start <= forward_start;
 	dbg_forward_finished <= forward_finished;
+	dbg_crc_accumulator <= crc_accumulator;
 
 end block_deserializer_impl;
