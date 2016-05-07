@@ -2,10 +2,12 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity sync_2ff is
+generic (
+	idle : std_logic := '0');
 port (
     async_in : in std_logic;
-    clk : in std_logic;
-    reset_n : in std_logic;
+    clk      : in std_logic;
+    reset_n  : in std_logic;
     sync_out : out std_logic);
 end sync_2ff;
 
@@ -26,8 +28,9 @@ begin
 
 	process (clk, reset_n) begin
 		if (reset_n = '0') then
-		    ff1 <= '0';
-		    ff2 <= '0';
+		    ff1      <= idle;
+		    ff2      <= idle;
+		    sync_out <= idle;
 		elsif (rising_edge(clk)) then
 		    ff1      <= async_in;
 		    ff2      <= ff1;

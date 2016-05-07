@@ -28,6 +28,9 @@ package aes_sub_table is
 	);
 
 	function sub_lookup(constant high : std_logic_vector(3 downto 0); constant low : std_logic_vector(3 downto 0)) return std_logic_vector;
+	
+	function sub_lookup(constant index : std_logic_vector(7 downto 0)) return std_logic_vector;
+
 
 end aes_sub_table;
 
@@ -40,5 +43,8 @@ package body aes_sub_table is
 		return sub_table(to_integer(unsigned(index)));
 	end function;
 
+	function sub_lookup(constant index : std_logic_vector(7 downto 0)) return std_logic_vector is begin
+		return sub_table(to_integer(unsigned(index)));
+	end function;
 
 end aes_sub_table;

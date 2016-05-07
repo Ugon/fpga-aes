@@ -52,6 +52,7 @@ architecture top_impl of top is
 	signal reset_n  : std_logic;
 
 	signal uart_clk          : std_logic;
+	signal uart_rx_async     : std_logic;
 	signal uart_rx           : std_logic;
 	signal uard_rx_data      : std_logic_vector(7 downto 0);
 	signal uart_rx_available : std_logic;
@@ -106,16 +107,14 @@ architecture top_impl of top is
 	end component hps;
 	
 begin
-	
-	
-	
+		
 	CONNECTED_TO_h2f_loan_io_oe(49) <= '0';
 	CONNECTED_TO_h2f_loan_io_oe(50) <= '1';
 	CONNECTED_TO_h2f_loan_io_oe(53) <= '1';
 	CONNECTED_TO_h2f_loan_io_oe(54) <= '0';
 
 	CONNECTED_TO_h2f_loan_io_out(50) <= uart_tx;
-	uart_rx <= CONNECTED_TO_h2f_loan_io_in(49);
+	uart_rx_async <= CONNECTED_TO_h2f_loan_io_in(49);
 	CONNECTED_TO_h2f_loan_io_out(53) <= hps_led_signal;
 	hps_key_signal <= CONNECTED_TO_h2f_loan_io_in(54);
 
@@ -144,6 +143,16 @@ begin
 			memory_mem_odt                   => HPS_DDR3_ODT,
 			memory_mem_dm                    => HPS_DDR3_DM,
 			memory_oct_rzqin                 => HPS_DDR3_RZQ
+		);
+
+	sync_2ff0 : entity work.sync_2ff
+		generic map (
+			idle => '1')
+		port map (
+		    async_in => uart_rx_async,
+		    clk      => uart_clk,
+		    reset_n  => reset_n,
+		    sync_out => uart_rx
 		);
 
 	uart_prescaler0 : entity work.uart_prescaler
