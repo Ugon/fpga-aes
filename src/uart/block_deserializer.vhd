@@ -66,13 +66,11 @@ begin
 			pulse_signal  => start_next_byte
 		);
 
--------------------------------------------
----------------TMP correct
 	process (finished_listening, rx_byte, correct_latched, crc_accumulator) begin
 		if (finished_listening = '1') then
-			correct_out <= crc_verify(crc_add_data(crc_accumulator, rx_byte)) or '1';
+			correct_out <= crc_verify(crc_add_data(crc_accumulator, rx_byte));
 		else
-			correct_out <= correct_latched or '1';
+			correct_out <= correct_latched;
 		end if;
 	end process;
 

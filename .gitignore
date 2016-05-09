@@ -1,2 +1,5 @@
 *.sublime-project
 *.sublime-workspace
+
+aes_data.txt
+uart_stress_test.txt
