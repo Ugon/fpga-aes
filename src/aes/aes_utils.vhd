@@ -33,6 +33,9 @@ package aes_utils is
 
 	function multiply (constant left : std_logic_vector(7 downto 0); constant right : std_logic_vector(7 downto 0)) return std_logic_vector;
 
+	function key_expansion256 (constant key : std_logic_vector) return std_logic_vector;
+
+	function reverse_byte_order(signal inp : std_logic_vector) return std_logic_vector;
 
 end aes_utils;
 
@@ -44,10 +47,12 @@ package body aes_utils is
 		--index := high & low;
 		--return sub_table(to_integer(unsigned(index)));
 	--end function;
+	
 
 	function lookup_sub (constant index : std_logic_vector(7 downto 0)) return std_logic_vector is begin
 		return sub_table(to_integer(unsigned(index)));
 	end function;
+
 
 	function multiply (constant left : std_logic_vector(7 downto 0); constant right : std_logic_vector(7 downto 0)) return std_logic_vector is
 		constant irred_poly       : std_logic_vector(7 downto 0) := x"1b";
@@ -80,6 +85,65 @@ package body aes_utils is
 		end loop;
 		
 		return p;
+	end function;
+
+
+	function key_expansion256 (constant key : std_logic_vector) return std_logic_vector is
+		constant word_length : Integer := 4 * 8;
+		constant byte_bits   : Integer := 8;
+		constant Nk          : Integer := 8;
+
+		variable tmp         : std_logic_vector(word_length - 1 downto 0);
+		variable tmp2        : std_logic_vector(word_length - 1 downto 0);
+		variable rcon        : std_logic_vector(word_length - 1 downto 0);
+		variable result      : std_logic_vector(60 * word_length - 1 downto 0);
+	begin
+		result(word_length * Nk - 1 downto 0) := key;
+		for i in Nk to 59 loop
+			tmp := result(word_length * i - 1 downto word_length * (i - 1));
+			
+			if (i mod Nk = 0) then
+				--RotWord
+				tmp2 := tmp;
+				tmp(word_length - 1 downto word_length - byte_bits) := tmp2(byte_bits - 1 downto 0);
+				tmp(word_length - byte_bits - 1 downto 0) := tmp2(word_length - 1 downto byte_bits);
+
+
+				--SubWord
+				for j in 0 to 3 loop
+					tmp((j + 1) * byte_bits - 1 downto j * byte_bits) := lookup_sub(tmp((j + 1) * byte_bits - 1 downto j * byte_bits));
+				end loop;
+
+				--Rcon XOR
+				tmp(byte_bits - 1 downto 0) := tmp(byte_bits - 1 downto 0) xor std_logic_vector(to_unsigned(2 ** (i / Nk - 1), byte_bits));
+
+			elsif (i mod Nk = 4) then
+				--SubWord
+				for j in 0 to 3 loop
+					tmp((j + 1) * byte_bits - 1 downto j * byte_bits) := lookup_sub(tmp((j + 1) * byte_bits - 1 downto j * byte_bits));
+				end loop;
+
+			end if;
+			
+			result(word_length * (i + 1) - 1 downto word_length * i) := 
+				tmp xor result(word_length * (i - Nk + 1) - 1 downto word_length * (i - Nk));
+		end loop;
+
+		return result;
+	end function;
+
+
+	function reverse_byte_order(signal inp : std_logic_vector) return std_logic_vector is
+		constant byte_bits : Integer := 8;	
+		constant inp_bytes : Integer := inp'length / byte_bits;
+		
+		variable result : std_logic_vector(inp'range);
+	begin
+		for i in 0 to inp_bytes - 1 loop
+			result((inp_bytes - i) * byte_bits - 1 downto (inp_bytes - i - 1) * byte_bits) := inp((i + 1) * byte_bits - 1 downto i * byte_bits);
+		end loop;
+
+		return result;
 	end function;
 
 

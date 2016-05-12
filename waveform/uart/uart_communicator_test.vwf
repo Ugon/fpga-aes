@@ -1007,7 +1007,7 @@ SIGNAL("dbg_state")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
 	SIGNAL_TYPE = BUS;
-	WIDTH = 3;
+	WIDTH = 4;
 	LSB_INDEX = 0;
 	DIRECTION = OUTPUT;
 	PARENT = "";
@@ -1144,6 +1144,16 @@ SIGNAL("dbg_serializer0_tx_byte[0]")
 }
 
 SIGNAL("dbg_state[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_state";
+}
+
+SIGNAL("dbg_state[3]")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
 	SIGNAL_TYPE = SINGLE_BIT;
@@ -2167,6 +2177,15 @@ TRANSITION_LIST("dbg_state[2]")
 	}
 }
 
+TRANSITION_LIST("dbg_state[3]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 100000.0;
+	}
+}
+
 DISPLAY_LINE
 {
 	CHANNEL = "reset_n";
@@ -3126,50 +3145,10 @@ DISPLAY_LINE
 
 DISPLAY_LINE
 {
-	CHANNEL = "dbg_state";
-	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
-	TREE_INDEX = 97;
-	TREE_LEVEL = 0;
-	CHILDREN = 98, 99, 100;
-}
-
-DISPLAY_LINE
-{
-	CHANNEL = "dbg_state[2]";
-	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
-	TREE_INDEX = 98;
-	TREE_LEVEL = 1;
-	PARENT = 97;
-}
-
-DISPLAY_LINE
-{
-	CHANNEL = "dbg_state[1]";
-	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
-	TREE_INDEX = 99;
-	TREE_LEVEL = 1;
-	PARENT = 97;
-}
-
-DISPLAY_LINE
-{
-	CHANNEL = "dbg_state[0]";
-	EXPAND_STATUS = COLLAPSED;
-	RADIX = Unsigned;
-	TREE_INDEX = 100;
-	TREE_LEVEL = 1;
-	PARENT = 97;
-}
-
-DISPLAY_LINE
-{
 	CHANNEL = "dbg_mux_rx0_enable_custom";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Binary;
-	TREE_INDEX = 101;
+	TREE_INDEX = 97;
 	TREE_LEVEL = 0;
 }
 
@@ -3178,7 +3157,7 @@ DISPLAY_LINE
 	CHANNEL = "dbg_mux_tx0_enable_custom";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Binary;
-	TREE_INDEX = 102;
+	TREE_INDEX = 98;
 	TREE_LEVEL = 0;
 }
 
@@ -3187,9 +3166,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 103;
+	TREE_INDEX = 99;
 	TREE_LEVEL = 0;
-	CHILDREN = 104, 105, 106, 107, 108, 109, 110, 111;
+	CHILDREN = 100, 101, 102, 103, 104, 105, 106, 107;
 }
 
 DISPLAY_LINE
@@ -3197,9 +3176,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[7]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 104;
+	TREE_INDEX = 100;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3207,9 +3186,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[6]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 105;
+	TREE_INDEX = 101;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3217,9 +3196,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[5]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 106;
+	TREE_INDEX = 102;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3227,9 +3206,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[4]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 107;
+	TREE_INDEX = 103;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3237,9 +3216,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[3]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 108;
+	TREE_INDEX = 104;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3247,9 +3226,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[2]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 109;
+	TREE_INDEX = 105;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3257,9 +3236,9 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[1]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
-	TREE_INDEX = 110;
+	TREE_INDEX = 106;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 99;
 }
 
 DISPLAY_LINE
@@ -3267,9 +3246,59 @@ DISPLAY_LINE
 	CHANNEL = "dbg_serializer0_tx_byte[0]";
 	EXPAND_STATUS = COLLAPSED;
 	RADIX = Hexadecimal;
+	TREE_INDEX = 107;
+	TREE_LEVEL = 1;
+	PARENT = 99;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Unsigned;
+	TREE_INDEX = 108;
+	TREE_LEVEL = 0;
+	CHILDREN = 109, 110, 111, 112;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[3]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Unsigned;
+	TREE_INDEX = 109;
+	TREE_LEVEL = 1;
+	PARENT = 108;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[2]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Unsigned;
+	TREE_INDEX = 110;
+	TREE_LEVEL = 1;
+	PARENT = 108;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[1]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Unsigned;
 	TREE_INDEX = 111;
 	TREE_LEVEL = 1;
-	PARENT = 103;
+	PARENT = 108;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[0]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Unsigned;
+	TREE_INDEX = 112;
+	TREE_LEVEL = 1;
+	PARENT = 108;
 }
 
 TIME_BAR

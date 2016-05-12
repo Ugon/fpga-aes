@@ -11,7 +11,9 @@ entity utils_test is
 		block_out : out std_logic_vector(127 downto 0);
 		a : in std_logic_vector(7 downto 0);
 		b : in std_logic_vector(7 downto 0);
-		p : out std_logic_vector(7 downto 0)
+		p : out std_logic_vector(7 downto 0);
+		key_in : in  std_logic_vector(255 downto 0);
+		key_expanded : out std_logic_vector(60 * 4 * 8 - 1 downto 0)
 	);
 end utils_test;
 
@@ -19,10 +21,14 @@ architecture utils_test_impl of utils_test is
 	
 	signal state_in  : aes_state;
 	signal state_out : aes_state;
-	
+	signal key_expanded_internal : std_logic_vector(60 * 4 * 8 - 1 downto 0);
 begin
+	key_expanded <= key_expanded_internal;
 
-	state_out <= mix_columns(state_in);
+	--key_expanded_internal <= key_expansion256(key_in);
+--	state_out <= encode256(state_in, key_in);
+	--state_out <= add_round_key(state_in, key_expanded_internal, 8);
+	--state_out <= mix_columns(state_in);
 	--state_out <= sub_bytes(state_in);
 	--p <= multiply(a, x"03");
 	

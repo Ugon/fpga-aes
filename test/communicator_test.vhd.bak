@@ -61,8 +61,8 @@ begin
 			clk_16                 => clk_16,
 			rx                     => rx,
 			tx                     => tx,
---			block_modification_in  => loopback,
---			block_modification_out => loopback,
+			block_modification_in  => loopback,
+			block_modification_out => loopback,
 
 			dbg_rx0_byte_out                          => dbg_rx0_byte_out,
 			dbg_rx0_start_listening_in                => dbg_rx0_start_listening_in,
@@ -87,6 +87,7 @@ begin
 			dbg_cnt_tx                                => dbg_cnt_tx,
 
 			dbg_mux_rx0_enable_custom                 => dbg_mux_rx0_enable_custom,
+			dbg_mux_tx0_enable_custom                 => dbg_mux_tx0_enable_custom,
 
 			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte
 		);
