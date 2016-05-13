@@ -7,8 +7,8 @@ entity communicator_test is
 		byte_bits    : Integer := 8;
 		block_bytes  : Integer := 4;
 		block_bits   : Integer := 32;
-		key_bytes    : Integer := 0;
-		key_bits     : Integer := 0);
+		key_bytes    : Integer := 8;
+		key_bits     : Integer := 64);
 	port (
 		clk_16                 : in    std_logic; --16x baudrate
 		reset_n                : in    std_logic;
@@ -40,7 +40,14 @@ dbg_cnt_tx                                : out Integer range 0 to 15;
 dbg_mux_rx0_enable_custom                 : out std_logic;
 dbg_mux_tx0_enable_custom                 : out std_logic;
 
-dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0)
+dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0);
+
+dbg_key                   : out std_logic_vector(key_bits   - 1 downto 0) := (others => '0');
+dbg_previous_ciphertext   : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+dbg_plaintext             : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+dbg_cyphertext            : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+
+dbg_next_serializer0_block_in  : out std_logic_vector(block_bits - 1 downto 0)
 
 	);
 end communicator_test;
@@ -55,7 +62,9 @@ begin
 		generic map (
 			byte_bits              => byte_bits,
 			block_bytes            => block_bytes,
-			block_bits             => block_bits)
+			block_bits             => block_bits,
+			key_bytes              => key_bytes,
+			key_bits               => key_bits)
 		port map (
 			reset_n                => reset_n,
 			clk_16                 => clk_16,
@@ -88,7 +97,14 @@ begin
 
 			dbg_mux_rx0_enable_custom                 => dbg_mux_rx0_enable_custom,
 
-			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte
+			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte,
+
+			dbg_key                                   => dbg_key,
+			dbg_previous_ciphertext                   => dbg_previous_ciphertext,
+			dbg_plaintext                             => dbg_plaintext,
+			dbg_cyphertext                            => dbg_cyphertext,
+			
+			dbg_next_serializer0_block_in             => dbg_next_serializer0_block_in
 		);
 	
 end communicator_test_impl;

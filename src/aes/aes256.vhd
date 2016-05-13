@@ -20,5 +20,6 @@ end aes256;
 architecture aes256_impl of aes256 is begin
 
 	cyphertext <= encode256(plaintext, key);
+--	cyphertext <= plaintext;
 
 end aes256_impl;
