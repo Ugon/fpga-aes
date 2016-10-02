@@ -124,6 +124,37 @@ set_location_assignment PIN_AD21 -to GPIO_1[33]
 set_location_assignment PIN_AA20 -to GPIO_1[34]
 set_location_assignment PIN_AC22 -to GPIO_1[35]
 set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"
+set_global_assignment -name VHDL_FILE ../src/aes/aes256enc.vhd
+set_global_assignment -name VHDL_FILE ../src/aes/aes256dec.vhd
+set_global_assignment -name QIP_FILE hps/synthesis/hps.qip
+set_global_assignment -name VHDL_FILE ../src/aes/aes_transformations.vhd
+set_global_assignment -name VHDL_FILE ../src/aes/aes_utils.vhd
+set_global_assignment -name VHDL_FILE ../src/sync_2ff.vhd
+set_global_assignment -name VHDL_FILE ../waveform/uart/entities/test_crc16.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/crc16.vhd
+set_global_assignment -name SDC_FILE timing_constraints.sdc
+set_global_assignment -name VHDL_FILE ../src/aes/utils_test.vhd
+set_global_assignment -name CDF_FILE programmer_chain.cdf
+set_global_assignment -name VHDL_FILE ../src/top.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/utils.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/uart_tx.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/uart_rx.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/uart_prescaler.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/trigger.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/communicator.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/block_serializer.vhd
+set_global_assignment -name VHDL_FILE ../src/uart/block_deserializer.vhd
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_rx_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_communicator_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/trigger_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/integration_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/block_serializer_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/block_deserializer_test.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_tx_test.vwf
+set_global_assignment -name VHDL_FILE ../test/communicator_test.vhd
+set_global_assignment -name VHDL_TEST_BENCH_FILE "../test-bench/uart/tb_trigger.vht"
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/aes/aes_utils.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/crc16.vwf
 set_instance_assignment -name D5_DELAY 2 -to memory_mem_ck -tag __hps_sdram_p0
 set_instance_assignment -name D5_DELAY 2 -to memory_mem_ck_n -tag __hps_sdram_p0
 set_instance_assignment -name PACKAGE_SKEW_COMPENSATION OFF -to memory_mem_dq[0] -tag __hps_sdram_p0
@@ -632,36 +663,6 @@ set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to HPS_DDR3_DM[3] -
 set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to HPS_DDR3_DM[3] -tag __hps_sdram_p0
 set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to HPS_DDR3_DM[4] -tag __hps_sdram_p0
 set_instance_assignment -name OUTPUT_TERMINATION "SERIES 50 OHM WITH CALIBRATION" -to HPS_DDR3_DM[4] -tag __hps_sdram_p0
-set_global_assignment -name QIP_FILE hps/synthesis/hps.qip
-set_global_assignment -name VHDL_FILE ../src/aes/aes256.vhd
-set_global_assignment -name VHDL_FILE ../src/aes/aes_transformations.vhd
-set_global_assignment -name VHDL_FILE ../src/aes/aes_utils.vhd
-set_global_assignment -name VHDL_FILE ../src/sync_2ff.vhd
-set_global_assignment -name VHDL_FILE ../waveform/uart/entities/test_crc16.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/crc16.vhd
-set_global_assignment -name SDC_FILE timing_constraints.sdc
-set_global_assignment -name VHDL_FILE ../src/aes/utils_test.vhd
-set_global_assignment -name CDF_FILE programmer_chain.cdf
-set_global_assignment -name VHDL_FILE ../src/top.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/utils.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/uart_tx.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/uart_rx.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/uart_prescaler.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/trigger.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/communicator.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/block_serializer.vhd
-set_global_assignment -name VHDL_FILE ../src/uart/block_deserializer.vhd
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_rx_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_communicator_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/trigger_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/integration_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/block_serializer_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/block_deserializer_test.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/uart_tx_test.vwf
-set_global_assignment -name VHDL_FILE ../test/communicator_test.vhd
-set_global_assignment -name VHDL_TEST_BENCH_FILE "../test-bench/uart/tb_trigger.vht"
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/aes/aes_utils.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../waveform/uart/crc16.vwf
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
