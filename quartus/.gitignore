@@ -44,7 +44,7 @@ output_files/
 software/
 
 #ignore QSYS output
-hps/
+soc_system/
 hps_isw_handoff/
 .qsys_edit/
 *.sopcinfo

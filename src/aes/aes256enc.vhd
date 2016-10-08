@@ -19,7 +19,7 @@ end aes256enc;
 
 architecture aes256enc_impl of aes256enc is begin
 
-	cyphertext_out <= encode256(plaintext_in, key_expansion_in);
-	--cyphertext_out <= plaintext_in;
+	--cyphertext_out <= encode256(plaintext_in, key_expansion_in);
+	cyphertext_out <= plaintext_in;
 
 end aes256enc_impl;
