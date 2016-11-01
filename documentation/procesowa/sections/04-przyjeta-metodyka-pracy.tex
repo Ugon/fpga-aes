@@ -1,7 +1,31 @@
 \section{Przyjęta metodyka pracy}
 \label{sec:przyjeta-metodyka-pracy}
-todo
+Proces tworzenia projektu prowadzony był zgodnie z iteracyjnym modelem wytwarzania oprogramowania. Prace zostały podzielone na szereg iteracji, z których każda miała na celu rozbudowę poprzedniej wersji o nowe funkcjonalności. Efekt każdego przyrostu miał być funkcjonalny oraz przetestowany.
+\newline
+Ze względu na trudności w oszacowaniu, jak długo mogą zająć kolejne iteracje, wyszczególnione zostały dwa duże etapy agregujące po kilka iteracji. Każdy z tych etapów ma nieprzekraczalny termin. Drugi etap ma na celu dostarczeniem gotowego produktu oraz po jego zakończeniu przewidziany jest długi okres czasu na ewentualne poprawki, oraz finalizację projektu.
 
+\subsection{Pierwszy etap projektu}
+Pierwszy etap ma na celu implementację komunikacji między komputerem a płytką FPGA wraz z obsługą błędów. Po jego zakończeniu układ FPGA ma być zdolny odbierać strumień bloków oraz odsyłać je z powrotem bez żadnych modyfikacji. Błędy transmisji powinny być wykrywane i obsługiwane. Implementacja ma być przystosowana do łatwego zintegrowania z modułem szyfrującym AES oraz sposobem wiązania bloków CBC. Etap pierwszy kończy się 30.06.2016r (koniec VI semestru).
+
+\subsubsection{Iteracje pierwszego etapu projektu}
+\begin{itemize}
+\item Zebranie informacji na temat układu FTDI i jego sterownikach, sprawdzenie czy jego wykorzystanie do realizacji komunikacji między komputerem a płytką będzie możliwe.
+\item Założenie projektu Quartus, skonfigurowanie pinów, wyprowadzenie sygnałów z układu FTDI do układu FPGA (przy użyciu programu Qsys). Zaimplementowanie modułu odbierającego znaki i odsyłającego je z powrotem.
+\item Zaimplementowanie modułów odpowiedzialnych za serializację i deserializację pomiędzy sygnałem UART a blokiem danych o wielkości 128b.
+\item Zaimplementowanie pierwszej wersji maszyny stanów odpowiedzialnej za sterowanie procesem odbierania i przesyłania bloków.
+\item Dodanie kontroli błędów przy użyciu sumy kontrolnej CRC.
+\end{itemize}
+
+\subsection{Drugi etap projektu}
+Drugi etap ma na celu dostarczenie gotowego produktu. Kończy się 30.09.2016r (koniec wakacji).
+\subsubsection{Iteracje drugiego etapu projektu}
+\begin{itemize}
+\item Implementacja modułu szyfrującego blok AES.
+\item Integracja modułu szyfrującego AES oraz implementacja i integracja sposobu łączenia bloków CBC.
+\item Implementacja modułu deszyfrującego blok AES.
+\item Integracja modułu deszyfrującego AES z uwzględnieniem sposobu łączenia bloków CBC.
+\item Przygotowanie karty SD zawierającej skrypt startowy programujący układ FPGA.
+\end{itemize}
 
 
 \newpage

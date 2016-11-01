@@ -1,6 +1,18 @@
 \section{Studium wykonalności}
 \label{sec:studium-wykonalnosci}
-todo
+
+Szyfrowanie symetryczne algorytmem AES jest obecnie powszechnie wykorzystywane oraz istnieje wiele rozwiązań do tego przeznaczonych. Produkt powinien dostarczać szyfrowania kompatybilnego z obecnie istniejącymi rozwiązaniami.
+
+\subsection{Wymagania}
+\begin{enumerate}
+\item Szyfrowanie bloków zgodne ze standardem FIPS-197
+\item Klucz o długości 256b
+\item Tryb wiązania bloków zaszyfrowanych CBC zgodny ze standardem NIST SP 800-38A
+\item Program konsolowy działający w środowisku Linux 
+\item Sposób uruchomienia analogiczny do programu \textit{openssl}
+\item Sposób szyfrowania powinien być kompatybilny z programem \textit{openssl aes-256-cbc} 
+\item Transmisja danych między komputerem a układem FPGA powinna być realizowana w sposób wolny od błędów
+\end{enumerate}
 
 
 
