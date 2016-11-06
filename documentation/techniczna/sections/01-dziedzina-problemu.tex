@@ -1,0 +1,67 @@
+\section{Dziedzina problemu}
+\label{sec:dziedzina-problemu}
+
+\subsection{Algorytm AES}
+
+Advanced Encryption Standard (AES) jest symetrycznym szyfrem blokowym przyjętym przez NIST w 2001 roku jakos standard FIPS-197. Jest oparty na algorytmie Rijandael'a oraz występuje w trzech wariantach o różnych dłgościach kluczy (128, 192 lub 256 bitów). Bloki szyfru AES maja wielkość 128b, a do szyfrowania i deszyfrowania danych używany jest ten sam klucz.
+\break
+Algorytm AES operuje na blokach danych będących macierzami o wielkości 4x4 o elemntach będących bajtami bloku. Taką macierz będziemy również nazywać stanem.
+
+\begin{center}
+$\begin{bmatrix}
+b_0 & b_4 & b_8    & b_{12} \\
+b_1 & b_5 & b_9    & b_{13} \\
+b_2 & b_6 & b_{10} & b_{14} \\
+b_3 & b_7 & b_{11} & b_{15} \\
+\end{bmatrix}$
+\end{center}
+
+Szyfrowanie AES składa się z iteracji, które są nazywane rundami. Liczba rund jest zależna od długości klucza.
+
+\begin{center}
+\begin{tabular}{|C{3cm}|C{3cm}|}
+\hline
+Długość klucza & Liczba rund\\
+\hline
+128 & 10\\
+\hline
+192 & 12\\
+\hline
+256 & 14\\
+\hline
+\end{tabular}
+\end{center}
+
+Rundy składają się z czterech podstawowych przekształceń operujących na stanie.
+\begin{description}
+\item[AddRoundKey] -- każdy bajt stanu jest zmodyfikowany przy pomocy operacji XOR z odpowiadającym mu bajtem klucza rundy.
+\item[SubBytes] -- każdy bajt stanu jest zastąpiony odpowiadającym mu bajtem z \textit{Rijandael's S-box}.
+\item[ShiftRows] -- trzy ostatnie rzędy stanu są cyklicznie przesunięte w lewo o odpowiednio 1, 2 lub 3 pozycje.
+\item[MixColumns] -- każda z kolumn stanu zostaje pomnożona przez odpowiedni wielomian.
+\end{description}
+
+\subsubsection{Kroki algorytmu szyfrowania}
+\begin{description}
+\item[1. Rozwinięcie klucza] -- Każda z rund wymaga osobnego klucza o długości 128b. Oblicza się je na podstawie klucza wejściowego przy pomocy schematu Rijandael'a (ang. \textit{Rijandael key schedule}).
+\item[2. Pierwsza runda] składająca się z jednego przekształcenia -- AddRoundKey
+\item[3. Kolejne rundy] -- Każda z rund składa się z czterech przekształceń:
+\begin{enumerate}[noitemsep,nolistsep]
+\item SubBytes
+\item ShiftRows
+\item MixColumns
+\item AddRoundKey
+\end{enumerate}
+\item[4. Ostatnia runda] składająca się z trzech przekształceń:
+\begin{enumerate}[noitemsep,nolistsep]
+\item SubBytes
+\item ShiftRows
+\item AddRoundKey
+\end{enumerate}
+
+\end{description}
+
+\subsubsection{Deszyfrowanie}
+
+
+
+\newpage

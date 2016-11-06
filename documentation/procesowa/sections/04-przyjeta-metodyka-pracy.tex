@@ -7,7 +7,7 @@ Ze względu na trudności w oszacowaniu, jak długo mogą zająć kolejne iterac
 \subsection{Pierwszy etap projektu}
 Pierwszy etap ma na celu implementację komunikacji między komputerem a płytką FPGA wraz z obsługą błędów. Po jego zakończeniu układ FPGA ma być zdolny odbierać strumień bloków oraz odsyłać je z powrotem bez żadnych modyfikacji. Błędy transmisji powinny być wykrywane i obsługiwane. Implementacja ma być przystosowana do łatwego zintegrowania z modułem szyfrującym AES oraz sposobem wiązania bloków CBC. Etap pierwszy kończy się 30.06.2016r (koniec VI semestru).
 
-\subsubsection{Iteracje pierwszego etapu projektu}
+\subsubsection{Planowane iteracje pierwszego etapu projektu}
 \begin{itemize}
 \item Zebranie informacji na temat układu FTDI i jego sterownikach, sprawdzenie czy jego wykorzystanie do realizacji komunikacji między komputerem a płytką będzie możliwe.
 \item Założenie projektu Quartus, skonfigurowanie pinów, wyprowadzenie sygnałów z układu FTDI do układu FPGA (przy użyciu programu Qsys). Zaimplementowanie modułu odbierającego znaki i odsyłającego je z powrotem.
@@ -18,7 +18,7 @@ Pierwszy etap ma na celu implementację komunikacji między komputerem a płytk�
 
 \subsection{Drugi etap projektu}
 Drugi etap ma na celu dostarczenie gotowego produktu. Kończy się 30.09.2016r (koniec wakacji).
-\subsubsection{Iteracje drugiego etapu projektu}
+\subsubsection{Planowane iteracje drugiego etapu projektu}
 \begin{itemize}
 \item Implementacja modułu szyfrującego blok AES.
 \item Integracja modułu szyfrującego AES oraz implementacja i integracja sposobu łączenia bloków CBC.
@@ -26,6 +26,11 @@ Drugi etap ma na celu dostarczenie gotowego produktu. Kończy się 30.09.2016r (
 \item Integracja modułu deszyfrującego AES z uwzględnieniem sposobu łączenia bloków CBC.
 \item Przygotowanie karty SD zawierającej skrypt startowy programujący układ FPGA.
 \end{itemize}
+
+\subsection{Narzędia użyte do zarządzania projektem}
+Do przechowywonia i wersjoniwania kodu źródłowego użyto systemu kontroli wersji Git oraz publicznego repozytorium kodu na stronie \textit{www.github.com}. Pozwoliło to na wygodne zarządzanie kodem źródłowym, wgląd w historię oraz inspekcję po wprowadzeniu zmian do repozytorium. Takie rozwiązanie daje również możliwość łatwego wglądu w kod dla promotora oraz managera projektu.
+\break
+Ze względu na fakt, że zespół projektowy był jednoosobowy, nie było konieczności używania innych narzędzi do zarządzania i wspomagania procesu wytwarzania oprogramowania. Wszelkie notatki, schematy oraz plany były tworzone odręcznie lub przy pomocy prostych edytorów tekstowych oraz narzędzi graficznych. Takie informacje były przechowywane lokalnie, oraz w razie konieczności były udostępnianie w repozytorium kodu lub wysyłane pocztą elektroniczną.
 
 
 \newpage

@@ -14,6 +14,16 @@ Szyfrowanie symetryczne algorytmem AES jest obecnie powszechnie wykorzystywane o
 \item Transmisja danych między komputerem a układem FPGA powinna być realizowana w sposób wolny od błędów
 \end{enumerate}
 
+\subsection{Wybrane technologie}
+Do wykonania projektu wybrałem płytkę Terasic DE1-SOC, ponieważ ma zintegrowany procesor ARM, który pozwoli na programowanie układu FPGA przy pomocy skryptu wczytanego z karty SD podczas uruchamiania. Płytka jest również wyposażona w kontroler UART, oraz ma wystarczająco dużo jednostek logicznych do wykonania projektu.
+\break
+Środowiskiem programistycznym, w którym stworzę projekt FPGA jest Quartus. Wybór ten jest podyktowany faktem, że płytka Terasic DE1-SOC jest wyposażona w układ FPGA firmy Altera. Językiem programowania, którym się posłużę do napisania projektu FPGA jest VHDL, ponieważ zapewnia silną kontrolę typów podczas kompilacji. Program komputerowy będzie napisany w języku Python, gdyż pozwala on na wygodne sterowanie transmisją UART. Testy integracyjne będą plikami Makefile, ponieważ jest to najprostsze, w pełni wystarczające rozwiązanie.
+
+\subsection{Strategia testów}
+Strategia testowania produktu będzie obejmować dwa rodzaje testów. Pierwszy z nich polega na przeprowadzaniu symulacji funkcjonalnych poszczególnych komponentów oraz analizie ich wyników. Ich celem jest sprawdzanie poprawności implementowanych modułów w izolacji. Powstałe w wyniku symulacji przebiegi ułatwią również szukanie błędów programistycznych. Drugim rodzajem testów będą testy integracyjne obejmujące układ FPGA, program komputerowy oraz komunikację pomiędzy komputerem oraz układem FPGA. Będą one przeprowadzane po każdej iteracji w celu sprawdzenia, czy cały produkt funkcjonuje zgodnie z oczekiwaniami.
+
+
+
 
 
 \newpage

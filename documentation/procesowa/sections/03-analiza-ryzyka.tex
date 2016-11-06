@@ -1,6 +1,14 @@
 \section{Analiza ryzyka}
 \label{sec:analiza-ryzyka}
-todo
+Proces tworzenia produktu wiąże się z następującymi zagrożeniami:
+\begin{itemize}
+\item Zbyt mała liczba jednostek logicznych w układzie FPGA. Moduły szyfrowania i deszyfrowania AES mogą się okazać zbyt złożone, aby mogły się zmieścić w wybranym układzie FPGA. W takim przypadku konieczne będzie zmniejszenie długości klucza, lub dostarczenie dwóch osobnych produktów - szyfrującego i deszyfrującego.
+\item Brak możliwości użycia układu UART znajdującego się na płytce, które mogą prowadzić do konieczności wykorzystania osobnego konwertera USB-UART. Prowadziłoby to do utrudnienia dla użytkownika końcowego związane z brakiem możliwości połączenia płytki z komputerem przy pomocy jednego kabla USB.
+\item Brak możliwości uruchomienia płytki w taki sposób, aby układ FPGA został skonfigurowany przy starcie. Prowadziłoby to do utrudnienia dla użytkownika końcowego związanego z koniecznością ręcznego programowania płytki.
+\item Problemy związane z niezerowym czasem propagacji sygnału oraz innymi właściwościami fizycznymi układu FPGA, powodującymi niedeterministyczne oraz trudne do wykrycia błędy.
+\item Czynniki losowe opóźniające pracę lub uniemożliwiające ukończenie projektu na czas, np. choroba.
+\item Uszkodzenie sprzętu ze względu na wadę produkcyjną lub niekompetencję zespołu projektowego.
+\end{itemize}
 
 
 
