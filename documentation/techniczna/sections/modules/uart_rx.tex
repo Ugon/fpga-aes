@@ -1,0 +1,59 @@
+\subsubsection{Moduł odbierający bajty UART}
+Interfejs układu odbierającego bajty UART \textit{uart\_rx}:
+\begin{interface}{FINISHED\_LISTENING}
+\item[\insignal{CLK\_16}] główny zegar układu.
+\item[\insignal{RX}] zsynchronizowany przy pomocy dwóch przerzutników typu D sygnał UART RX, wychodzący z konwertera USB-UART.
+\item[\insignal{START\_LISTENING}] sygnał wprowadzający komponent w stan oczekiwania na bajt.
+\item[\outsignal{BYTE[7:0]}] odebrany bajt. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
+\item[\outsignal{FINISHED\_LISTENING}] sygnał sygnalizujący zakończenie odbierania danych oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_LISTENING} podczas kolejnego zbocza rosnącego.
+\end{interface}
+
+Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Każdy bit jest próbkowany 16 razy. Wartość bitu jest ustalana na podstawie \textit{głosowania} -- bit jest uznawany za {'1'} jeśli co najmniej dwie z trzech środkowych próbek mają wartość {'1'}, analogicznie dla {'0'}. Transmisja bajty zostaje uznana za rozpoczętą, jeśli zostanie odebrany bit startu -- gdy zostanie napotkana pierwsza próbka o wartości {'0'} i potwierdzona przez głosowanie. Bajt zostaje uznany za poprawnie odebrany, jeśli zostanie odebrany poprawny bit stopu. Bit stopu jest próbkowany jedynie 9 razy. Jest to minimalna liczba próbek pozwalająca przeprowadzić \textit{głosowanie}. Próbkowanie bitu stopu jest skrócone, ze względu na fakt, że pomimo ustawienia zgodnych parametrów transmisji nadajnika i odbiornika, zegar urządzenia nadającego może być minimalnie szybszy. Prowadzi to do zbyt wolnego odbierania napływających informacji i po kilku odebranych bajtach prowadzi do błędów, co zostało zaobserwowane w trakcie testów. Skrócenie czasu odbierania bitu stopu zapobiega takim sytuacjom.
+
+\begin{figure}
+	\begin{tikztimingtable}
+	\insignal{CLK\_16}          & 32{cc}  \\
+	\insignal{RX}               & HHH    16J{Start}    13D{Data[0]}\\
+	\insignal{START\_LISTENING} & LH30L\\
+	\extracode
+	\tablerules
+	\draw[red, ->] (3.5,0) -- (3.5,1);
+	\draw[red, ->] (9.5,0) -- (9.5,1);
+	\draw[red, ->] (10.5,0) -- (10.5,1);
+	\draw[red, ->] (11.5,0) -- (11.5,1);
+	\draw[red, ->] (26.5,0) -- (26.5,1);
+	\draw[red, ->] (27.5,0) -- (27.5,1);
+	\draw[red, ->] (28.5,0) -- (28.5,1);
+	\end{tikztimingtable}
+\caption{\textit{uart\_rx} -- odbiór bitu startu}
+\end{figure}
+
+\begin{figure}
+	\begin{tikztimingtable}
+	\insignal{CLK\_16}              & 31{cc}  \\
+	\insignal{RX}                   & 13D{Data[7]} 16J{Stop} HH   \\
+	\outsignal{BYTE[7:0]}           & 22U D 8U \\
+	\outsignal{FINISHED\_LISTENING} & 22L H 8L \\
+	\extracode
+	\tablerules
+	\draw[red, ->] (4.5,0) -- (4.5,1);
+	\draw[red, ->] (5.5,0) -- (5.5,1);
+	\draw[red, ->] (3.5,0) -- (3.5,1);
+	\draw[red, ->] (19.5,0) -- (19.5,1);
+	\draw[red, ->] (20.5,0) -- (20.5,1);
+	\draw[red, ->] (21.5,0) -- (21.5,1);
+	\end{tikztimingtable}
+\caption{\textit{uart\_rx} -- odbiór bitu stopu}
+\end{figure}
+
+\begin{figure}
+	\begin{tikztimingtable}[timing/wscale=3.3]
+  	\insignal{CLK\_UART}            & c cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
+  	\insignal{RX}                   & u J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
+  	\outsignal{BYTE[7:0]}           & 10U 0.5d 1.5u \\
+	\outsignal{FINISHED\_LISTENING} & 10L 0.5h 1.5l \\
+	\extracode
+	\tablerules
+	\end{tikztimingtable}
+\caption{\textit{uart\_rx} -- odbiór całej ramki UART}
+\end{figure}

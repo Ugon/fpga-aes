@@ -1,0 +1,39 @@
+\subsubsection{Moduł odbierający bajty UART}
+Interfejs układu wysyłającego bajty UART \textit{uart\_tx}:
+\begin{interface}{FINISHED\_TRANSMITTING}
+\item[\insignal{CLK\_16}] główny zegar układu.
+\item[\insignal{START\_TRANSMITTING}] sygnał sygnalizujący start wysyłania danych.
+\item[\insignal{BYTE[7:0]}] bajt do wysłania. Stabilność sygnału jest wymagana, gdy \insignal{START\_TRANSMITTING} jest w stanie wysokim.
+\item[\outsignal{TX}] sygnał UART TX wychodzący do konwertera USB-UART.
+\item[\outsignal{FINISHED\_TRANSMITTING}] sygnał sygnalizujący zakończenie wysyłania bajtu oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_TRANSMITTING} podczas kolejnego zbocza rosnącego.
+\end{interface}
+
+Moduł rozpoczyna transmisję po otrzymaniu sygnału \insignal{START\_TRANSMITTING}. Wysyłany jest bajt dostarczony do modułu przez sygnał \insignal{BYTE[7:0]}. Bity startu, danych oraz stopu są wysyłane przez 16 cykli zegara \insignal{CLK\_16}. Zakończenie wysyłania ramki UART sygnalizowane jest przez sygnał \outsignal{FINISHED\_TRANSMITTING}, który również oznacza gotowość modułu na rozpoczęcie transmisji kolejnego bitu podczas następnego zbocza rosnącego. Sygnał \outsignal{FINISHED\_TRANSMITTING} wysyłany jest w przedostatnim cyklu zegarowym wysyłania bitu stopu, aby w ostatnim cyklu mógł nadejść następny sygnał \insignal{START\_TRANSMITTING}. Takie rozwiązanie umożliwia prowadzenie transmisji przez moduł z maksymalną możliwą prędkością -- ani jeden cykl zegara nie jest zmarnowany.
+
+\begin{figure}
+	\begin{tikztimingtable}
+	\insignal{CLK\_16}          & h2{cc}      16{cc}     16{cc}     3{cc}c\\
+	Dec & [timing/counter/new={char=Q, max value=15, wraps, text style={font =\scriptsize}}] UUU 33{Q}d \\
+	\insignal{START\_TRANS}     & 2.5U        15UH       16U        3.5U     \\
+	\insignal{BYTE[7:0]}        & 2.5U        15UD       16U        3.5U          \\
+	\outsignal{TX}              & 3D{Data[7]} 16K{Stop}  16J{Start} 3D{Data[0]}\\
+	\outsignal{FINISHED\_TRANS} & 2.5U        14UHU      16U        3.5U\\
+	\extracode
+	\tablerules
+	\end{tikztimingtable}
+\caption{\textit{uart\_rx} -- wysłanie bitu stopu i startu}
+\end{figure}
+
+
+\begin{figure}
+	\begin{tikztimingtable}[timing/wscale=3.3]
+	\insignal{CLK\_16}          & c              cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
+	\insignal{START\_TRANS}     & 0.5u0.5h 10.5U     \\
+	\insignal{BYTE[7:0]}        & 0.5u0.5d 10.5U      \\
+	\outsignal{TX}              & u              J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
+	\outsignal{FINISHED\_TRANS} & u              9.5U 0.5h 1.5u\\
+	\extracode
+	\tablerules
+	\end{tikztimingtable}
+\caption{\textit{uart\_tx} -- wysłanie całej ramki UART}
+\end{figure}

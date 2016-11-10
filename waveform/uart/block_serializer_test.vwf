@@ -1233,6 +1233,56 @@ SIGNAL("dbg_crc_accumulator[0]")
 	PARENT = "dbg_crc_accumulator";
 }
 
+SIGNAL("dbg_state")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = BUS;
+	WIDTH = 4;
+	LSB_INDEX = 0;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("dbg_state[3]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_state";
+}
+
+SIGNAL("dbg_state[2]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_state";
+}
+
+SIGNAL("dbg_state[1]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_state";
+}
+
+SIGNAL("dbg_state[0]")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "dbg_state";
+}
+
 TRANSITION_LIST("block_in[31]")
 {
 	NODE
@@ -2365,6 +2415,42 @@ TRANSITION_LIST("dbg_crc_accumulator[1]")
 }
 
 TRANSITION_LIST("dbg_crc_accumulator[0]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 10000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_state[3]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 10000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_state[2]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 10000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_state[1]")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 10000.0;
+	}
+}
+
+TRANSITION_LIST("dbg_state[0]")
 {
 	NODE
 	{
@@ -3563,6 +3649,56 @@ DISPLAY_LINE
 	TREE_INDEX = 119;
 	TREE_LEVEL = 1;
 	PARENT = 103;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 120;
+	TREE_LEVEL = 0;
+	CHILDREN = 121, 122, 123, 124;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[3]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 121;
+	TREE_LEVEL = 1;
+	PARENT = 120;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[2]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 122;
+	TREE_LEVEL = 1;
+	PARENT = 120;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[1]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 123;
+	TREE_LEVEL = 1;
+	PARENT = 120;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "dbg_state[0]";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 124;
+	TREE_LEVEL = 1;
+	PARENT = 120;
 }
 
 TIME_BAR

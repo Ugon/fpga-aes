@@ -414,7 +414,7 @@ begin
 		);
 
 
-sync_2ff0 : entity work.sync_2ff
+	sync_2ff0 : entity work.sync_2ff
 		generic map (
 			idle => '1')
 		port map (

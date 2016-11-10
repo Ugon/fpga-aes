@@ -66,14 +66,13 @@ begin
 			pulse_signal  => start_next_byte
 		);
 
-	correct_out <= '1';
-	--process (finished_listening, rx_byte, correct_latched, crc_accumulator) begin
-		--if (finished_listening = '1') then
-			--correct_out <= crc_verify(crc_add_data(crc_accumulator, rx_byte));
-		--else
-			--correct_out <= correct_latched;
-		--end if;
-	--end process;
+	process (finished_listening, rx_byte, correct_latched, crc_accumulator) begin
+		if (finished_listening = '1') then
+			correct_out <= crc_verify(crc_add_data(crc_accumulator, rx_byte));
+		else
+			correct_out <= '0';
+		end if;
+	end process;
 
 	process (reset_n, finished_listening) begin
 		if (reset_n = '0') then
@@ -96,7 +95,7 @@ begin
 			trigger_start_next_byte_action <= '0';
 			delayed_forward_start          := false;
 			delayed_forward_finished       := false;
-			byte_position                  := 0;
+			byte_position                  := block_bytes - 1;
 			crc_position                   := 0;
 			block_buffer                   <= (others => '0');
 			crc_accumulator                <= (others => '0');
@@ -109,7 +108,7 @@ begin
 
 					if (delayed_forward_start) then
 						state <= receive_block;
-						byte_position := block_bytes - 1;
+						byte_position := 0;
 						crc_accumulator <= crc_init;
 						forward_start <= '0';
 						delayed_forward_start := false;
@@ -123,11 +122,11 @@ begin
 						crc_accumulator <= crc_add_data(crc_accumulator, rx_byte);
 						trigger(trigger_start_next_byte_action, trigger_start_next_byte_reaction);
 
-						if (byte_position = 0) then
+						if (byte_position = block_bytes - 1) then
 							state <= receive_crc;
 							crc_position := crc_bytes - 1;
 						else
-							byte_position := byte_position - 1;
+							byte_position := byte_position + 1;
 						end if;
 					end if;
 
@@ -160,6 +159,6 @@ begin
 
 	dbg_forward_start <= forward_start;
 	dbg_forward_finished <= forward_finished;
-	dbg_crc_accumulator <= crc_accumulator;
+	dbg_crc_accumulator <= crc_finish(crc_accumulator);
 
 end block_deserializer_impl;

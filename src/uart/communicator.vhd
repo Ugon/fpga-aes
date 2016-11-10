@@ -213,14 +213,15 @@ dbg_aec_dec_output <= aes_dec_output;
 
 dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
-	aes_key              <= reverse_byte_order(key);
+	aes_key              <= key;
 	aes_key_expansion    <= key_expansion256(aes_key);
+--	aes_key_expansion    <= (others => '0');
 
-	aes_enc_plaintext    <= reverse_byte_order(aes_enc_prev_ciphertext) xor reverse_byte_order(aes_input);
-	aes_enc_output       <= reverse_byte_order(aes_enc_cyphertext);
+	aes_enc_plaintext    <= aes_enc_prev_ciphertext xor aes_input;
+	aes_enc_output       <= aes_enc_cyphertext;
 
-	aes_dec_cyphertext   <= reverse_byte_order(aes_input);
-	aes_dec_output       <= aes_dec_prev_ciphertext xor reverse_byte_order(aes_dec_plaintext);
+	aes_dec_cyphertext   <= aes_input;
+	aes_dec_output       <= aes_dec_prev_ciphertext xor aes_dec_plaintext;
 
 	serializer0_block_in <= block_to_transmit;
 	custom0_tx_byte_in   <= ack_to_transmit;
@@ -530,7 +531,8 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						handle_deserializer_finished(
 							p_deserializer0_block_out   => deserializer0_block_out,
 							p_deserializer0_correct_out => deserializer0_correct_out,
-							p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
+							--p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
+							p_received_block            => key(block_bits - 1 downto 0),
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
@@ -560,7 +562,8 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						handle_deserializer_finished(
 							p_deserializer0_block_out   => deserializer0_block_out,
 							p_deserializer0_correct_out => deserializer0_correct_out,
-							p_received_block            => key(block_bits - 1 downto 0),
+							p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
+							--p_received_block            => key(block_bits - 1 downto 0),
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);

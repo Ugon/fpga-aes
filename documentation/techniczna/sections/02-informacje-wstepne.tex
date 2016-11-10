@@ -1,0 +1,81 @@
+\section{Informacje wstępne}
+\label{sec:infornacje-wstepne}
+
+\subsection{Płytka Terasic DE1-SOC}
+Układ FPGA na płytce Terasic DE1-SOC posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
+\begin{enumerate}
+\item Nie wszystkie urządzenia peryferyjne są podłączone bezpośrednio do programowalnej części układu FPGA -- niektóre są podłączone do procesora ARM. Powoduje to, że aby uzyskać dostęp do ich sygnałów z FPGA, wymagana jest dodatkowa konfiguracja multipleksacji pinów przeprowadzona przez preloader podczas procedury startowej. Konwerter USB-UART firmy FTDI jest przykładem układu peryferyjnego, który jest podłączony do procesowa ARM i wymaga takie konfiguracji.
+\item Obecność procesora ARM umożliwia wykonanie przy starcie płytki skryptów zdefiniowanych przez użytkownika i umieszczonych na karcie SD. Przykładem zastosowania jest programowanie układu FPGA przy starcie układu.
+\end{enumerate}
+
+\subsubsection{Fazy startowe}
+Proces startowania płytki składa się z czterech faz \cite[p. 1068]{altera-vol3}. Dwie pierwsze fazy są konieczne do prawidłowego zainicjowania układu FPGA oraz zintegrowanego procesora ARM. Dwie kolejne fazy są opcjonalne. Kod wykonywalny fazy BootROM znajduje się w zintegrowanej pamięci HPS. Kod pozostałych fazy musi być dostarczony przez użytkownika, np. w postaci plików zapisanych na karcie SD.
+\begin{enumerate}[noitemsep]
+\item BootROM -- przeprowadza minimalną konfigurację oraz ładuje preloader do zintegrowanej pamięci RAM.
+\item Preloader -- inicjalizacja SDRAM, konfiguracja multipleksacji pinów HPS I/O, załadowanie boot loadera do pamięci SDRAM.
+\item Boot Loader (U-Boot) -- wykonuje zdefiniowane przez użytkownika skrypty startowe, ładuje system operacyjny.
+\item Operating System
+\end{enumerate}
+
+\subsection{Transmisja UART}
+Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) jest protokołem umożliwiającym dwustronną szeregową transmisję danych. Wykorzystywany jest m.in. w standardzie RS-232. Najprostsza wersja składa się z dwóch sygnałów RX i TX, po jednym dla każdego z kierunków transmisji. UART umożliwia wybór parametrów transmisji. 
+\subsubsection{Parametry transmisji użyte w projekcie}
+\begin{enumerate}[noitemsep]
+\item Szybkość transmisji: 115200 baud
+\item 1 bit startu
+\item 1 bit stopu
+\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 całych bloków danych
+\item Bity w bajcie przesyłane są od najmłodszego -- \textit{LSB first}
+\end{enumerate}
+\subsubsection{Ramka UART}
+Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format:
+\begin{center}
+\begin{tikztimingtable}[timing/wscale=3.3]
+  \insignal{CLK\_UART} & c cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
+  RX        & u J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
+\extracode
+\tablerules
+\end{tikztimingtable}
+\end{center}
+
+\subsection{Kolejność bitów i bajtów}
+\begin{itemize}
+\item Podczas transmisji danych bity w bajcie przesyłane są od najmłodszego do najstarszego (\textit{LSB first}), ponieważ jest to domyślny sposób wykorzystywany przez sterownik UART w systemie operacyjnym Linux.
+\item Podczas transmisji danych bajty w bloku są przesyłane zgodnie z kolejnością ich odczytu i zapisu na dysku -- pierwszy odczytany (najstarszy) bajt jest przesyłany jako pierwszy. Taki sposób formowania bloków jest również używany przez program \textit{openssl}.
+\item Moduły szyfrujące i deszyfrujące AES operują na bajtach, w których najmłodszy (pierwszy odebrany lub wysłany) bit ma numer 0, co jest zgodne se standardem AES.
+\item Moduły szyfrujące i deszyfrujące AES operują na blokach, w których najstarszy (pierwszy odebrany lub wysłany) bajt ma numer 0, co jest zgodne se standardem AES.
+\end{itemize}
+
+
+
+Oznaczenia sygnałów
+
+
+\subsection{Przyjęte konwencje}
+\subsubsection{Zegar \textit{CLK\_{UART}}}
+Ze względu na dużą szybkość zegara \textit{CLK\_16}, nie będzie on prezentowany na schematach. Będzie on zastąpiony umownym zegarem \textit{CLK\_UART} o częstotliwości
+\begin{equation}
+f_{CLK\_UART} = \frac{f_{CLK\_16}}{16} = UART\_BAUD\_RATE
+\end{equation}
+gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. Zbocza rosnące tego zegara będą pokrywać się ze zboczami sygnałów UART rozpoczynających transmitowane bity, a zarazem zboczami rosnącymi zegara \textit{CLK\_16} -- ponieważ sygnał UART jest zsynchronizowany z zegarem \textit{CLK\_16}.
+
+\begin{center}
+\begin{tikztimingtable}
+  CLK\_16   & c 16{cc}     16{cc}       7{c}       \\
+  CLK\_UART & c 2{16c}     2{16c}       7c         \\
+  RX        & h 16J{Start} 16D{DATA[0]} 7d{Data[1]}\\
+\extracode
+\tablerules
+\vertlines[red]{0.5}
+\end{tikztimingtable}
+\end{center}
+
+
+\subsubsection{Konwencje kolorystyczne i nazewnicze sygnałów}
+W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą zaznaczane kolorem \insignal{czerwonym}, a wyjściowych kolorem \outsignal{zielonym}. Sygnał \textit{CLK\_UART}, który zawsze będzie występował jako sygnał wejściowy, będzie zaznaczany kolorem \helpsignal{pomarańczowym}.
+\break
+Wektory sygnałów będą oznaczane poprzez dodanie ich zakresu w nawiasach kwadratowych na końcu nazwy, np \textit{BYTE[7:0]} jest wektorem ośmiu sygnałów.
+\break
+Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \outsignal{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas \(\frac{1}{2048}\) razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
+\break
+Wszystkie moguły mają zaimplementowany asynchroniczny sygnał \insignal{RESET\_N}, jednak nie będzie on uwzględniany na przebiegach czasowych.

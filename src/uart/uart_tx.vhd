@@ -28,7 +28,7 @@ dbg_state                 : out Integer range 0 to 3
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is
-	type fsm is (await_pulse, start, bits, stop);
+	type fsm is (await_pulse, begin_start, start, bits, stop);
 	signal state : fsm := await_pulse;
 
 	signal trigger_finished_action   : std_logic := '0';
@@ -62,11 +62,14 @@ begin
 			case state is
 				when await_pulse =>
 					if (start_transmitting_in = '1') then
-						tx <= '0';
-						counter := 1;
 						byte_buffer <= byte_in;
-						state <= start;
+						state <= begin_start;
 					end if;
+
+				when begin_start =>
+					tx <= '0';
+					counter := 0;
+					state <= start;
 
 				when start =>
 					if (counter = 15) then
@@ -75,6 +78,7 @@ begin
 						tx <= byte_buffer(0);
 						state <= bits;
 					else 
+						tx <= '0';
 						counter := counter + 1;
 					end if;
 				
@@ -93,12 +97,17 @@ begin
 					end if;
 
 				when stop =>
-					if (counter = 14) then
-						counter := 15;
+					if (counter = 12) then
+						counter := 13;
 						trigger(trigger_finished_action, trigger_finished_reaction);
-					elsif (counter = 15) then
+					elsif (counter = 13) then
 						counter := 0;
 						state <= await_pulse;
+					--else 
+					--if (counter = 14) then
+						--counter := 0;
+						--state <= await_pulse;
+						--trigger(trigger_finished_action, trigger_finished_reaction);
 					else 
 						counter := counter + 1;
 					end if;
@@ -113,6 +122,8 @@ begin
 		case state is
 			when await_pulse =>
 				dbg_state <= 0;
+			when begin_start =>
+				dbg_state <= 2;
 			when start =>
 				dbg_state <= 1;
 			when bits =>

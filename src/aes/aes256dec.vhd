@@ -20,6 +20,6 @@ end aes256dec;
 architecture aes256dec_impl of aes256dec is begin
 
 	plaintext_out <= decode256(cyphertext_in, key_expansion_in);
-	--plaintext_out <= cyphertext_in;
+--	plaintext_out <= cyphertext_in;
 
 end aes256dec_impl;

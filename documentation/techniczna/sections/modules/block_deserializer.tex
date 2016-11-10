@@ -1,0 +1,9 @@
+\subsubsection{Moduł deserializujący bajty UART do bloków AES}
+Interfejs układu odbierającego bajty UART \textit{uart\_rx}:
+\begin{interface}{FINISHED\_LISTENING}
+\item[\insignal{CLK\_16}] główny zegar układu.
+\item[\insignal{RX}] zsynchronizowany przy pomocy dwóch przerzutników typu D sygnał UART RX, wychodzący z konwertera USB-UART.
+\item[\insignal{START\_LISTENING}] sygnał wprowadzający komponent w stan oczekiwania na bajt.
+\item[\outsignal{BYTE[7:0]}] odebrany bajt. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
+\item[\outsignal{FINISHED\_LISTENING}] sygnał sygnalizujący zakończenie odbierania danych oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_LISTENING} podczas kolejnego zbocza rosnącego.
+\end{interface}

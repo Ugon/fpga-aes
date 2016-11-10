@@ -100,12 +100,6 @@ dbg_stop_error <= '0';
 					end if;
 
 				when confirm_start =>
-					--case counter is
-					--	when 7  => oversample_buffer(0) <= rx;
-					--	when 8  => oversample_buffer(1) <= rx;
-					--	when 9  => oversample_buffer(2) <= rx;						
-					--	when others =>
-					--end case;
 					if (counter = 7) then
 						oversample_buffer(0) <= rx;
 						counter := 8;
@@ -129,12 +123,6 @@ dbg_start_error <= '1';
 					end if;
 				
 				when receive_byte =>
-					--case counter is
-					--	when 7  => oversample_buffer(0) <= rx;
-					--	when 8  => oversample_buffer(1) <= rx;
-					--	when 9  => oversample_buffer(2) <= rx;
-					--	when others =>
-					--end case;
 					if (counter = 7) then
 						oversample_buffer(0) <= rx;
 						counter := 8;
@@ -157,12 +145,6 @@ dbg_start_error <= '1';
 					end if;
 				
 				when await_stop =>
-					--case counter is		
-					--	when 7  => oversample_buffer(0) <= rx;
-					--	when 8  => oversample_buffer(1) <= rx;
-					--	when 9  => oversample_buffer(2) <= rx;
-					--	when others =>
-					--end case;
 					if (counter = 7) then
 						oversample_buffer(0) <= rx;
 						counter := 8;
