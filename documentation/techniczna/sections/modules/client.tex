@@ -1,0 +1,10 @@
+\subsubsection{Skrypt klienta}
+Skrypt klienta jest implementacją algorytmu przedstawionego w sekcji \ref{przebieg-komunikacji}. Jest napisany w języku python, oraz korzysta z bibliotek:
+\begin{description}[noitemsep]
+\item[serial] -- komunikacja przez port szeregowy UART
+\item[threading] -- wielowątkowość związana z jednoczesnym wysyłaniem i odbieraniem bloków
+\item[crcmod] -- obliczanie sumy kontrolnej crc16
+\item[struct] -- konwersja liczby crc16 do tablicy bajtów możliwej do przesłania biblioteką serial
+\item[argparse] -- parsowanie argumentów programu
+\item[re] -- obsługa wyrażeń regularnych
+\end{description}

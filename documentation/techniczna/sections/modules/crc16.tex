@@ -1,0 +1,21 @@
+\subsubsection{CRC16}
+Do sprawdzania poprawności przesyłanych bloków używana jest suma kontrolna CRC16 -- wariant z wielomianem \textit{x8005}. Moduły \textit{block\_serializer} oraz \textit{block\_deserializer} zawierają zmienne wielkości 16b będące akumulatorami przechowującymi aktualnie obliczoną sumę CRC16. Przed rozpoczęciem transmisji są one zerowane. Każdy odebrany/wysłany bajt bloku danych aktualizuje akumulator zgodnie ze sposobem działania CRC16. Moduł \textit{block\_serializer} po wysłaniu bloku danych wysyła 2 bajty akumulatora będące sumą kontrolną bloku. Moduł \textit{block\_serializer} po odebraniu bloku, odbiera 2 bajty sumy kontrolnej obliczonej przez klienta, oraz dodaje je do akumulatora w taki sam sposób jak pozostałe bajty. Poprawność jest określana poprzez sprawdzenie, czy wszystkie bity akumulatora są równe {'0'} -- jeśli są to znaczy, że blok został odebrany poprawnie.
+
+\begin{figure}[!h]
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily, autogobble=true, tabsize=3, morekeywords={downto, val, var}]
+val crc_poly[16:0] := "1'1000'0000'0000'0101" # wielomian x8005
+
+def crc_add(acc[15:0], data[7:0]):
+	var tmp[23:0]
+
+	tmp[23:8] := acc[15:0]
+	tmp[7:0]  := data[7:0]
+
+	for i in 23 downto 16:
+		if tmp[i] == '1':
+			tmp[i:i-16] := tmp[i:i-16] xor crc_poly[16:0]
+
+	return tmp[15:0]
+\end{lstlisting}
+\caption{Algorytm dodawania bajtu do akumulatora sumy kontrolnej CRC16}
+\end{figure}

@@ -6,16 +6,29 @@
 \usepackage{amsmath}
 \usepackage{tabulary}
 \usepackage{listings}
+\usepackage{lstautogobble}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{tikz-timing}
 \usepackage{subfig}
+\usepackage{algorithmicx}
+\usepackage{algorithm2e} 
+\usepackage{courier}
+\usepackage{svg}
+
+\usetikzlibrary{automata}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+
+\setlength{\parindent}{0px}
+\setlength{\parskip}{6px}
 
 \usetikztiminglibrary{counters}
 
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 
-\newcommand{\insignal}[1]{\textcolor{red}{\textit{#1}}}
-\newcommand{\outsignal}[1]{\textcolor{green}{\textit{#1}}}
-\newcommand{\helpsignal}[1]{\textcolor{orange}{\textit{#1}}}
+\newcommand{\insignal}[1]{\textcolor{OliveGreen}{\textit{#1}}}
+\newcommand{\outsignal}[1]{\textcolor{BrickRed}{\textit{#1}}}
+\newcommand{\helpsignal}[1]{\textcolor{BurntOrange}{\textit{#1}}}
 
 %L with label
 \tikztimingmetachar{J}[2]{#1l !{++(0,+.5\yunit)} N[rectangle,scale=.65]{#2} !{++(0,-.5\yunit)} #1l}
@@ -23,18 +36,18 @@
 %H with label
 \tikztimingmetachar{K}[2]{#1h !{++(0,-.5\yunit)} N[rectangle,scale=.65]{#2} !{++(0,+.5\yunit)} #1h}
 
-
-
 \captionsetup[figure]{aboveskip=1pt}
 
-
 \newenvironment{interface}[1]
-   {\begin{list}{}%
-    {\renewcommand\makelabel[1]{\hfill ##1 --}%
-    \settowidth\labelwidth{\makelabel{#1}}%
+   {\begin{list}{}
+    {\renewcommand\makelabel[1]{\hfill ##1 --}
+    \settowidth\labelwidth{\makelabel{#1}}
     \setlength\leftmargin{\labelwidth}
     \addtolength\leftmargin{\labelsep}}}
    {\end{list}}
+
+\graphicspath{ {figures/} }
+
 
 \author{Wojciech Pachuta}
 

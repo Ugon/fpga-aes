@@ -1,16 +1,18 @@
 \subsubsection{Moduł odbierający bajty UART}
 Interfejs układu odbierającego bajty UART \textit{uart\_rx}:
+
 \begin{interface}{FINISHED\_LISTENING}
-\item[\insignal{CLK\_16}] główny zegar układu.
-\item[\insignal{RX}] zsynchronizowany przy pomocy dwóch przerzutników typu D sygnał UART RX, wychodzący z konwertera USB-UART.
-\item[\insignal{START\_LISTENING}] sygnał wprowadzający komponent w stan oczekiwania na bajt.
-\item[\outsignal{BYTE[7:0]}] odebrany bajt. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
-\item[\outsignal{FINISHED\_LISTENING}] sygnał sygnalizujący zakończenie odbierania danych oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_LISTENING} podczas kolejnego zbocza rosnącego.
+	\item[\insignal{CLK\_16}] główny zegar układu.
+	\item[\insignal{RX}] zsynchronizowany przy pomocy dwóch przerzutników typu D sygnał UART RX, wychodzący z konwertera USB-UART.
+	\item[\insignal{START\_LISTENING}] sygnał wprowadzający komponent w stan oczekiwania na bajt.
+	\item[\outsignal{BYTE[7:0]}] odebrany bajt. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
+	\item[\outsignal{FINISHED\_LISTENING}] sygnał informujący o zakończeniu odbierania bajtu oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_LISTENING} podczas kolejnego zbocza rosnącego zegara \insignal{CLK\_16}.
 \end{interface}
 
-Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Każdy bit jest próbkowany 16 razy. Wartość bitu jest ustalana na podstawie \textit{głosowania} -- bit jest uznawany za {'1'} jeśli co najmniej dwie z trzech środkowych próbek mają wartość {'1'}, analogicznie dla {'0'}. Transmisja bajty zostaje uznana za rozpoczętą, jeśli zostanie odebrany bit startu -- gdy zostanie napotkana pierwsza próbka o wartości {'0'} i potwierdzona przez głosowanie. Bajt zostaje uznany za poprawnie odebrany, jeśli zostanie odebrany poprawny bit stopu. Bit stopu jest próbkowany jedynie 9 razy. Jest to minimalna liczba próbek pozwalająca przeprowadzić \textit{głosowanie}. Próbkowanie bitu stopu jest skrócone, ze względu na fakt, że pomimo ustawienia zgodnych parametrów transmisji nadajnika i odbiornika, zegar urządzenia nadającego może być minimalnie szybszy. Prowadzi to do zbyt wolnego odbierania napływających informacji i po kilku odebranych bajtach prowadzi do błędów, co zostało zaobserwowane w trakcie testów. Skrócenie czasu odbierania bitu stopu zapobiega takim sytuacjom.
+Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Każdy bit jest próbkowany 16 razy. Wartość bitu jest ustalana na podstawie \textit{głosowania} -- bit jest uznawany za {'1'} jeśli co najmniej dwie z trzech środkowych próbek mają wartość {'1'}, analogicznie dla {'0'}. Transmisja bajtu zostaje uznana za rozpoczętą, jeśli zostanie odebrany bit startu -- gdy zostanie napotkana pierwsza próbka o wartości {'0'} i potwierdzona przez głosowanie. Bajt zostaje uznany za poprawnie odebrany, jeśli zostanie odebrany poprawny bit stopu. Bit stopu jest próbkowany jedynie 9 razy. Jest to minimalna liczba próbek pozwalająca przeprowadzić \textit{głosowanie}. Próbkowanie bitu stopu jest skrócone, ze względu na fakt, że pomimo ustawienia zgodnych parametrów transmisji nadajnika i odbiornika, zegar urządzenia nadającego może być minimalnie szybszy. Prowadzi to do zbyt wolnego odbierania napływających informacji i po kilku odebranych bajtach prowadzi do błędów, co zostało zaobserwowane w trakcie testów. Skrócenie czasu odbierania bitu stopu zapobiega takim sytuacjom.
 
-\begin{figure}
+\begin{figure}[!h]
+	\centering
 	\begin{tikztimingtable}
 	\insignal{CLK\_16}          & 32{cc}  \\
 	\insignal{RX}               & HHH    16J{Start}    13D{Data[0]}\\
@@ -28,7 +30,8 @@ Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwa
 \caption{\textit{uart\_rx} -- odbiór bitu startu}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!h]
+	\centering
 	\begin{tikztimingtable}
 	\insignal{CLK\_16}              & 31{cc}  \\
 	\insignal{RX}                   & 13D{Data[7]} 16J{Stop} HH   \\
@@ -46,8 +49,9 @@ Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwa
 \caption{\textit{uart\_rx} -- odbiór bitu stopu}
 \end{figure}
 
-\begin{figure}
-	\begin{tikztimingtable}[timing/wscale=3.3]
+\begin{figure}[!h]
+	\centering
+	\begin{tikztimingtable}[timing/wscale=2.8]
   	\insignal{CLK\_UART}            & c cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
   	\insignal{RX}                   & u J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
   	\outsignal{BYTE[7:0]}           & 10U 0.5d 1.5u \\

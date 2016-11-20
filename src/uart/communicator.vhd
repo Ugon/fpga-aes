@@ -68,10 +68,10 @@ architecture communicator_impl of communicator is
 		start,
 		choice,
 		choice_ack,
-		key_high,
-		key_high_ack,
 		key_low,
 		key_low_ack,
+		key_high,
+		key_high_ack,
 		init_vector,
 		init_vector_ack,
 		first_block,
@@ -514,44 +514,13 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 				when choice_ack =>
 					if (custom0_tx_finished_transmitting = '1' and ack_to_transmit = ACK) then
-						state <= key_high;
+						state <= key_low;
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
 						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 
 					elsif (custom0_tx_finished_transmitting = '1') then
 						state <= choice;
 						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
-					end if;
-
-
-				when key_high =>
-					if (deserializer0_finished_listening_out = '1') then
-						state <= key_high_ack;
-
-						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
-							--p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
-							p_received_block            => key(block_bits - 1 downto 0),
-							p_next_ack_to_transmit      => next_ack_to_transmit);
-
-						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
-						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
-					end if;
-
-
-				when key_high_ack =>
-					if (custom0_tx_finished_transmitting = '1' and ack_to_transmit = ACK) then
-						state <= key_low;
-					
-						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
-						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
-
-					elsif (custom0_tx_finished_transmitting = '1') then
-						state <= key_high;
-					
-						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
-						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 					end if;
 
 
@@ -562,8 +531,37 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						handle_deserializer_finished(
 							p_deserializer0_block_out   => deserializer0_block_out,
 							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_received_block            => key(block_bits - 1 downto 0),
+							p_next_ack_to_transmit      => next_ack_to_transmit);
+
+						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
+						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
+					end if;
+
+
+				when key_low_ack =>
+					if (custom0_tx_finished_transmitting = '1' and ack_to_transmit = ACK) then
+						state <= key_high;
+					
+						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
+						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
+
+					elsif (custom0_tx_finished_transmitting = '1') then
+						state <= key_low;
+					
+						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
+						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
+					end if;
+
+
+				when key_high =>
+					if (deserializer0_finished_listening_out = '1') then
+						state <= key_high_ack;
+
+						handle_deserializer_finished(
+							p_deserializer0_block_out   => deserializer0_block_out,
+							p_deserializer0_correct_out => deserializer0_correct_out,
 							p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
-							--p_received_block            => key(block_bits - 1 downto 0),
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
@@ -571,7 +569,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 					end if;				
 
 
-				when key_low_ack =>
+				when key_high_ack =>
 					if (custom0_tx_finished_transmitting = '1' and ack_to_transmit = ACK) then
 						state <= init_vector;
 
@@ -579,7 +577,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 
 					elsif (custom0_tx_finished_transmitting = '1') then
-						state <= key_low;
+						state <= key_high;
 						
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
 						trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
@@ -820,8 +818,6 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 							p_next_block_to_transmit       => next_block_to_transmit);
 
 						trigger(trigger_custom0_rx_start_listening_action, trigger_custom0_rx_start_listening_reaction);
-						--trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
-						--trigger(trigger_deserializer0_start_listening_action, trigger_deserializer0_start_listening_reaction);
 						
 					elsif (custom0_rx_finished_listening = '1') then
 						state <= finishing;
@@ -846,10 +842,10 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			when start                       => dbg_state <= 0;
 			when choice                      => dbg_state <= 1;
 			when choice_ack                  => dbg_state <= 2;
-			when key_high                    => dbg_state <= 3;
-			when key_high_ack                => dbg_state <= 4;
-			when key_low                     => dbg_state <= 5;
-			when key_low_ack                 => dbg_state <= 6;
+			when key_low                    => dbg_state <= 3;
+			when key_low_ack                => dbg_state <= 4;
+			when key_high                     => dbg_state <= 5;
+			when key_high_ack                 => dbg_state <= 6;
 			when init_vector                 => dbg_state <= 7;
 			when init_vector_ack             => dbg_state <= 8;
 			when first_block                 => dbg_state <= 9;

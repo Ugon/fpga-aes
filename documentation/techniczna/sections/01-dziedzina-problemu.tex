@@ -1,9 +1,7 @@
-\section{Dziedzina problemu}
+\section{Dziedzina problemu - algorytm AES}
 \label{sec:dziedzina-problemu}
 
-\subsection{Algorytm AES}
-
-Advanced Encryption Standard (AES) jest symetrycznym szyfrem blokowym przyjętym przez NIST w 2001 roku jakos standard FIPS-197. Jest oparty na algorytmie Rijandael'a oraz występuje w trzech wariantach o różnych dłgościach kluczy (128, 192 lub 256 bitów). Bloki szyfru AES maja wielkość 128b, a do szyfrowania i deszyfrowania danych używany jest ten sam klucz.
+Advanced Encryption Standard (AES) jest symetrycznym szyfrem blokowym przyjętym przez NIST w 2001 roku jakos standard FIPS-197 \cite{aes-standard}. Jest oparty na algorytmie Rijandael'a oraz występuje w trzech wariantach o różnych dłgościach kluczy (128, 192 lub 256 bitów). Bloki szyfru AES maja wielkość 128b, a do szyfrowania i deszyfrowania danych używany jest ten sam klucz.
 \break
 Algorytm AES operuje na blokach danych będących macierzami o wielkości 4x4 o elemntach będących bajtami bloku. Taką macierz będziemy również nazywać stanem.
 
@@ -40,28 +38,45 @@ Rundy składają się z czterech podstawowych przekształceń operujących na st
 \item[MixColumns] -- każda z kolumn stanu zostaje pomnożona przez odpowiedni wielomian.
 \end{description}
 
-\subsubsection{Kroki algorytmu szyfrowania}
-\begin{description}
+\paragraph{Kroki algorytmu szyfrowania}
+\begin{description}[noitemsep]
 \item[1. Rozwinięcie klucza] -- Każda z rund wymaga osobnego klucza o długości 128b. Oblicza się je na podstawie klucza wejściowego przy pomocy schematu Rijandael'a (ang. \textit{Rijandael key schedule}).
 \item[2. Pierwsza runda] składająca się z jednego przekształcenia -- AddRoundKey
 \item[3. Kolejne rundy] -- Każda z rund składa się z czterech przekształceń:
-\begin{enumerate}[noitemsep,nolistsep]
-\item SubBytes
-\item ShiftRows
-\item MixColumns
-\item AddRoundKey
-\end{enumerate}
+	\begin{enumerate}[noitemsep,nolistsep]
+	\item SubBytes
+	\item ShiftRows
+	\item MixColumns
+	\item AddRoundKey
+	\end{enumerate}
 \item[4. Ostatnia runda] składająca się z trzech przekształceń:
-\begin{enumerate}[noitemsep,nolistsep]
-\item SubBytes
-\item ShiftRows
-\item AddRoundKey
-\end{enumerate}
-
+	\begin{enumerate}[noitemsep,nolistsep]
+	\item SubBytes
+	\item ShiftRows
+	\item AddRoundKey
+	\end{enumerate}
 \end{description}
 
-\subsubsection{Deszyfrowanie}
+\paragraph{Kroki algorytmu deszyfrowania}
+\begin{description}[noitemsep]
+\item[1. Rozwinięcie klucza] -- Każda z rund wymaga osobnego klucza o długości 128b. Oblicza się je na podstawie klucza wejściowego przy pomocy schematu Rijandael'a (ang. \textit{Rijandael key schedule}).
+\item[2. Pierwsza runda] składająca się z jednego przekształcenia -- AddRoundKey
+\item[3. Kolejne rundy] -- Każda z rund składa się z czterech przekształceń:
+	\begin{enumerate}[noitemsep,nolistsep]
+	\item InvShiftRows
+	\item InvSubBytes
+	\item AddRoundKey
+	\item InvMixColumns
+	\end{enumerate}
+\item[4. Ostatnia runda] składająca się z trzech przekształceń:
+	\begin{enumerate}[noitemsep,nolistsep]
+	\item InvShiftRows
+	\item InvSubBytes
+	\item AddRoundKey
+	\end{enumerate}
+\end{description}
 
 
+Szczegółowy opis wraz z pseudokodem algorytmu można znaleźć w dokumencie stanowiącym standard szyfrowania AES \cite{aes-standard}.
 
 \newpage

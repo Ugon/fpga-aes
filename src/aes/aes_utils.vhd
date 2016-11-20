@@ -127,7 +127,6 @@ package body aes_utils is
 				tmp(word_length - 1 downto word_length - byte_bits) := tmp2(byte_bits - 1 downto 0);
 				tmp(word_length - byte_bits - 1 downto 0) := tmp2(word_length - 1 downto byte_bits);
 
-
 				--SubWord
 				for j in 0 to 3 loop
 					tmp((j + 1) * byte_bits - 1 downto j * byte_bits) := lookup_sub(tmp((j + 1) * byte_bits - 1 downto j * byte_bits));

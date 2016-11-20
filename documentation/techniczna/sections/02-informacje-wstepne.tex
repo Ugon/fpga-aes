@@ -2,20 +2,22 @@
 \label{sec:infornacje-wstepne}
 
 \subsection{Płytka Terasic DE1-SOC}
-Układ FPGA na płytce Terasic DE1-SOC posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
+Układ FPGA Altera Cyclone V na płytce Terasic DE1-SOC posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
 \begin{enumerate}
 \item Nie wszystkie urządzenia peryferyjne są podłączone bezpośrednio do programowalnej części układu FPGA -- niektóre są podłączone do procesora ARM. Powoduje to, że aby uzyskać dostęp do ich sygnałów z FPGA, wymagana jest dodatkowa konfiguracja multipleksacji pinów przeprowadzona przez preloader podczas procedury startowej. Konwerter USB-UART firmy FTDI jest przykładem układu peryferyjnego, który jest podłączony do procesowa ARM i wymaga takie konfiguracji.
 \item Obecność procesora ARM umożliwia wykonanie przy starcie płytki skryptów zdefiniowanych przez użytkownika i umieszczonych na karcie SD. Przykładem zastosowania jest programowanie układu FPGA przy starcie układu.
 \end{enumerate}
 
+
 \subsubsection{Fazy startowe}
-Proces startowania płytki składa się z czterech faz \cite[p. 1068]{altera-vol3}. Dwie pierwsze fazy są konieczne do prawidłowego zainicjowania układu FPGA oraz zintegrowanego procesora ARM. Dwie kolejne fazy są opcjonalne. Kod wykonywalny fazy BootROM znajduje się w zintegrowanej pamięci HPS. Kod pozostałych fazy musi być dostarczony przez użytkownika, np. w postaci plików zapisanych na karcie SD.
+Proces startowania płytki składa się z czterech faz \cite[p. 1068]{altera-vol3}. Dwie pierwsze fazy są konieczne do prawidłowego zainicjowania układu FPGA oraz zintegrowanego procesora ARM. Dwie kolejne fazy są opcjonalne. Kod wykonywalny fazy BootROM znajduje się w zintegrowanej pamięci HPS. Kod pozostałych faz musi być dostarczony przez użytkownika, np. w postaci plików zapisanych na karcie SD.
 \begin{enumerate}[noitemsep]
 \item BootROM -- przeprowadza minimalną konfigurację oraz ładuje preloader do zintegrowanej pamięci RAM.
 \item Preloader -- inicjalizacja SDRAM, konfiguracja multipleksacji pinów HPS I/O, załadowanie boot loadera do pamięci SDRAM.
 \item Boot Loader (U-Boot) -- wykonuje zdefiniowane przez użytkownika skrypty startowe, ładuje system operacyjny.
 \item Operating System
 \end{enumerate}
+
 
 \subsection{Transmisja UART}
 Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) jest protokołem umożliwiającym dwustronną szeregową transmisję danych. Wykorzystywany jest m.in. w standardzie RS-232. Najprostsza wersja składa się z dwóch sygnałów RX i TX, po jednym dla każdego z kierunków transmisji. UART umożliwia wybór parametrów transmisji. 
@@ -27,16 +29,21 @@ Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) 
 \item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 całych bloków danych
 \item Bity w bajcie przesyłane są od najmłodszego -- \textit{LSB first}
 \end{enumerate}
+
+
 \subsubsection{Ramka UART}
 Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format:
-\begin{center}
+\begin{figure}[!h]
+\centering
 \begin{tikztimingtable}[timing/wscale=3.3]
-  \insignal{CLK\_UART} & c cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
-  RX        & u J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
+  \textit{CLK\_UART} & c cc        cc         cc         cc         cc         cc         cc         cc         cc         cc       c \\
+  \textit{RX}        & u J{Start}  D{Data[0]} D{Data[1]} D{Data[2]} D{Data[3]} D{Data[4]} D{Data[5]} D{Data[6]} D{Data[7]} K{Stop}  u \\
 \extracode
 \tablerules
 \end{tikztimingtable}
-\end{center}
+\caption{Format ramki UART}
+\end{figure}
+
 
 \subsection{Kolejność bitów i bajtów}
 \begin{itemize}
@@ -47,11 +54,48 @@ Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący forma
 \end{itemize}
 
 
+\subsection{Przebieg komunikacji}
+\label{przebieg-komunikacji}
+Informacje przesyłane między klientem (komputerem) a układem FPGA w celu zaszyfrowania informacji:
+\begin{enumerate}[noitemsep]
+\item Klient wysyła bajt ENC lub DEC wskazujący, czy informacje mają być szyfrowane czy deszyfrowane.
+\item FPGA odpowiada bajtem ACK jeśli odebrał bajt o wartości ENC lub DEC, NACK w innym przypadku.
+\item Jeśli klient otrzymał NACK kończy działanie.
+\item Klient wysyła blok zawierający 128 młodszych bajtów klucza oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie(suma kontrolna CRC16 się zgadza), NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła blok zawierający 128 starszych bajtów klucza oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła blok zawierający wektor inicjalizacji oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła pierwszy blok danych oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item FPGA szyfruje otrzymany blok, wysyła go oraz 2 bajty CRC16. Jednocześnie Klient wysyła kolejny blok do zaszyfrowania.
+\item FPGA sprawdza CRC16 i wysyła bajt ACK jeśli blok został otrzymany poprawnie lub NACK w przeciwnym przypadku. Jednocześnie klient postępuje analogicznie.
+\item Jeśli FPGA odebrało blok poprawnie, oraz otrzymało od klienta bajt ACK, szyfruje otrzymany blok oraz odsyła go do klienta. W przeciwnym przypadku retransmituje poprzedni zaszyfrowany blok.
+\item Jeśli klient odebrał blok poprawnie, oraz otrzymał od FPGA bajt ACK, wysyła kolejny blok do zaszyfrowania. W przeciwnym wypadku retransmituje poprzedni blok.
+\item Wymiana bloków zachodzi dopóki wszystkie informacje nie zostaną zaszyfrowane. O końcu transmisji decyduje klient. Po wysłaniu ostatniego bloku i odebraniu przedostatniego zaszyfrowanego bloku, jeśli zaszyfrowany blok zastał odebrany poprawnie, zamiast ACK wysyła FIN.
+\item FPGA po odebraniu bajtu FIN szyfruje ostatni blok oraz odsyła go do klienta.
+\item Jeśli klient otrzymał ostatni blok poprawnie wysyła bajt ACK oraz kończy działanie, w przeciwnym wypadku wysyła NACK.
+\item Jeśli FPGA otrzymało bajt ACK przechodzi do stanu oczekiwania na rozpoczęcie kolejnego procesu szyfrowania. W przeciwnym wypadku retransmituje ostatni zaszyfrowany blok oraz czeka na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\end{enumerate}
 
-Oznaczenia sygnałów
-
+\begin{figure}[!h]
+\centering
+\begin{tikztimingtable}[timing/wscale=2.9]
+  \textit{RX} & h d{ENC} h      1.5D{KEY\_LOW} h      1.5D{KEY\_HIGH} h      1.5D{INIT\_V} h      1.5D{D1\_PLAIN} h      1.5D{D2\_PLAIN}  d{FIN} 1.5H             d{ACK} h\\
+  \textit{TX} & h h      d{ACK} 1.5H           d{ACK} 1.5H            d{ACK} 1.5H          d{ACK} 1.5H            d{ACK} 1.5D{D1\_CYPHER} d{ACK} 1.5D{D2\_CYPHER} h      h\\
+\extracode
+\tablerules
+\end{tikztimingtable}
+\caption{Przebieg komunikacji w celu zaszyfrowania dwóch bloków}
+\end{figure}
 
 \subsection{Przyjęte konwencje}
+
 \subsubsection{Zegar \textit{CLK\_{UART}}}
 Ze względu na dużą szybkość zegara \textit{CLK\_16}, nie będzie on prezentowany na schematach. Będzie on zastąpiony umownym zegarem \textit{CLK\_UART} o częstotliwości
 \begin{equation}
@@ -59,23 +103,28 @@ f_{CLK\_UART} = \frac{f_{CLK\_16}}{16} = UART\_BAUD\_RATE
 \end{equation}
 gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. Zbocza rosnące tego zegara będą pokrywać się ze zboczami sygnałów UART rozpoczynających transmitowane bity, a zarazem zboczami rosnącymi zegara \textit{CLK\_16} -- ponieważ sygnał UART jest zsynchronizowany z zegarem \textit{CLK\_16}.
 
-\begin{center}
+\begin{figure}[!h]
+\centering
 \begin{tikztimingtable}
-  CLK\_16   & c 16{cc}     16{cc}       7{c}       \\
-  CLK\_UART & c 2{16c}     2{16c}       7c         \\
-  RX        & h 16J{Start} 16D{DATA[0]} 7d{Data[1]}\\
+  \textit{CLK\_16}   & c 16{cc}     16{cc}       7{c}       \\
+  \textit{CLK\_UART} & c 2{16c}     2{16c}       7c         \\
+  \textit{RX}        & h 16J{Start} 16D{DATA[0]} 7d{Data[1]}\\
 \extracode
 \tablerules
 \vertlines[red]{0.5}
 \end{tikztimingtable}
-\end{center}
+\caption{Relacja między zegarami \textit{CLK\_16} i \textit{CLK\_UART}}
+\end{figure}
 
 
 \subsubsection{Konwencje kolorystyczne i nazewnicze sygnałów}
 W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą zaznaczane kolorem \insignal{czerwonym}, a wyjściowych kolorem \outsignal{zielonym}. Sygnał \textit{CLK\_UART}, który zawsze będzie występował jako sygnał wejściowy, będzie zaznaczany kolorem \helpsignal{pomarańczowym}.
-\break
-Wektory sygnałów będą oznaczane poprzez dodanie ich zakresu w nawiasach kwadratowych na końcu nazwy, np \textit{BYTE[7:0]} jest wektorem ośmiu sygnałów.
-\break
-Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \outsignal{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas \(\frac{1}{2048}\) razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
-\break
+
+
+Wektory sygnałów będą oznaczane poprzez dodanie ich zakresu w nawiasach kwadratowych na końcu nazwy, np. \textit{BYTE[7:0]} jest wektorem ośmiu sygnałów.
+
+
+Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \outsignal{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas 2048 razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
+
+
 Wszystkie moguły mają zaimplementowany asynchroniczny sygnał \insignal{RESET\_N}, jednak nie będzie on uwzględniany na przebiegach czasowych.

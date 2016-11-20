@@ -1,12 +1,11 @@
-\section{Szczegóły implementacyjne}
-\label{sec:szczegoly-implementacyjne}
-
-
+\section{Szczegóły implementacyjne projektu FPGA}
+\label{sec:szczegoly-implementacyjne-fpga}
 
 \subsubsection{Przygotowanie projektu oraz konfiguracja pinów UART}
 Najwygodniejszym sposobem na rozpoczęcie projektu jest przystosowanie dołączonego przez producenta płytki projektu \textit{de1\_soc\_GHRD} (GHRD -- ang. \textit{Golden Hardware Reference Design}). GHRD jest projektem przeznaczonym do tego celu oraz jest skonfigurowany i gotowy do pracy z płytką Terasic DE1-SOC.
-\break
+
 Do kowersji sygnału USB do UART postanowiłem wykorzystać znajdujący się na płytce Terasic DE1-SOC układ firmy FTDI. Jego sygnały nie są jednak podłączone bezpośrednio do programowalnej części układu FPGA, lecz do zintegrowanego procesora ARM. Aby uzyskać dostęp do jego sygnałów z FPGA należy odpowiednio dostosować projekt oraz stworzyć i wgrać na kartę SD preloader, który podczas uruchamiania płytki przestawi piny UART w odpowiedni tryb działania oraz określi ich kierunek. Aby przystosować projekt należy \cite{altera-youtube-loanerio, altera-forum-fgga-hps-access, altera-forum-cant-rx}:
+
 \begin{enumerate}
 \item Otworzyć w edytorze QSys plik \textit{soc-system.qsys}
 \item Wybrać komponent \textit{hps\_0} oraz w zakładce \textit{Peripheral Pins} dokonać zmian:
@@ -33,6 +32,7 @@ Do kowersji sygnału USB do UART postanowiłem wykorzystać znajdujący się na 
 	\item Do sygnału \textit{hps\_0\_h2f\_loan\_io\_oe(50)}, który odpowiada sygnałowi UART TX przypisać wartość \textit{'0'}, co odpowiada kierunkowi \textit{in}.
 	\end{itemize}
 \end{enumerate}
+
 Powyższe zmiany spowodują, że:
 \begin{itemize}[noitemsep]
 \item Sygnał \textit{hps\_0\_h2f\_loan\_io\_out(49)} będzie odpowiadał sygnałowi UART RX oraz będzie poprawnie połączony z konwerterem USB-UART firmy FTDI.
@@ -51,14 +51,14 @@ fpga load 0 $fpgadata $filesize;
 Do programowania układu FPGA przy pomocy skryptu potrzebny jest plik konfiguracyjny w formacie \textit{.rbf}. Można go stworzyć konwertując przy pomocy środowiska Quartus plik \textit{.sof} powstały w wyniku kompilacji projektu \cite{rocketboards-sof-to-rfb}. Użyłem trybu programowania \textit{Fast Passive Parallel X16}, któremu odpowiada ustawienie przełączników MSEL[0:4] znajdujących się na płytce na wartość 00100.
 
 \subsubsection{Przygotowanie karty SD}
-Najłatwiejszym sposobem na stworzenie karty SD zawierającej potrzebne pliki jest modyfikacja dostarczonych na płycie CD do płytki Terasic DE1-SOC przykładowych obrazów. Lista kroków realizujących to zadanie przy użyciu komputera z systemem operacyjnym Linux:
+Najłatwiejszym sposobem na stworzenie karty SD zawierającej potrzebne pliki jest modyfikacja dostarczonych na płycie CD do płytki Terasic DE1-SOC przykładowych obrazów. Lista kroków realizujących to zadanie przy użyciu komputera z systemem operacyjnym Linux \cite{rocketboards-booting-prebuild, rocketboards-updating-sd}:
 \begin{enumerate}
 \item Po włożeniu karty SD do czytnika należy określić jej ścieżkę w systemie operacyjnym, najlepiej analizując plik \textit{/proc/partitions}. Załóżmy, że ścieżką karty jest \textit{/dev/sdx}.
 \begin{lstlisting}
   $ cat /proc/partitions
 \end{lstlisting}
 
-\item Wgrać dostarczony przez producenta obraz \textit{DE1\_SoC\_SD.img} na kartę SD \cite{rocketboards-booting-prebuild}.
+\item Wgrać dostarczony przez producenta obraz \textit{DE1\_SoC\_SD.img} na kartę SD.
 \begin{lstlisting}
   $ sudo dd if=DE1\_SoC\_SD.img of=/dev/sdx bs=1M
   $ sudo sync
@@ -81,9 +81,9 @@ Główny zegar \textit{CLK\_16}, którym taktowany będzie projektowany układ m
 f_{CLK\_16} = 16 * UART\_BAUD\_RATE
 \end{equation}
 gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach, która dla tego projektu wynosi 115200 baudów. Taka wartość podyktowana jest faktem, że częstą praktyką interpretacji sygnału UART, którą postanowiłem zastosować, jest jego próbkowanie z częstotliwością 16 razy szybszą niż częstotliwość zmian sygnału.
-\break
+
 Częstotliwość zegara \textit{CLK\_16} jest o wiele niższa niż dostępny w układzie FPGA zegar o częstotliwości 50MHz. Pozwoliło to na uzyskanie żądanej częstotliwości przy pomocy prostego dzielnika częstotliwości.
-\break
+
 Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja mająca miejsce w danym rosnącym zboczu zależy od wartości innego sygnału, to ma on stałą wartość co najmniej od poprzedzającego do następnego zbocza malejącego.
 
 
@@ -93,6 +93,11 @@ Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który 
 \input{sections/modules/uart_rx}
 \input{sections/modules/uart_tx}
 \input{sections/modules/block_deserializer}
+\input{sections/modules/block_serializer}
+\input{sections/modules/crc16}
+\input{sections/modules/aes}
+\input{sections/modules/communicator}
+\input{sections/modules/client}
 
 
 
