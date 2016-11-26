@@ -19,13 +19,7 @@ entity uart_rx is
 			
 		byte               : out std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
 		start_listening    : in  std_logic;
-		finished_listening : out std_logic                                := '0';
-
-dbg_cnt                   : out Integer range 0 to 15;
-dbg_start_error           : out std_logic;
-dbg_stop_error            : out std_logic;
-dbg_rx_state              : out Integer range 0 to 3
-		);
+		finished_listening : out std_logic                                := '0');
 end uart_rx;
 
 architecture uart_rx_impl of uart_rx is
@@ -80,8 +74,6 @@ begin
 			oversample_buffer       <= (others => '0');
 			byte_buffer             <= (others => '0');
 			trigger_finished_action <= '0';
-dbg_start_error <= '0';
-dbg_stop_error <= '0';
 		elsif(rising_edge(clk_16)) then
 			case state is
 				when await_pulse =>
@@ -115,7 +107,6 @@ dbg_stop_error <= '0';
 						bit_position := 0;
 					elsif (counter = 15) then
 						--start bit error
-dbg_start_error <= '1';
 						state <= await_pulse;
 						trigger(trigger_finished_action, trigger_finished_reaction);
 					else 
@@ -160,7 +151,6 @@ dbg_start_error <= '1';
 						counter := 0;
 					elsif (counter = 10) then
 						--stop bit error
-dbg_stop_error <= '1';
 						state <= await_pulse;
 						trigger(trigger_finished_action, trigger_finished_reaction);
 						counter := 0;
@@ -171,18 +161,6 @@ dbg_stop_error <= '1';
 			end case;
 		end if;
 
-		dbg_cnt <= counter;
-	end process;
-
-
-	process (state) begin
-		case state is
-			when await_pulse   => dbg_rx_state <= 0;
-			when await_start   => dbg_rx_state <= 1; 
-			when confirm_start => dbg_rx_state <= 2;
-			when receive_byte  => dbg_rx_state <= 3;
-			when await_stop    => dbg_rx_state <= 3;
-		end case;
 	end process;
 
 end uart_rx_impl;

@@ -24,15 +24,7 @@ entity block_serializer is
 		--API
 		aes_block                : in  std_logic_vector(block_bits - 1 downto 0);
 		start_transmitting       : in  std_logic;
-		finished_transmitting    : out std_logic                                 := 'X';
-
-dbg_byte_crc_position : out Integer range 0 to block_bytes + crc_bytes - 1;
-dbg_forward_start : out std_logic;
-dbg_forward_finished : out std_logic;
-dbg_block_crc_buffer : out std_logic_vector(block_bits + crc_bits - 1 downto 0);
-dbg_crc_accumulator  : out std_logic_vector(crc_bits - 1 downto 0);
-dbg_state            : out Integer range 0 to 8
-);
+		finished_transmitting    : out std_logic                                 := 'X');
 end block_serializer;
 
 architecture block_serializer_impl of block_serializer is
@@ -158,24 +150,6 @@ begin
 
 			end case;
 		end if;
-	end process;
-
-dbg_byte_crc_position <= byte_crc_position;
-dbg_forward_start <= forward_start;
-dbg_forward_finished <= forward_finished;
-dbg_block_crc_buffer <= block_crc_buffer;
-dbg_crc_accumulator <= crc_accumulator;
-
-
-	process(state) begin
-		case state is
-			when await_pulse => 
-				dbg_state <= 0;
-			when transmit_block => 
-				dbg_state <= 1;
-			when transmit_crc => 
-				dbg_state <= 2;
-		end case;
 	end process;
 
 end block_serializer_impl;

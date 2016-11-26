@@ -19,12 +19,7 @@ entity uart_tx is
 
 		byte                  : in  std_logic_vector(byte_bits - 1 downto 0);
 		start_transmitting    : in  std_logic;
-		finished_transmitting : out std_logic                                := 'X';
-
-dbg_cnt                   : out Integer range 0 to 15;
-dbg_state                 : out Integer range 0 to 3
-
-		);
+		finished_transmitting : out std_logic                                := 'X');
 end uart_tx;
 
 architecture uart_tx_impl of uart_tx is
@@ -109,22 +104,6 @@ begin
 
 			end case;
 		end if;
-
-		dbg_cnt <= counter;
 	end process;
 
-	process (state) begin
-		case state is
-			when await_pulse =>
-				dbg_state <= 0;
-			when begin_start =>
-				dbg_state <= 2;
-			when start =>
-				dbg_state <= 1;
-			when bits =>
-				dbg_state <= 2;
-			when stop =>
-				dbg_state <= 3;
-		end case;
-	end process;
 end uart_tx_impl;

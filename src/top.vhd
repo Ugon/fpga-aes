@@ -161,29 +161,10 @@ architecture rtl of top is
 	signal uart_clk                           : std_logic;
 	signal uart_rx_async                      : std_logic;
 	signal uart_rx                            : std_logic;
-	signal uard_rx_data                       : std_logic_vector(7 downto 0);
-	signal uart_rx_available                  : std_logic;
 	signal uart_tx                            : std_logic;
-	signal uard_tx_data                       : std_logic_vector(7 downto 0);
-	signal uart_tx_available                  : std_logic;
 	
 	signal hps_key_signal                     : std_logic;
 	signal hps_led_signal                     : std_logic;
-
-	signal block_from_aes                     : std_logic_vector(127 downto 0);
-	signal block_to_aes                       : std_logic_vector(127 downto 0);
-
-	signal test_block                         : std_logic_vector(127 downto 0);
-
-	signal dbg_start_error                    : std_logic;
-	signal dbg_stop_error                     : std_logic;
-	signal dbg_cnt_rx                         : Integer range 0 to 15;
-	signal dbg_rx0_start_listening            : std_logic;
-	signal dbg_rx0_finished_listening     : std_logic;
-	signal dbg_tx0_start_transmitting         : std_logic;
-	signal dbg_tx0_finished_transmitting      : std_logic;
-	signal dbg_state                          : Integer range 0 to 15;
-	signal dbg_rx_state                       : Integer range 0 to 3;
 
 	component soc_system is
 		port (
@@ -305,6 +286,9 @@ architecture rtl of top is
 	end component soc_system;
 
 begin
+
+	reset_n <= KEY(0);
+	hps_led_signal <= hps_key_signal;
 
 	CONNECTED_TO_hps_0_h2f_loan_io_oe(49) <= '0';
 	CONNECTED_TO_hps_0_h2f_loan_io_oe(50) <= '1';
@@ -456,58 +440,13 @@ begin
 			reset_n                                => reset_n,
 			clk_16                                 => uart_clk,
 			rx                                     => uart_rx,
-			tx                                     => uart_tx,
-			
-			dbg_cnt_rx                             => dbg_cnt_rx,
-			dbg_start_error                        => dbg_start_error,
-			dbg_stop_error                         => dbg_stop_error,
-			dbg_rx0_start_listening             => dbg_rx0_start_listening,
-			dbg_tx0_start_transmitting          => dbg_tx0_start_transmitting,
-			dbg_tx0_finished_transmitting      => dbg_tx0_finished_transmitting,
-			dbg_rx0_finished_listening         => dbg_rx0_finished_listening,
-			dbg_state                              => dbg_state,
-			dbg_rx_state                           => dbg_rx_state
-			--dbg_deserializer0_finished_listening => probe(6),
-			--dbg_deserializer0_start_listening => probe(7)
+			tx                                     => uart_tx			
 		);
 
-	LEDR(9) <= dbg_start_error or dbg_stop_error;
-	--LEDR(8) <= dbg_funky_state_reached;
 
-	--LEDR(7 downto 0) <= block_from_aes((to_integer(unsigned(iSW(4 downto 0))) + 1) * 8 - 1 downto to_integer(unsigned(iSW(4 downto 0))) * 8);
-	LEDR(3 downto 0) <= std_logic_vector(to_unsigned(dbg_state, 4));
-
-	--probe(0) <= uart_clk;
-	probe(0) <= uart_rx;
-	probe(1) <= uart_tx;
-	--probe(1) <= uart_tx;
-	--probe(3 downto 2) <= std_logic_vector(to_unsigned(dbg_rx_state, 2));
-	probe(2) <= dbg_tx0_finished_transmitting;
-	probe(3) <= dbg_tx0_start_transmitting;
-	--probe(4) <= dbg_tx0_start_transmitting;
-	--probe(5) <= dbg_tx0_finished_transmitting;
-	--probe(3) <= dbg_start_error or dbg_stop_error;
-	probe(7 downto 4) <= std_logic_vector(to_unsigned(dbg_state, 4));
-	--probe(4) <= dbg_rx0_finished_listening;
-	--probe(5) <= dbg_rx0_start_listening;
-	--probe(7) <= std_logic_vector(to_unsigned(dbg_state, 4));
-	--probe(7) <= std_logic_vector(to_unsigned(dbg_state, 4));
-	--probe(7 downto 6) <= std_logic_vector(to_unsigned(dbg_state, 2));
-
-	--process (uart_rx_available, uard_rx_data) begin
-		--if(rising_edge(uart_rx_available)) then
-			--LEDR(7 downto 0) <= uard_rx_data;
-		--end if;
-	--end process;
-
-	block_from_aes <= block_to_aes;
-
-
-
-	reset_n <= KEY(0);
-	hps_led_signal <= hps_key_signal;
-
-	
+	probe(0) <= uart_clk;
+	probe(1) <= uart_rx;
+	probe(2) <= uart_tx;
 
 	probe_gnd <= (others => '0');
 

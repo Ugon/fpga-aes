@@ -14,45 +14,7 @@ entity communicator_test is
 		clk_16  : in    std_logic; --16x baudrate
 		reset_n : in    std_logic;
 		rx      : in    std_logic;
-		tx      : out   std_logic;
-
-dbg_rx0_byte                          : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_rx0_start_listening                : out std_logic;
-dbg_rx0_finished_listening            : out std_logic;
-
-dbg_tx0_byte                           : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_tx0_start_transmitting             : out std_logic;
-dbg_tx0_finished_transmitting         : out std_logic;
-
-dbg_deserializer0_block               : out std_logic_vector(block_bits - 1 downto 0);
-dbg_deserializer0_start_listening      : out std_logic;
-dbg_deserializer0_finished_listening  : out std_logic;
-dbg_deserializer0_correct             : out std_logic;
-
-dbg_serializer0_block                  : out std_logic_vector(block_bits - 1 downto 0);
-dbg_serializer0_start_transmitting     : out std_logic;
-dbg_serializer0_finished_transmitting : out std_logic;
-
-dbg_state                                 : out Integer range 0 to 17;  
-
-dbg_cnt_rx                                : out Integer range 0 to 15;
-dbg_cnt_tx                                : out Integer range 0 to 15;
-
-dbg_mux_rx0_enable_custom                 : out std_logic;
-dbg_mux_tx0_enable_custom                 : out std_logic;
-
-dbg_serializer0_tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0);
-
-dbg_key                                   : out std_logic_vector(key_bits   - 1 downto 0) := (others => '0');
-dbg_aes_input                             : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-dbg_aes_enc_prev_ciphertext               : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-dbg_aec_enc_output                        : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-dbg_aes_dec_prev_ciphertext               : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-dbg_aec_dec_output                        : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-
-dbg_next_serializer0_block  : out std_logic_vector(block_bits - 1 downto 0)
-
-	);
+		tx      : out   std_logic);
 end communicator_test;
 
 architecture communicator_test_impl of communicator_test is
@@ -73,44 +35,7 @@ begin
 			reset_n            => reset_n,
 			clk_16             => clk_16,
 			rx                 => rx,
-			tx                 => tx,
---			block_modification  => loopback,
---			block_modification => loopback,
-
-			dbg_rx0_byte                          => dbg_rx0_byte,
-			dbg_rx0_start_listening                => dbg_rx0_start_listening,
-			dbg_rx0_finished_listening            => dbg_rx0_finished_listening,
-
-			dbg_tx0_byte                           => dbg_tx0_byte,
-			dbg_tx0_start_transmitting             => dbg_tx0_start_transmitting,
-			dbg_tx0_finished_transmitting         => dbg_tx0_finished_transmitting,
-
-			dbg_deserializer0_block               => dbg_deserializer0_block,
-			dbg_deserializer0_start_listening      => dbg_deserializer0_start_listening,
-			dbg_deserializer0_finished_listening  => dbg_deserializer0_finished_listening,
-			dbg_deserializer0_correct             => dbg_deserializer0_correct,
-
-			dbg_serializer0_block                  => dbg_serializer0_block,
-			dbg_serializer0_start_transmitting     => dbg_serializer0_start_transmitting,
-			dbg_serializer0_finished_transmitting => dbg_serializer0_finished_transmitting,
-
-			dbg_state                                 => dbg_state,
-
-			dbg_cnt_rx                                => dbg_cnt_rx,
-			dbg_cnt_tx                                => dbg_cnt_tx,
-
-			dbg_mux_rx0_enable_custom                 => dbg_mux_rx0_enable_custom,
-
-			dbg_serializer0_tx_byte                   => dbg_serializer0_tx_byte,
-
-			dbg_key                                   => dbg_key,
-			dbg_aes_input                             => dbg_aes_input,
-			dbg_aes_enc_prev_ciphertext               => dbg_aes_enc_prev_ciphertext,
-			dbg_aec_enc_output                        => dbg_aec_enc_output,
-			dbg_aes_dec_prev_ciphertext               => dbg_aes_dec_prev_ciphertext,
-			dbg_aec_dec_output                        => dbg_aec_dec_output,
-			
-			dbg_next_serializer0_block             => dbg_next_serializer0_block
+			tx                 => tx
 		);
 	
 end communicator_test_impl;

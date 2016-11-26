@@ -25,12 +25,7 @@ entity block_deserializer is
 		aes_block             : out std_logic_vector(block_bits - 1 downto 0) := (others => 'X');
 		start_listening       : in  std_logic;
 		finished_listening    : out std_logic                                 := 'X';
-		correct               : out std_logic                                 := 'X';
-
-dbg_forward_start      : out std_logic;
-dbg_forward_finished   : out std_logic;
-dbg_crc_accumulator    : out std_logic_vector(crc_bits - 1 downto 0)
-);
+		correct               : out std_logic                                 := 'X');
 end block_deserializer;
 
 architecture block_deserializer_impl of block_deserializer is
@@ -154,9 +149,5 @@ begin
 			end case;
 		end if;
 	end process;
-
-	dbg_forward_start <= forward_start;
-	dbg_forward_finished <= forward_finished;
-	dbg_crc_accumulator <= crc_finish(crc_accumulator);
 
 end block_deserializer_impl;
