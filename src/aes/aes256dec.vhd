@@ -12,14 +12,14 @@ entity aes256dec is
 		key_bytes          : Integer := 32;
 		key_expansion_bits : Integer := 15 * 128);
 	port (
-		key_expansion_in   : in  std_logic_vector(key_expansion_bits - 1 downto 0);
-		cyphertext_in      : in  std_logic_vector(block_bits - 1 downto 0);
-		plaintext_out      : out std_logic_vector(block_bits - 1 downto 0));
+		key_expansion : in  std_logic_vector(key_expansion_bits - 1 downto 0);
+		cyphertext    : in  std_logic_vector(block_bits - 1 downto 0);
+		plaintext     : out std_logic_vector(block_bits - 1 downto 0));
 end aes256dec;
 
 architecture aes256dec_impl of aes256dec is begin
 
-	plaintext_out <= decode256(cyphertext_in, key_expansion_in);
---	plaintext_out <= cyphertext_in;
+	plaintext <= decode256(cyphertext, key_expansion);
+--	plaintext <= cyphertext;
 
 end aes256dec_impl;

@@ -13,13 +13,13 @@ entity uart_rx is
 	generic (
 		byte_bits : Integer := 8);
 	port (
-		reset_n                   : in  std_logic;
-		clk_16                    : in  std_logic; --16x baud rate
-		rx                        : in  std_logic;
+		reset_n            : in  std_logic;
+		clk_16             : in  std_logic; --16x baud rate
+		rx                 : in  std_logic;
 			
-		byte_out                  : out std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
-		start_listening_in        : in  std_logic;
-		finished_listening_out    : out std_logic                                := '0';
+		byte               : out std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
+		start_listening    : in  std_logic;
+		finished_listening : out std_logic                                := '0';
 
 dbg_cnt                   : out Integer range 0 to 15;
 dbg_start_error           : out std_logic;
@@ -32,14 +32,14 @@ architecture uart_rx_impl of uart_rx is
 	type fsm is (await_pulse, await_start, confirm_start, receive_byte, await_stop);
 	signal state : fsm;
 
-	signal trigger_finished_action   : std_logic := '0';
-	signal trigger_finished_reaction : std_logic := '0';
-	signal finished_listening        : std_logic := '0';
+	signal trigger_finished_action     : std_logic                                := '0';
+	signal trigger_finished_reaction   : std_logic                                := '0';
+	signal finished_listening_internal : std_logic                                := '0';
 
-	signal byte_buffer : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
+	signal byte_buffer                 : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
 
-	signal oversample_buffer : std_logic_vector(2 downto 0) := (others => '0');
-	signal vote_result       : std_logic := '0';
+	signal oversample_buffer           : std_logic_vector(2 downto 0)             := (others => '0');
+	signal vote_result                 : std_logic                                := '0';
 
 	function vote(signal samples : in std_logic_vector(2 downto 0)) return std_logic is begin
 		return ((samples(0) and samples(1)) or (samples(1) and samples(2)) or (samples(0) and samples(2)));
@@ -47,7 +47,7 @@ architecture uart_rx_impl of uart_rx is
 
 begin
 
-	finished_listening_out <= finished_listening;
+	finished_listening <= finished_listening_internal;
 
 	vote_result <= vote(oversample_buffer);
 
@@ -57,14 +57,14 @@ begin
 			reset_n       => reset_n,
 			action        => trigger_finished_action,
 			reaction      => trigger_finished_reaction,
-			pulse_signal  => finished_listening
+			pulse_signal  => finished_listening_internal
 		);
 
-	process (reset_n, finished_listening) begin
+	process (reset_n, finished_listening_internal) begin
 		if (reset_n = '0') then
-			byte_out <= (others => '0');
-		elsif (rising_edge(finished_listening)) then
-			byte_out <= byte_buffer;
+			byte <= (others => '0');
+		elsif (rising_edge(finished_listening_internal)) then
+			byte <= byte_buffer;
 		end if;
 
 	end process;
@@ -85,10 +85,10 @@ dbg_stop_error <= '0';
 		elsif(rising_edge(clk_16)) then
 			case state is
 				when await_pulse =>
-					if (start_listening_in = '1' and rx = '0') then
+					if (start_listening = '1' and rx = '0') then
 						state <= confirm_start;
 						counter := 1;
-					elsif (start_listening_in) then
+					elsif (start_listening) then
 						state <= await_start;
 						counter := 0;
 					end if;

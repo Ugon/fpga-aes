@@ -7,26 +7,24 @@ use work.crc16.all;
 
 entity block_serializer is
 	generic (
-		byte_bits    : Integer := 8;
-		block_bytes  : Integer := 4;   --test
-		block_bits   : Integer := 32;  --test
-		crc_bytes    : Integer := 2;
-		crc_bits     : Integer := 16);
-		--block_bytes  : Integer := 16;
-		--block_bits   : Integer := 128);
+		byte_bits   : Integer := 8;
+		block_bytes : Integer := 4;   --test
+		block_bits  : Integer := 32;  --test
+		crc_bytes   : Integer := 2;
+		crc_bits    : Integer := 16);
 	port (
-		reset_n                   : in  std_logic;
-		clk_16                    : in  std_logic; --16x baud rate
+		reset_n                  : in  std_logic;
+		clk_16                   : in  std_logic; --16x baud rate
 
 		--TO TX
-		tx_byte                   : out std_logic_vector(byte_bits - 1 downto 0)  := (others => 'X');
-		tx_start_transmitting     : out std_logic                                 := 'X';
-		tx_finished_transmitting  : in  std_logic;
+		tx_byte                  : out std_logic_vector(byte_bits - 1 downto 0)  := (others => 'X');
+		tx_start_transmitting    : out std_logic                                 := 'X';
+		tx_finished_transmitting : in  std_logic;
 
 		--API
-		block_in                  : in  std_logic_vector(block_bits - 1 downto 0);
-		start_transmitting_in     : in  std_logic;
-		finished_transmitting_out : out std_logic                                 := 'X';
+		aes_block                : in  std_logic_vector(block_bits - 1 downto 0);
+		start_transmitting       : in  std_logic;
+		finished_transmitting    : out std_logic                                 := 'X';
 
 dbg_byte_crc_position : out Integer range 0 to block_bytes + crc_bytes - 1;
 dbg_forward_start : out std_logic;
@@ -41,18 +39,18 @@ architecture block_serializer_impl of block_serializer is
 	type fsm is (await_pulse, transmit_block, transmit_crc);
 	signal state : fsm;
 
-	signal byte_crc_position         : Integer range 0 to block_bytes + crc_bytes - 1 := 0;
-	signal byte_crc_position_latched : Integer range 0 to block_bytes + crc_bytes - 1 := 0;
+	signal byte_crc_position                : Integer range 0 to block_bytes + crc_bytes - 1 := 0;
+	signal byte_crc_position_latched        : Integer range 0 to block_bytes + crc_bytes - 1 := 0;
 
-	signal forward_start    : std_logic := '1';
-	signal forward_finished : std_logic := '0';
+	signal forward_start                    : std_logic := '1';
+	signal forward_finished                 : std_logic := '0';
 
-	signal tx_start_transmitting_internal : std_logic := '0';
+	signal tx_start_transmitting_internal   : std_logic := '0';
 	
-	signal block_buffer     : std_logic_vector(block_bits - 1 downto 0)            := (others => '0');
-	signal crc_buffer       : std_logic_vector(crc_bits - 1 downto 0)              := (others => '0');
-	signal block_crc_buffer : std_logic_vector(block_bits + crc_bits - 1 downto 0) := (others => '0');
-	signal crc_accumulator  : std_logic_vector(crc_bits - 1 downto 0)              := (others => '0');
+	signal block_buffer                     : std_logic_vector(block_bits - 1 downto 0)            := (others => '0');
+	signal crc_buffer                       : std_logic_vector(crc_bits - 1 downto 0)              := (others => '0');
+	signal block_crc_buffer                 : std_logic_vector(block_bits + crc_bits - 1 downto 0) := (others => '0');
+	signal crc_accumulator                  : std_logic_vector(crc_bits - 1 downto 0)              := (others => '0');
 
 	signal trigger_start_next_byte_action   : std_logic := '0';
 	signal trigger_start_next_byte_reaction : std_logic := '0';
@@ -60,11 +58,11 @@ architecture block_serializer_impl of block_serializer is
 
 begin
 
-	finished_transmitting_out      <= tx_finished_transmitting and forward_finished;
-	tx_start_transmitting_internal <= (start_transmitting_in and forward_start) or start_next_byte;
+	finished_transmitting          <= tx_finished_transmitting and forward_finished;
+	tx_start_transmitting_internal <= (start_transmitting and forward_start) or start_next_byte;
 	tx_start_transmitting          <= tx_start_transmitting_internal;
 
-	block_crc_buffer(block_bits - 1 downto 0)                     <= block_buffer;
+	block_crc_buffer(block_bits - 1                        downto 0)                                 <= block_buffer;
 	block_crc_buffer(block_bits + crc_bits - 1             downto block_bits + crc_bits - byte_bits) <= crc_buffer(byte_bits - 1 downto 0);
 	block_crc_buffer(block_bits + crc_bits - byte_bits - 1 downto block_bits)                        <= crc_buffer(crc_bits - 1 downto byte_bits);
 
@@ -77,9 +75,9 @@ begin
 			pulse_signal  => start_next_byte
 		);
 	
-	process (start_transmitting_in, block_in, block_crc_buffer, byte_crc_position_latched) begin
-		if (start_transmitting_in = '1') then
-			tx_byte <= block_in(byte_bits - 1 downto 0);
+	process (start_transmitting, aes_block, block_crc_buffer, byte_crc_position_latched) begin
+		if (start_transmitting = '1') then
+			tx_byte <= aes_block(byte_bits - 1 downto 0);
 		else
 			tx_byte <= block_crc_buffer((byte_crc_position_latched + 1) * byte_bits - 1 downto byte_crc_position_latched * byte_bits);
 		end if;
@@ -120,8 +118,8 @@ begin
 						byte_crc_position <= 0;
 						forward_start <= '0';
 						delayed_forward_start := false;
-					elsif (start_transmitting_in = '1') then
-						block_buffer <= block_in;
+					elsif (start_transmitting = '1') then
+						block_buffer <= aes_block;
 						crc_accumulator <= crc_init;
 						delayed_forward_start := true;
 					end if;

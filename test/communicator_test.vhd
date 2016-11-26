@@ -4,34 +4,34 @@ use ieee.numeric_std.all;
 
 entity communicator_test is
 	generic (
-		byte_bits    : Integer := 8;
-		block_bytes  : Integer := 4;
-		block_bits   : Integer := 32;
-		key_bytes    : Integer := 8;
-		key_bits     : Integer := 64;
+		byte_bits   : Integer := 8;
+		block_bytes : Integer := 4;
+		block_bits  : Integer := 32;
+		key_bytes   : Integer := 8;
+		key_bits    : Integer := 64;
 		key_expansion_bits : Integer := 15 * 32);
 	port (
-		clk_16                 : in    std_logic; --16x baudrate
-		reset_n                : in    std_logic;
-		rx                     : in    std_logic;
-		tx                     : out   std_logic;
+		clk_16  : in    std_logic; --16x baudrate
+		reset_n : in    std_logic;
+		rx      : in    std_logic;
+		tx      : out   std_logic;
 
-dbg_rx0_byte_out                          : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_rx0_start_listening_in                : out std_logic;
-dbg_rx0_finished_listening_out            : out std_logic;
+dbg_rx0_byte                          : out std_logic_vector(byte_bits - 1 downto 0);
+dbg_rx0_start_listening                : out std_logic;
+dbg_rx0_finished_listening            : out std_logic;
 
-dbg_tx0_byte_in                           : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_tx0_start_transmitting_in             : out std_logic;
-dbg_tx0_finished_transmitting_out         : out std_logic;
+dbg_tx0_byte                           : out std_logic_vector(byte_bits - 1 downto 0);
+dbg_tx0_start_transmitting             : out std_logic;
+dbg_tx0_finished_transmitting         : out std_logic;
 
-dbg_deserializer0_block_out               : out std_logic_vector(block_bits - 1 downto 0);
-dbg_deserializer0_start_listening_in      : out std_logic;
-dbg_deserializer0_finished_listening_out  : out std_logic;
-dbg_deserializer0_correct_out             : out std_logic;
+dbg_deserializer0_block               : out std_logic_vector(block_bits - 1 downto 0);
+dbg_deserializer0_start_listening      : out std_logic;
+dbg_deserializer0_finished_listening  : out std_logic;
+dbg_deserializer0_correct             : out std_logic;
 
-dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 downto 0);
-dbg_serializer0_start_transmitting_in     : out std_logic;
-dbg_serializer0_finished_transmitting_out : out std_logic;
+dbg_serializer0_block                  : out std_logic_vector(block_bits - 1 downto 0);
+dbg_serializer0_start_transmitting     : out std_logic;
+dbg_serializer0_finished_transmitting : out std_logic;
 
 dbg_state                                 : out Integer range 0 to 17;  
 
@@ -50,7 +50,7 @@ dbg_aec_enc_output                        : out std_logic_vector(block_bits - 1 
 dbg_aes_dec_prev_ciphertext               : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 dbg_aec_dec_output                        : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 
-dbg_next_serializer0_block_in  : out std_logic_vector(block_bits - 1 downto 0)
+dbg_next_serializer0_block  : out std_logic_vector(block_bits - 1 downto 0)
 
 	);
 end communicator_test;
@@ -63,36 +63,36 @@ begin
 
 	communicator0 : entity work.communicator
 		generic map (
-			byte_bits              => byte_bits,
-			block_bytes            => block_bytes,
-			block_bits             => block_bits,
-			key_bytes              => key_bytes,
-			key_bits               => key_bits,
-			key_expansion_bits     => key_expansion_bits)
+			byte_bits          => byte_bits,
+			block_bytes        => block_bytes,
+			block_bits         => block_bits,
+			key_bytes          => key_bytes,
+			key_bits           => key_bits,
+			key_expansion_bits => key_expansion_bits)
 		port map (
-			reset_n                => reset_n,
-			clk_16                 => clk_16,
-			rx                     => rx,
-			tx                     => tx,
---			block_modification_in  => loopback,
---			block_modification_out => loopback,
+			reset_n            => reset_n,
+			clk_16             => clk_16,
+			rx                 => rx,
+			tx                 => tx,
+--			block_modification  => loopback,
+--			block_modification => loopback,
 
-			dbg_rx0_byte_out                          => dbg_rx0_byte_out,
-			dbg_rx0_start_listening_in                => dbg_rx0_start_listening_in,
-			dbg_rx0_finished_listening_out            => dbg_rx0_finished_listening_out,
+			dbg_rx0_byte                          => dbg_rx0_byte,
+			dbg_rx0_start_listening                => dbg_rx0_start_listening,
+			dbg_rx0_finished_listening            => dbg_rx0_finished_listening,
 
-			dbg_tx0_byte_in                           => dbg_tx0_byte_in,
-			dbg_tx0_start_transmitting_in             => dbg_tx0_start_transmitting_in,
-			dbg_tx0_finished_transmitting_out         => dbg_tx0_finished_transmitting_out,
+			dbg_tx0_byte                           => dbg_tx0_byte,
+			dbg_tx0_start_transmitting             => dbg_tx0_start_transmitting,
+			dbg_tx0_finished_transmitting         => dbg_tx0_finished_transmitting,
 
-			dbg_deserializer0_block_out               => dbg_deserializer0_block_out,
-			dbg_deserializer0_start_listening_in      => dbg_deserializer0_start_listening_in,
-			dbg_deserializer0_finished_listening_out  => dbg_deserializer0_finished_listening_out,
-			dbg_deserializer0_correct_out             => dbg_deserializer0_correct_out,
+			dbg_deserializer0_block               => dbg_deserializer0_block,
+			dbg_deserializer0_start_listening      => dbg_deserializer0_start_listening,
+			dbg_deserializer0_finished_listening  => dbg_deserializer0_finished_listening,
+			dbg_deserializer0_correct             => dbg_deserializer0_correct,
 
-			dbg_serializer0_block_in                  => dbg_serializer0_block_in,
-			dbg_serializer0_start_transmitting_in     => dbg_serializer0_start_transmitting_in,
-			dbg_serializer0_finished_transmitting_out => dbg_serializer0_finished_transmitting_out,
+			dbg_serializer0_block                  => dbg_serializer0_block,
+			dbg_serializer0_start_transmitting     => dbg_serializer0_start_transmitting,
+			dbg_serializer0_finished_transmitting => dbg_serializer0_finished_transmitting,
 
 			dbg_state                                 => dbg_state,
 
@@ -110,7 +110,7 @@ begin
 			dbg_aes_dec_prev_ciphertext               => dbg_aes_dec_prev_ciphertext,
 			dbg_aec_dec_output                        => dbg_aec_dec_output,
 			
-			dbg_next_serializer0_block_in             => dbg_next_serializer0_block_in
+			dbg_next_serializer0_block             => dbg_next_serializer0_block
 		);
 	
 end communicator_test_impl;

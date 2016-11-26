@@ -21,22 +21,22 @@ entity communicator is
 		tx      : out   std_logic;
 
 
-dbg_rx0_byte_out                          : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_rx0_start_listening_in                : out std_logic;
-dbg_rx0_finished_listening_out            : out std_logic;
+dbg_rx0_byte                          : out std_logic_vector(byte_bits - 1 downto 0);
+dbg_rx0_start_listening               : out std_logic;
+dbg_rx0_finished_listening            : out std_logic;
 
-dbg_tx0_byte_in                           : out std_logic_vector(byte_bits - 1 downto 0);
-dbg_tx0_start_transmitting_in             : out std_logic;
-dbg_tx0_finished_transmitting_out         : out std_logic;
+dbg_tx0_byte                          : out std_logic_vector(byte_bits - 1 downto 0);
+dbg_tx0_start_transmitting            : out std_logic;
+dbg_tx0_finished_transmitting         : out std_logic;
 
-dbg_deserializer0_block_out               : out std_logic_vector(block_bits - 1 downto 0);
-dbg_deserializer0_start_listening_in      : out std_logic;
-dbg_deserializer0_finished_listening_out  : out std_logic;
-dbg_deserializer0_correct_out             : out std_logic;
+dbg_deserializer0_block               : out std_logic_vector(block_bits - 1 downto 0);
+dbg_deserializer0_start_listening     : out std_logic;
+dbg_deserializer0_finished_listening  : out std_logic;
+dbg_deserializer0_correct             : out std_logic;
 
-dbg_serializer0_block_in                  : out std_logic_vector(block_bits - 1 downto 0);
-dbg_serializer0_start_transmitting_in     : out std_logic;
-dbg_serializer0_finished_transmitting_out : out std_logic;
+dbg_serializer0_block                 : out std_logic_vector(block_bits - 1 downto 0);
+dbg_serializer0_start_transmitting    : out std_logic;
+dbg_serializer0_finished_transmitting : out std_logic;
 
 dbg_state                                 : out Integer range 0 to 17;
 
@@ -58,7 +58,7 @@ dbg_aec_enc_output                        : out std_logic_vector(block_bits - 1 
 dbg_aes_dec_prev_ciphertext               : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 dbg_aec_dec_output                        : out std_logic_vector(block_bits - 1 downto 0) := (others => '0');
 
-dbg_next_serializer0_block_in  : out std_logic_vector(block_bits - 1 downto 0)
+dbg_next_serializer0_block: out std_logic_vector(block_bits - 1 downto 0)
 
 );
 end communicator;
@@ -96,107 +96,107 @@ architecture communicator_impl of communicator is
 	constant  DEC : std_logic_vector(byte_bits - 1 downto 0) := "01000100"; --ASCII('D')
 
 	--AES SIGNALS
-	signal key                   : std_logic_vector(key_bits           - 1 downto 0) := (others => '0');
-	signal initialization_vector : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
-	signal aes_key               : std_logic_vector(key_bits           - 1 downto 0) := (others => '0');
-	signal aes_key_expansion     : std_logic_vector(key_expansion_bits - 1 downto 0) := (others => '0');
-	signal aes_input             : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
-	signal aes_output            : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
-	signal aes_enc_dec_choice    : std_logic                                         := '0'; --0 if enc; 1 if dec
+	signal key                                             : std_logic_vector(key_bits           - 1 downto 0) := (others => '0');
+	signal initialization_vector                           : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
+	signal aes_key                                         : std_logic_vector(key_bits           - 1 downto 0) := (others => '0');
+	signal aes_key_expansion                               : std_logic_vector(key_expansion_bits - 1 downto 0) := (others => '0');
+	signal aes_input                                       : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
+	signal aes_output                                      : std_logic_vector(block_bits         - 1 downto 0) := (others => '0');
+	signal aes_enc_dec_choice                              : std_logic                                         := '0'; --0 if enc; 1 if dec
 
 	--AES ENCODE
-	signal aes_enc_plaintext       : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_enc_cyphertext      : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_enc_output          : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_enc_prev_ciphertext : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+	signal aes_enc_plaintext                               : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_enc_cyphertext                              : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_enc_output                                  : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_enc_prev_ciphertext                         : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
 
 	--AES DECODE
-	signal aes_dec_plaintext       : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_dec_cyphertext      : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_dec_output          : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal aes_dec_prev_ciphertext : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+	signal aes_dec_plaintext                               : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_dec_cyphertext                              : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_dec_output                                  : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal aes_dec_prev_ciphertext                         : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
 
 	--AUXILIARY SIGNALS
-	signal block_zeros       : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal block_to_transmit : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal ack_to_transmit   : std_logic_vector(byte_bits  - 1 downto 0) := (others => '0');
+	signal block_zeros                                     : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal block_to_transmit                               : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal ack_to_transmit                                 : std_logic_vector(byte_bits  - 1 downto 0)         := (others => '0');
 
     --ENTITY CONNECTIONS SIGNALS
-	signal rx0_byte_out                          : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal rx0_start_listening_in                : std_logic                                 := '0';
-	signal rx0_finished_listening_out            : std_logic                                 := '0';
+	signal rx0_byte                                        : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal rx0_start_listening                             : std_logic                                         := '0';
+	signal rx0_finished_listenig                           : std_logic                                         := '0';
 
-	signal deserializer0_rx_byte                 : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal deserializer0_rx_start_listening      : std_logic                                 := '0';
-	signal deserializer0_rx_finished_listening   : std_logic                                 := '0';
-	signal deserializer0_block_out               : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal deserializer0_start_listening_in      : std_logic                                 := '0';
-	signal deserializer0_finished_listening_out  : std_logic                                 := '0';
-	signal deserializer0_correct_out             : std_logic                                 := '0';
+	signal deserializer0_rx_byt                            : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal deserializer0_rx_stat_listening                 : std_logic                                         := '0';
+	signal deserializer0_rx_finshed_listening              : std_logic                                         := '0';
+	signal deserializer0_block                             : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal deserializer0_start_istening                    : std_logic                                         := '0';
+	signal deserializer0_finishd_listening                 : std_logic                                         := '0';
+	signal deserializer0_correc                            : std_logic                                         := '0';
 
-	signal tx0_byte_in                           : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal tx0_start_transmitting_in             : std_logic                                 := '0';
-	signal tx0_finished_transmitting_out         : std_logic                                 := '0';
+	signal tx0_byte                                        : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal tx0_start_transmittig                           : std_logic                                         := '0';
+	signal tx0_finished_transmiting                        : std_logic                                         := '0';
 
-	signal serializer0_tx_byte                   : std_logic_vector(byte_bits - 1 downto 0)  := (others => '0');
-	signal serialzier0_tx_start_transmitting     : std_logic                                 := '0';
-	signal serialzier0_tx_finished_transmitting  : std_logic                                 := '0';
-	signal serializer0_block_in                  : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
-	signal serializer0_start_transmitting_in     : std_logic                                 := '0';
-	signal serializer0_finished_transmitting_out : std_logic                                 := '0';
+	signal serializer0_tx_byte                             : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal serialzier0_tx_starttransmitting                : std_logic                                         := '0';
+	signal serialzier0_tx_finised_transmitting             : std_logic                                         := '0';
+	signal serializer0_block                               : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal serializer0_start_trnsmitting                   : std_logic                                         := '0';
+	signal serializer0_finishedtransmitting                : std_logic                                         := '0';
 
 	--CUSTOM CONNECTION SIGNALS
-	signal custom0_rx_byte                  : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
-	signal custom0_rx_start_listening       : std_logic                                := '0';
-	signal custom0_rx_finished_listening    : std_logic                                := '0';
+	signal custom0_rx_byte                                 : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal custom0_rx_start_lisening                       : std_logic                                         := '0';
+	signal custom0_rx_finished_istening                    : std_logic                                         := '0';
 
-	signal custom0_tx_byte_in               : std_logic_vector(byte_bits - 1 downto 0) := (others => '0');
-	signal custom0_tx_start_transmitting    : std_logic                                := '0';
-	signal custom0_tx_finished_transmitting : std_logic                                := '0';
+	signal custom0_tx_byte                                 : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal custom0_tx_start_trasmitting                    : std_logic                                         := '0';
+	signal custom0_tx_finished_ransmitting                 : std_logic                                         := '0';
 
 	--RX TX SIGNAL MUX
-	signal mux_switch_pulse             : std_logic := '0';
- 	signal mux_enable_custom            : std_logic := '1';
+	signal mux_switch_pulse                                : std_logic                                         := '0';
+ 	signal mux_enable_custom                               : std_logic                                         := '1';
 	
-	signal next_ack_to_transmit         : std_logic_vector(byte_bits  - 1 downto 0) := (others => '0');
-	signal next_block_to_transmit       : std_logic_vector(block_bits - 1 downto 0) := (others => '0');
+	signal next_ack_to_transmit                            : std_logic_vector(byte_bits  - 1 downto 0)         := (others => '0');
+	signal next_block_to_transmt                           : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
 	
-	signal trigger_mux_switch0_action   : std_logic := '0';
-	signal trigger_mux_switch0_reaction : std_logic := '0';
+	signal trigger_mux_switch0_ction                       : std_logic                                         := '0';
+	signal trigger_mux_switch0_eaction                     : std_logic                                         := '0';
 
 	--START PULSE TRIGGERS
-	signal trigger_deserializer0_start_listening_action    : std_logic := '0';
-	signal trigger_deserializer0_start_listening_reaction  : std_logic := '0';
-	signal trigger_custom0_rx_start_listening_action       : std_logic := '0';
-	signal trigger_custom0_rx_start_listening_reaction     : std_logic := '0';
+	signal trigger_deserializer_start_listening_action     : std_logic                                         := '0';
+	signal trigger_deserializer_start_listening_reaction   : std_logic                                         := '0';
+	signal trigger_custom0_rx_sart_listening_action        : std_logic                                         := '0';
+	signal trigger_custom0_rx_sart_listening_reaction      : std_logic                                         := '0';
 	
-	signal trigger_serializer0_start_transmitting_action   : std_logic := '0';
-	signal trigger_serializer0_start_transmitting_reaction : std_logic := '0';
-	signal trigger_custom0_tx_start_transmitting_action    : std_logic := '0';
-	signal trigger_custom0_tx_start_transmitting_reaction  : std_logic := '0';
+	signal trigger_serializer0_tart_transmitting_action    : std_logic                                         := '0';
+	signal trigger_serializer0_tart_transmitting_reaction  : std_logic                                         := '0';
+	signal trigger_custom0_tx_sart_transmitting_action     : std_logic                                         := '0';
+	signal trigger_custom0_tx_sart_transmitting_reaction   : std_logic                                         := '0';
 
 	--ACK CONTROL SIGNALS
-	signal transmit_success : std_logic := '0';
-	signal receive_success  : std_logic := '0';
+	signal transmit_success                                : std_logic                                         := '0';
+	signal receive_success                                 : std_logic                                         := '0';
 
 begin
 
-dbg_rx0_byte_out                          <= rx0_byte_out;
-dbg_rx0_start_listening_in                <= rx0_start_listening_in;
-dbg_rx0_finished_listening_out            <= rx0_finished_listening_out;
+dbg_rx0_byte                         <= rx0_byte;
+dbg_rx0_start_listening               <= rx0_start_listening;
+dbg_rx0_finished_listening           <= rx0_finished_listening;
 
-dbg_tx0_byte_in                           <= tx0_byte_in;
-dbg_tx0_start_transmitting_in             <= tx0_start_transmitting_in;
-dbg_tx0_finished_transmitting_out         <= tx0_finished_transmitting_out;
+dbg_tx0_byte                          <= tx0_byte;
+dbg_tx0_start_transmitting            <= tx0_start_transmitting;
+dbg_tx0_finished_transmitting        <= tx0_finished_transmitting;
 
-dbg_deserializer0_block_out               <= deserializer0_block_out;
-dbg_deserializer0_start_listening_in      <= deserializer0_start_listening_in;
-dbg_deserializer0_finished_listening_out  <= deserializer0_finished_listening_out;
-dbg_deserializer0_correct_out             <= deserializer0_correct_out;
+dbg_deserializer0_block             <= deserializer0_block;
+dbg_deserializer0_start_listening     <= deserializer0_start_listening;
+dbg_deserializer0_finished_listening <= deserializer0_finished_listening;
+dbg_deserializer0_correct            <= deserializer0_correct;
 
-dbg_serializer0_block_in                  <= block_to_transmit;
-dbg_serializer0_start_transmitting_in     <= serializer0_start_transmitting_in;
-dbg_serializer0_finished_transmitting_out <= serializer0_finished_transmitting_out;
+dbg_serializer0_block                <= block_to_transmit;
+dbg_serializer0_start_transmitting    <= serializer0_start_transmitting;
+dbg_serializer0_finished_transmitting<= serializer0_finished_transmitting;
 
 dbg_mux_rx0_enable_custom                 <= mux_enable_custom;
 
@@ -211,21 +211,21 @@ dbg_aec_enc_output <= aes_enc_output;
 dbg_aes_dec_prev_ciphertext <= aes_dec_prev_ciphertext;
 dbg_aec_dec_output <= aes_dec_output;
 
-dbg_next_serializer0_block_in                  <= next_block_to_transmit;
+dbg_next_serializer0_block                <= next_block_to_transmit;
 
-	aes_key              <= key;
-	aes_key_expansion    <= key_expansion256(aes_key);
---	aes_key_expansion    <= (others => '0');
+	aes_key            <= key;
+	aes_key_expansion  <= key_expansion256(aes_key);
+--	aes_key_expansion  <= (others => '0');
 
-	aes_enc_plaintext    <= aes_enc_prev_ciphertext xor aes_input;
-	aes_enc_output       <= aes_enc_cyphertext;
+	aes_enc_plaintext  <= aes_enc_prev_ciphertext xor aes_input;
+	aes_enc_output     <= aes_enc_cyphertext;
 
-	aes_dec_cyphertext   <= aes_input;
-	aes_dec_output       <= aes_dec_prev_ciphertext xor aes_dec_plaintext;
+	aes_dec_cyphertext <= aes_input;
+	aes_dec_output     <= aes_dec_prev_ciphertext xor aes_dec_plaintext;
 
-	serializer0_block_in <= block_to_transmit;
-	custom0_tx_byte_in   <= ack_to_transmit;
-	block_zeros          <= (others => '0');
+	serializer0_block  <= block_to_transmit;
+	custom0_tx_byte    <= ack_to_transmit;
+	block_zeros        <= (others => '0');
 
 	aes_enc0 : entity work.aes256enc
 		generic map (
@@ -235,9 +235,9 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			key_bytes                 => key_bytes,
 			key_expansion_bits        => key_expansion_bits)
 		port map (
-			key_expansion_in          => aes_key_expansion,
-			plaintext_in              => aes_enc_plaintext,
-			cyphertext_out            => aes_enc_cyphertext
+			key_expansion             => aes_key_expansion,
+			plaintext                 => aes_enc_plaintext,
+			cyphertext                => aes_enc_cyphertext
 		);
 
 	aes_dec0: entity work.aes256dec
@@ -248,9 +248,9 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			key_bytes                 => key_bytes,
 			key_expansion_bits        => key_expansion_bits)
 		port map (
-			key_expansion_in          => aes_key_expansion,
-			cyphertext_in             => aes_dec_cyphertext,
-			plaintext_out             => aes_dec_plaintext
+			key_expansion             => aes_key_expansion,
+			cyphertext                => aes_dec_cyphertext,
+			plaintext                 => aes_dec_plaintext
 		);
 
 	uart_rx0 : entity work.uart_rx
@@ -261,9 +261,9 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			clk_16                    => clk_16,
 			rx                        => rx,
 			
-			byte_out                  => rx0_byte_out,
-			start_listening_in        => rx0_start_listening_in,
-			finished_listening_out    => rx0_finished_listening_out,
+			byte                      => rx0_byte,
+			start_listening           => rx0_start_listening,
+			finished_listening        => rx0_finished_listening,
 			
 			dbg_cnt                   => dbg_cnt_rx,
 			dbg_start_error           => dbg_start_error,
@@ -279,9 +279,9 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			clk_16                    => clk_16,
 			tx                        => tx,
 			
-			byte_in                   => tx0_byte_in,
-			start_transmitting_in     => tx0_start_transmitting_in,
-			finished_transmitting_out => tx0_finished_transmitting_out,
+			byte                      => tx0_byte,
+			start_transmitting        => tx0_start_transmitting,
+			finished_transmitting     => tx0_finished_transmitting,
 			dbg_cnt                   => dbg_cnt_tx
 		);	
 
@@ -300,10 +300,10 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			rx_finished_listening     => deserializer0_rx_finished_listening,
 
 			--API
-			block_out                 => deserializer0_block_out,
-			start_listening_in        => deserializer0_start_listening_in,
-			finished_listening_out    => deserializer0_finished_listening_out,
-			correct_out               => deserializer0_correct_out
+			aes_block                 => deserializer0_block,
+			start_listening           => deserializer0_start_listening,
+			finished_listening        => deserializer0_finished_listening,
+			correct                   => deserializer0_correct
 		);
 
 	block_serializer0 : entity work.block_serializer 
@@ -321,9 +321,9 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			tx_finished_transmitting  => serialzier0_tx_finished_transmitting,
 
 			--API
-			block_in                  => serializer0_block_in,
-			start_transmitting_in     => serializer0_start_transmitting_in,
-			finished_transmitting_out => serializer0_finished_transmitting_out
+			aes_block                 => serializer0_block,
+			start_transmitting        => serializer0_start_transmitting,
+			finished_transmitting     => serializer0_finished_transmitting
 		);
 
 	trigger0 : entity work.trigger
@@ -332,7 +332,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			reset_n      => reset_n,
 			action       => trigger_deserializer0_start_listening_action,
 			reaction     => trigger_deserializer0_start_listening_reaction,
-			pulse_signal => deserializer0_start_listening_in
+			pulse_signal => deserializer0_start_listening
 		);
 
 	trigger1 : entity work.trigger
@@ -350,7 +350,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			reset_n      => reset_n,
 			action       => trigger_serializer0_start_transmitting_action,
 			reaction     => trigger_serializer0_start_transmitting_reaction,
-			pulse_signal => serializer0_start_transmitting_in
+			pulse_signal => serializer0_start_transmitting
 		);
 
 	trigger3 : entity work.trigger
@@ -379,32 +379,32 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 		end if;
 	end process;
 
-	mux_rx0 : process (mux_enable_custom, rx0_byte_out, custom0_rx_start_listening, rx0_finished_listening_out, deserializer0_rx_start_listening) begin
+	mux_rx0 : process (mux_enable_custom, rx0_byte, custom0_rx_start_listening, rx0_finished_listening, deserializer0_rx_start_listening) begin
 		if (mux_enable_custom = '1') then
-			custom0_rx_byte                     <= rx0_byte_out;
-			rx0_start_listening_in              <= custom0_rx_start_listening;
-			custom0_rx_finished_listening       <= rx0_finished_listening_out;
+			custom0_rx_byte                     <= rx0_byte;
+			rx0_start_listening                 <= custom0_rx_start_listening;
+			custom0_rx_finished_listening       <= rx0_finished_listening;
 			deserializer0_rx_byte               <= (others => '0');
 			deserializer0_rx_finished_listening <= '0';
 		else
-			deserializer0_rx_byte               <= rx0_byte_out;
-			rx0_start_listening_in              <= deserializer0_rx_start_listening;
-			deserializer0_rx_finished_listening <= rx0_finished_listening_out;
+			deserializer0_rx_byte               <= rx0_byte;
+			rx0_start_listening                 <= deserializer0_rx_start_listening;
+			deserializer0_rx_finished_listening <= rx0_finished_listening;
 			custom0_rx_byte                     <= (others => '0');
 			custom0_rx_finished_listening       <= '0';
 		end if;
 	end process;
 
-	mux_tx0 : process (mux_enable_custom, tx0_finished_transmitting_out, custom0_tx_byte_in, custom0_tx_start_transmitting, serializer0_tx_byte, serialzier0_tx_start_transmitting) begin
+	mux_tx0 : process (mux_enable_custom, tx0_finished_transmitting, custom0_tx_byte, custom0_tx_start_transmitting, serializer0_tx_byte, serialzier0_tx_start_transmitting) begin
 		if (mux_enable_custom = '1') then
-			tx0_byte_in                          <= custom0_tx_byte_in;
-			tx0_start_transmitting_in            <= custom0_tx_start_transmitting;
-			custom0_tx_finished_transmitting     <= tx0_finished_transmitting_out;
+			tx0_byte                             <= custom0_tx_byte;
+			tx0_start_transmitting               <= custom0_tx_start_transmitting;
+			custom0_tx_finished_transmitting     <= tx0_finished_transmitting;
 			serialzier0_tx_finished_transmitting <= '0';
 		else
-			tx0_byte_in                          <= serializer0_tx_byte;
-			tx0_start_transmitting_in            <= serialzier0_tx_start_transmitting;
-			serialzier0_tx_finished_transmitting <= tx0_finished_transmitting_out;
+			tx0_byte                             <= serializer0_tx_byte;
+			tx0_start_transmitting               <= serialzier0_tx_start_transmitting;
+			serialzier0_tx_finished_transmitting <= tx0_finished_transmitting;
 			custom0_tx_finished_transmitting     <= '0';
 		end if;
 	end process;
@@ -425,10 +425,10 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 		end if;
 	end process;
 
-	serializer_byte_set : process (reset_n, serializer0_start_transmitting_in) begin
+	serializer_byte_set : process (reset_n, serializer0_start_transmitting) begin
 		if (reset_n = '0') then
 			block_to_transmit <= (others => '0');
-		elsif (rising_edge(serializer0_start_transmitting_in)) then
+		elsif (rising_edge(serializer0_start_transmitting)) then
 			block_to_transmit <= next_block_to_transmit;
 		end if;
 	end process;
@@ -437,17 +437,17 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 		variable finished : std_logic := '0';
 
 		procedure handle_deserializer_finished (
-			signal p_deserializer0_block_out   : in  std_logic_vector;
-			signal p_deserializer0_correct_out : in  std_logic;
+			signal p_deserializer0_block       : in  std_logic_vector;
+			signal p_deserializer0_correct     : in  std_logic;
 			signal p_received_block            : out std_logic_vector;
 			signal p_next_ack_to_transmit      : out std_logic_vector) is
 
 		begin
 			--read receiver output
-			p_received_block <= p_deserializer0_block_out;
+			p_received_block <= p_deserializer0_block;
 				
 			--set transmitter input
-			if (p_deserializer0_correct_out = '1') then
+			if (p_deserializer0_correct = '1') then
 				p_next_ack_to_transmit <= ACK;
 			else 
 				p_next_ack_to_transmit <= NACK;
@@ -525,12 +525,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 
 				when key_low =>
-					if (deserializer0_finished_listening_out = '1') then
+					if (deserializer0_finished_listening= '1') then
 						state <= key_low_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => key(block_bits - 1 downto 0),
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -555,12 +555,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 
 				when key_high =>
-					if (deserializer0_finished_listening_out = '1') then
+					if (deserializer0_finished_listening= '1') then
 						state <= key_high_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => key(key_bits - 1 downto key_bits - block_bits),
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -585,12 +585,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 
 				when init_vector =>
-					if (deserializer0_finished_listening_out = '1') then
+					if (deserializer0_finished_listening= '1') then
 						state <= init_vector_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => initialization_vector,
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -614,13 +614,13 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 					end if;
 
 
-				when first_block => 
-					if (deserializer0_finished_listening_out = '1') then
+				when first_block=> 
+					if (deserializer0_finished_listening= '1') then
 						state <= blocks_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => aes_input,
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -635,12 +635,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 				when blocks =>
  					--if receiver and transmitter finished at the same time
- 					if (deserializer0_finished_listening_out = '1' and serializer0_finished_transmitting_out = '1') then
+ 					if (deserializer0_finished_listening= '1' and serializer0_finished_transmitting= '1') then
 						state <= blocks_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => aes_input,
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -652,12 +652,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						trigger(trigger_custom0_tx_start_transmitting_action, trigger_custom0_tx_start_transmitting_reaction);
 
 					--if receiver finished first
-					elsif (deserializer0_finished_listening_out = '1') then
+					elsif (deserializer0_finished_listening= '1') then
 						state <= blocks_r_finished_t_waiting;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => aes_input,
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -665,13 +665,13 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 						aes_dec_prev_ciphertext <= aes_input;
 
 					--if transmitter finished first
-					elsif (serializer0_finished_transmitting_out = '1') then
+					elsif (serializer0_finished_transmitting= '1') then
 						state <= blocks_r_waiting_t_finished;
 					end if;
 
 
 				when blocks_r_finished_t_waiting =>
-					if (serializer0_finished_transmitting_out = '1') then
+					if (serializer0_finished_transmitting= '1') then
 						state <= blocks_ack;
 
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
@@ -681,12 +681,12 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 
 				when blocks_r_waiting_t_finished =>
-					if (deserializer0_finished_listening_out = '1') then
+					if (deserializer0_finished_listening= '1') then
 						state <= blocks_ack;
 
 						handle_deserializer_finished(
-							p_deserializer0_block_out   => deserializer0_block_out,
-							p_deserializer0_correct_out => deserializer0_correct_out,
+							p_deserializer0_block       => deserializer0_block,
+							p_deserializer0_correct     => deserializer0_correct,
 							p_received_block            => aes_input,
 							p_next_ack_to_transmit      => next_ack_to_transmit);
 
@@ -798,7 +798,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 
 
 				when finishing =>
-					if (serializer0_finished_transmitting_out = '1') then
+					if (serializer0_finished_transmitting= '1') then
 						state <= finishing_ack;
 
 						trigger(trigger_mux_switch0_action, trigger_mux_switch0_reaction);
@@ -848,7 +848,7 @@ dbg_next_serializer0_block_in                  <= next_block_to_transmit;
 			when key_high_ack                 => dbg_state <= 6;
 			when init_vector                 => dbg_state <= 7;
 			when init_vector_ack             => dbg_state <= 8;
-			when first_block                 => dbg_state <= 9;
+			when first_block                => dbg_state <= 9;
 			when blocks                      => dbg_state <= 10;
 			when blocks_r_finished_t_waiting => dbg_state <= 11;
 			when blocks_r_waiting_t_finished => dbg_state <= 12;

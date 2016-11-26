@@ -149,41 +149,41 @@ end entity top;
 
 architecture rtl of top is
 
-	signal probe     : std_logic_vector(7 downto 0);
-	signal probe_gnd : std_logic_vector(1 downto 0);
+	signal probe                              : std_logic_vector(7 downto 0);
+	signal probe_gnd                          : std_logic_vector(1 downto 0);
 	
 	signal CONNECTED_TO_hps_0_h2f_loan_io_in  : std_logic_vector(66 downto 0);
 	signal CONNECTED_TO_hps_0_h2f_loan_io_out : std_logic_vector(66 downto 0);
 	signal CONNECTED_TO_hps_0_h2f_loan_io_oe  : std_logic_vector(66 downto 0);
 
-	signal reset_n  : std_logic;
+	signal reset_n                            : std_logic;
 
-	signal uart_clk          : std_logic;
-	signal uart_rx_async     : std_logic;
-	signal uart_rx           : std_logic;
-	signal uard_rx_data      : std_logic_vector(7 downto 0);
-	signal uart_rx_available : std_logic;
-	signal uart_tx           : std_logic;
-	signal uard_tx_data      : std_logic_vector(7 downto 0);
-	signal uart_tx_available : std_logic;
+	signal uart_clk                           : std_logic;
+	signal uart_rx_async                      : std_logic;
+	signal uart_rx                            : std_logic;
+	signal uard_rx_data                       : std_logic_vector(7 downto 0);
+	signal uart_rx_available                  : std_logic;
+	signal uart_tx                            : std_logic;
+	signal uard_tx_data                       : std_logic_vector(7 downto 0);
+	signal uart_tx_available                  : std_logic;
 	
-	signal hps_key_signal : std_logic;
-	signal hps_led_signal : std_logic;
+	signal hps_key_signal                     : std_logic;
+	signal hps_led_signal                     : std_logic;
 
-	signal block_from_aes : std_logic_vector(127 downto 0);
-	signal block_to_aes : std_logic_vector(127 downto 0);
+	signal block_from_aes                     : std_logic_vector(127 downto 0);
+	signal block_to_aes                       : std_logic_vector(127 downto 0);
 
-	signal test_block : std_logic_vector(127 downto 0);
+	signal test_block                         : std_logic_vector(127 downto 0);
 
-	signal dbg_start_error : std_logic;
-	signal dbg_stop_error : std_logic;
-	signal dbg_cnt_rx : Integer range 0 to 15;
-	signal dbg_rx0_start_listening_in : std_logic;
-	signal dbg_rx0_finished_listening_out : std_logic;
-	signal dbg_tx0_start_transmitting_in : std_logic;
-	signal dbg_tx0_finished_transmitting_out : std_logic;
-	signal dbg_state : Integer range 0 to 15;
-	signal dbg_rx_state : Integer range 0 to 3;
+	signal dbg_start_error                    : std_logic;
+	signal dbg_stop_error                     : std_logic;
+	signal dbg_cnt_rx                         : Integer range 0 to 15;
+	signal dbg_rx0_start_listening            : std_logic;
+	signal dbg_rx0_finished_listening     : std_logic;
+	signal dbg_tx0_start_transmitting         : std_logic;
+	signal dbg_tx0_finished_transmitting      : std_logic;
+	signal dbg_state                          : Integer range 0 to 15;
+	signal dbg_rx_state                       : Integer range 0 to 3;
 
 	component soc_system is
 		port (
@@ -439,38 +439,36 @@ begin
 		generic map (
 			idle => '1')
 		port map (
-		    async_in => uart_rx_async,
-		    clk      => uart_clk,
-		    reset_n  => reset_n,
-		    sync_out => uart_rx
+		    async_in                               => uart_rx_async,
+		    clk                                    => uart_clk,
+		    reset_n                                => reset_n,
+		    sync_out                               => uart_rx
 		);
 
 	uart_prescaler0 : entity work.uart_prescaler
 		port map(
-			clk_in  => CLOCK_50,
-			clk_out => uart_clk
+			clk_in                                 => CLOCK_50,
+			clk_out                                => uart_clk
 		);
 
 	communicator0 : entity work.communicator
 		port map (
-			reset_n                => reset_n,
-			clk_16                 => uart_clk,
-			rx                     => uart_rx,
-			tx                     => uart_tx,
---			block_modification_in  => block_from_aes,
---			block_modification_out => block_to_aes,
+			reset_n                                => reset_n,
+			clk_16                                 => uart_clk,
+			rx                                     => uart_rx,
+			tx                                     => uart_tx,
 			
-			dbg_cnt_rx             => dbg_cnt_rx,
-			dbg_start_error        => dbg_start_error,
-			dbg_stop_error         => dbg_stop_error,
-			dbg_rx0_start_listening_in => dbg_rx0_start_listening_in,
-			dbg_tx0_start_transmitting_in => dbg_tx0_start_transmitting_in,
-			dbg_tx0_finished_transmitting_out => dbg_tx0_finished_transmitting_out,
-			dbg_rx0_finished_listening_out => dbg_rx0_finished_listening_out,
-			dbg_state => dbg_state,
-			dbg_rx_state => dbg_rx_state
-			--dbg_deserializer0_finished_listening_out => probe(6),
-			--dbg_deserializer0_start_listening_in => probe(7)
+			dbg_cnt_rx                             => dbg_cnt_rx,
+			dbg_start_error                        => dbg_start_error,
+			dbg_stop_error                         => dbg_stop_error,
+			dbg_rx0_start_listening             => dbg_rx0_start_listening,
+			dbg_tx0_start_transmitting          => dbg_tx0_start_transmitting,
+			dbg_tx0_finished_transmitting      => dbg_tx0_finished_transmitting,
+			dbg_rx0_finished_listening         => dbg_rx0_finished_listening,
+			dbg_state                              => dbg_state,
+			dbg_rx_state                           => dbg_rx_state
+			--dbg_deserializer0_finished_listening => probe(6),
+			--dbg_deserializer0_start_listening => probe(7)
 		);
 
 	LEDR(9) <= dbg_start_error or dbg_stop_error;
@@ -484,14 +482,14 @@ begin
 	probe(1) <= uart_tx;
 	--probe(1) <= uart_tx;
 	--probe(3 downto 2) <= std_logic_vector(to_unsigned(dbg_rx_state, 2));
-	probe(2) <= dbg_tx0_finished_transmitting_out;
-	probe(3) <= dbg_tx0_start_transmitting_in;
-	--probe(4) <= dbg_tx0_start_transmitting_in;
-	--probe(5) <= dbg_tx0_finished_transmitting_out;
+	probe(2) <= dbg_tx0_finished_transmitting;
+	probe(3) <= dbg_tx0_start_transmitting;
+	--probe(4) <= dbg_tx0_start_transmitting;
+	--probe(5) <= dbg_tx0_finished_transmitting;
 	--probe(3) <= dbg_start_error or dbg_stop_error;
 	probe(7 downto 4) <= std_logic_vector(to_unsigned(dbg_state, 4));
-	--probe(4) <= dbg_rx0_finished_listening_out;
-	--probe(5) <= dbg_rx0_start_listening_in;
+	--probe(4) <= dbg_rx0_finished_listening;
+	--probe(5) <= dbg_rx0_start_listening;
 	--probe(7) <= std_logic_vector(to_unsigned(dbg_state, 4));
 	--probe(7) <= std_logic_vector(to_unsigned(dbg_state, 4));
 	--probe(7 downto 6) <= std_logic_vector(to_unsigned(dbg_state, 2));

@@ -13,13 +13,13 @@ entity uart_tx is
 	generic (
 		byte_bits : Integer := 8);
 	port (
-		reset_n                   : in  std_logic;
-		clk_16                    : in  std_logic; --16x baud rate
-		tx                        : out std_logic                                := 'X';
+		reset_n               : in  std_logic;
+		clk_16                : in  std_logic; --16x baud rate
+		tx                    : out std_logic                                := 'X';
 
-		byte_in                   : in  std_logic_vector(byte_bits - 1 downto 0);
-		start_transmitting_in     : in  std_logic;
-		finished_transmitting_out : out std_logic                                := 'X';
+		byte                  : in  std_logic_vector(byte_bits - 1 downto 0);
+		start_transmitting    : in  std_logic;
+		finished_transmitting : out std_logic                                := 'X';
 
 dbg_cnt                   : out Integer range 0 to 15;
 dbg_state                 : out Integer range 0 to 3
@@ -44,7 +44,7 @@ begin
 			reset_n       => reset_n,
 			action        => trigger_finished_action,
 			reaction      => trigger_finished_reaction,
-			pulse_signal  => finished_transmitting_out
+			pulse_signal  => finished_transmitting
 		);
 
 	process (clk_16, byte_buffer, reset_n) 
@@ -61,8 +61,8 @@ begin
 		elsif(rising_edge(clk_16)) then
 			case state is
 				when await_pulse =>
-					if (start_transmitting_in = '1') then
-						byte_buffer <= byte_in;
+					if (start_transmitting = '1') then
+						byte_buffer <= byte;
 						state <= begin_start;
 					end if;
 
@@ -103,11 +103,6 @@ begin
 					elsif (counter = 13) then
 						counter := 0;
 						state <= await_pulse;
-					--else 
-					--if (counter = 14) then
-						--counter := 0;
-						--state <= await_pulse;
-						--trigger(trigger_finished_action, trigger_finished_reaction);
 					else 
 						counter := counter + 1;
 					end if;

@@ -14,12 +14,9 @@ end sync_2ff;
 architecture sync_2ff_impl of sync_2ff is
 	signal ff1, ff2: std_logic;
 	
-	-- It's nice to let the synthesizer know what you're doing. Altera's way of doing it as follows:
 	ATTRIBUTE altera_attribute : string;
 	ATTRIBUTE altera_attribute OF ff1 : signal is "-name SYNCHRONIZER_IDENTIFICATION ""FORCED IF ASYNCHRONOUS""";
 	ATTRIBUTE altera_attribute OF sync_2ff_impl : architecture is "-name SDC_STATEMENT ""set_false_path -to *|sync_2ff:*|ff1 """;
-	
-	-- also set the 'preserve' attribute to ff1 and ff2 so the synthesis tool doesn't optimize them away
 	ATTRIBUTE preserve: boolean;
 	ATTRIBUTE preserve OF ff1: signal IS true;
 	ATTRIBUTE preserve OF ff2: signal IS true;

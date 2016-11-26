@@ -12,11 +12,8 @@ entity trigger is
 end trigger;
 
 architecture trigger_impl of trigger is
-	
 	signal reaction_internal : std_logic := '0';
-
 begin
-
 	reaction <= reaction_internal;
 
 	process (clk_16, reset_n) 
