@@ -1,10 +1,35 @@
-\section{Szczegóły implementacyjne projektu FPGA}
-\label{sec:szczegoly-implementacyjne-fpga}
+\section{Szczegóły implementacyjne}
+\label{sec:szczegoly-implementacyjne}
 
-\subsubsection{Przygotowanie projektu oraz konfiguracja pinów UART}
-Najwygodniejszym sposobem na rozpoczęcie projektu jest przystosowanie dołączonego przez producenta płytki projektu \textit{de1\_soc\_GHRD} (GHRD -- ang. \textit{Golden Hardware Reference Design}). GHRD jest projektem przeznaczonym do tego celu oraz jest skonfigurowany i gotowy do pracy z płytką Terasic DE1-SOC.
+\subsection{Wykorzystane technologie oraz narzędzia programistyczne}
+Projekt jest realizowany na platformie FPGA, więc musi zostać napisany w języku opisu sprzętu. Wykorzystany został język VHDL, ze względu na jego silną kontrolę typów, która pozwala na wczesne wykrywanie niektórych błędów podczas kompilacji, co okazało się bardzo pomocne podczas implementowania modułów AES.
 
-Do kowersji sygnału USB do UART postanowiłem wykorzystać znajdujący się na płytce Terasic DE1-SOC układ firmy FTDI. Jego sygnały nie są jednak podłączone bezpośrednio do programowalnej części układu FPGA, lecz do zintegrowanego procesora ARM. Aby uzyskać dostęp do jego sygnałów z FPGA należy odpowiednio dostosować projekt oraz stworzyć i wgrać na kartę SD preloader, który podczas uruchamiania płytki przestawi piny UART w odpowiedni tryb działania oraz określi ich kierunek. Aby przystosować projekt należy \cite{altera-youtube-loanerio, altera-forum-fgga-hps-access, altera-forum-cant-rx}:
+Środowiskiem programistycznym, które zostało wykorzystane do realizacji tego projektu jest Altera Quartus Prime 15.1 Lite Edition. Taki wybór był podyktowany faktem, że wykorzystana w projekcie płytka Terasic DE1-SOC wyposażona jest w układ FPGA firmy Altera, a Quartus jest jedynym środowiskiem przeznaczonym do tworzenia oprogramowania dla układów FPGA tej firmy.
+
+Do realizacji projektu zostało wykorzystane narzędzie QSys, które wchodzi w skład środowiska Quartus oraz służy do integracji zasobów dostępnych na płytce w projekcie, np. HPS, RAM. Pozwala również na konfigurację tych komponentów, co ma kluczowe znaczenie dla wykorzystania znajdującego się na płytce konwertera USB UART (patrz rozdział \ref{sec:uart-qsys}).
+
+Do przygotowania karty SD wykorzystane zostało środowisko Altera SoC FPGA Embedded Design Suite 15.1, które zawiera narzędzia programistyczne przeznaczone do tworzenia projektów korzystających zarówno z programowalnej części FPGA jak i procesora HPS. Użyte zostało narzędzie \textit{bsp-editor}, które posłużyło do wygenerowania preloadera (patrz rozdział \ref{sec:uart-preloader-gen}).
+
+Testy implementowanych komponentów były realizowane jako symulacje funkcyjne przy pomocy narzędzi wchodzących w skład środowiska programistycznego Quartus.
+
+
+\subsection{Przygotowanie oraz konfiguracja projektu}
+
+Terasic -- producent wykorzystanej w tym projekcie płytki płytki DE1-SOC -- opracował i udostępnił na płycie CD dołączonej do zestawu \cite{??} projekt bazowy GHRD (ang. \textit{Golden Hardware Reference Design}). Jest to projekt skonfigurowany do poprawnego działania z płytką DE1-SOC, w którym ustawione są m.in.
+\begin{itemize}[noitemsep]
+\item model układu FPGA znajdującego się na płytce
+\item konfiguracja pinów
+\item podstawowe ograniczenia czasowe układu
+\item projekt QSys reprezentujący zintegrowany procesor HPS (ang. \textit{Hard Processor System})
+\item główny plik projektu (ang. \textit{top-level entity}) wraz z dodanym komponentem reprezentującym HPS
+\end{itemize}
+Projekt GHRG zawiera podstawowe ustawienia, więc umożliwia programiście skrócenie etapu konfiguracji projektu oraz szybkie rozpoczęcie pracy nad projektowanym układem. Bazą dla tego projektu był GHRD.
+
+Do konwersji sygnału USB do UART wykorzystany został znajdujący się na płytce Terasic DE1-SOC układ firmy FTDI. Jego sygnały nie są jednak podłączone bezpośrednio do programowalnej części układu FPGA, lecz do zintegrowanego procesora ARM. Aby uzyskać dostęp do jego sygnałów z FPGA należy odpowiednio dostosować projekt oraz stworzyć i wgrać na kartę SD preloader, który podczas uruchamiania płytki przestawi piny UART w odpowiedni tryb działania oraz określi ich kierunek.
+
+\subsubsection{Konfiguracja pinów UART}
+\label{sec:uart-qsys}
+Aby skonfigurować projekt tak, aby układ FPGA miał dostęp do sygnałów UART konwertera USB UART podłączonych do HPS, należy wykonać następujące czynności \cite{altera-youtube-loanerio, altera-forum-fgga-hps-access, altera-forum-cant-rx}:
 
 \begin{enumerate}
 \item Otworzyć w edytorze QSys plik \textit{soc-system.qsys}
@@ -40,6 +65,7 @@ Powyższe zmiany spowodują, że:
 \end{itemize}
 
 \subsubsection{Przygotowanie preloadera}
+\label{sec:uart-preloader-gen}
 Aby przy starcie płytki piny UART zostały poprawnie połączone z układem FPGA należy z plików powstałych w wyniku kompilacji projektu wygenerować preloader. Aby to zrobić posłużyłem się narzędziem \textit{bsp-editor} będącym częścią oprogramowania Quartus, zgodnie z instrukcją znalezioną w internecie \cite{rocketboards-preloader}.
 
 \subsubsection{Skrypt startowy programujący układ FPGA}
@@ -76,28 +102,60 @@ Najłatwiejszym sposobem na stworzenie karty SD zawierającej potrzebne pliki je
 Aby przy starcie płytki programowanie FPGA przebiegło pomyślnie, należy umieścić kartę SD w czytniku oraz ustawić przełączniki MSEL[4:0] w pozycji 00100.
 
 \subsubsection{Główny zegar}
+\label{clk-16}
 Główny zegar \textit{CLK\_16}, którym taktowany będzie projektowany układ ma częstotliwość
 \begin{equation}
 f_{CLK\_16} = 16 * UART\_BAUD\_RATE
 \end{equation}
-gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach, która dla tego projektu wynosi 115200 baudów. Taka wartość podyktowana jest faktem, że częstą praktyką interpretacji sygnału UART, którą postanowiłem zastosować, jest jego próbkowanie z częstotliwością 16 razy szybszą niż częstotliwość zmian sygnału.
+gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach, która dla tego projektu wynosi 115200 baudów. Taka wartość podyktowana jest faktem, że częstą praktyką interpretacji sygnału UART, jest jego próbkowanie z częstotliwością 16 razy szybszą niż częstotliwość zmian sygnału.
 
 Częstotliwość zegara \textit{CLK\_16} jest o wiele niższa niż dostępny w układzie FPGA zegar o częstotliwości 50MHz. Pozwoliło to na uzyskanie żądanej częstotliwości przy pomocy prostego dzielnika częstotliwości.
+
+\begin{figure}[!h]
+	\begin{lstlisting}[style=vhdl, caption=Dzielnik częstotliwości, captionpos=b]
+	entity uart_prescaler is
+		port (
+			clk_in  : in  std_logic;  --50MHz
+			clk_out : out std_logic); --16 * 115200Hz
+	end uart_prescaler;
+	
+	architecture uart_prescaler_impl of uart_prescaler is
+		signal clk : std_logic := '0';
+	begin
+		clk_out <= clk;
+		
+		process (clk_in) 
+			variable counter : Integer range 0 to 13 := 0;
+		begin	
+			if(rising_edge(clk_in)) then
+				case counter is
+					when 13 =>
+						clk <= not clk;
+						counter := 0;
+					when others =>
+						counter := counter + 1;
+				end case;
+			end if;
+		end process;
+	end uart_prescaler_impl;
+	\end{lstlisting}
+\end{figure}
 
 Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja mająca miejsce w danym rosnącym zboczu zależy od wartości innego sygnału, to ma on stałą wartość co najmniej od poprzedzającego do następnego zbocza malejącego.
 
 
 \subsubsection{Synchronizacja sygnału UART RX}
+\label{uart-sync}
 Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec zsynchronizowałem sygnał RX, prowadząc go przez dwa przerzutniki typu D \cite{altera-metastability, 2ff-synchronization} wyzwalane głównym zegarem. Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
 
-\input{sections/modules/uart_rx}
-\input{sections/modules/uart_tx}
-\input{sections/modules/block_deserializer}
-\input{sections/modules/block_serializer}
+% \input{sections/modules/uart_rx}
+% \input{sections/modules/uart_tx}
+% \input{sections/modules/block_deserializer}
+% \input{sections/modules/block_serializer}
 \input{sections/modules/crc16}
-\input{sections/modules/aes}
-\input{sections/modules/communicator}
-\input{sections/modules/client}
+% \input{sections/modules/aes}
+% \input{sections/modules/communicator}
+% \input{sections/modules/client}
 
 
 

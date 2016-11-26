@@ -26,8 +26,6 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 	\item[\textbf{store \textit{x} into \textit{y}}] -- ustawienie sygnału \textit{y} na wartość \textit{x}
 \end{description}
 
-\newpage
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,7 +47,6 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \includegraphics{communicator.pdf}
 \caption{Schemat modułu \textit{communicator}}
 \end{figure}
-\newpage
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,8 +55,6 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 
 \begin{figure}[!h]
 \centering
-\caption{Maszyna stanów modułu \textit{communicator}}
-\vspace{10mm}
 \begin{tikzpicture}[->,>=stealth', y=-1cm]
 
 \node[state, initial] (start) {
@@ -242,9 +237,9 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \path[->] (init_vector_ack) edge [bend right] node {} (init_vector);
 
 \end{tikzpicture}
+\caption{Maszyna stanów modułu \textit{communicator}}
 \end{figure}
 
-\newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -517,4 +512,3 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tikzpicture}
 \end{figure}
 
-\newpage
