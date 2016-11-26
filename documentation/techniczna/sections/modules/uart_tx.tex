@@ -1,5 +1,18 @@
 \subsubsection{Moduł odbierający bajty UART}
-Interfejs układu wysyłającego bajty UART \textit{uart\_tx}:
+Interfejs modułu wysyłającego bajty UART \textit{uart\_tx}:
+
+\begin{figure}[!h]
+\begin{lstlisting}[style=vhdl]
+port (
+	reset_n               : in  std_logic;
+	clk_16                : in  std_logic;
+	tx                    : out std_logic;
+
+	byte                  : in  std_logic_vector(byte_bits - 1 downto 0);
+	start_transmitting    : in  std_logic;
+	finished_transmitting : out std_logic);
+\end{lstlisting}
+\end{figure}
 
 \begin{interface}{FINISHED\_TRANSMITTING}
 \item[\insignal{CLK\_16}] główny zegar układu.

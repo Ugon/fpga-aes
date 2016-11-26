@@ -1,5 +1,18 @@
 \subsubsection{Moduł odbierający bajty UART}
-Interfejs układu odbierającego bajty UART \textit{uart\_rx}:
+Interfejs modułu odbierającego bajty UART \textit{uart\_rx}:
+
+\begin{figure}[!h]
+\begin{lstlisting}[style=vhdl]
+port (
+	reset_n            : in  std_logic;
+	clk_16             : in  std_logic;
+	rx                 : in  std_logic;
+		
+	byte               : out std_logic_vector(byte_bits - 1 downto 0);
+	start_listening    : in  std_logic;
+	finished_listening : out std_logic);
+\end{lstlisting}
+\end{figure}
 
 \begin{interface}{FINISHED\_LISTENING}
 	\item[\insignal{CLK\_16}] główny zegar układu.

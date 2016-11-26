@@ -112,7 +112,7 @@ gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyra�
 Częstotliwość zegara \textit{CLK\_16} jest o wiele niższa niż dostępny w układzie FPGA zegar o częstotliwości 50MHz. Pozwoliło to na uzyskanie żądanej częstotliwości przy pomocy prostego dzielnika częstotliwości.
 
 \begin{figure}[!h]
-	\begin{lstlisting}[style=vhdl, caption=Dzielnik częstotliwości, captionpos=b]
+	\begin{lstlisting}[style=vhdl, caption={Dzielnik częstotliwości}, captionpos=b]
 	entity uart_prescaler is
 		port (
 			clk_in  : in  std_logic;  --50MHz
@@ -148,14 +148,14 @@ Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja 
 \label{uart-sync}
 Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec zsynchronizowałem sygnał RX, prowadząc go przez dwa przerzutniki typu D \cite{altera-metastability, 2ff-synchronization} wyzwalane głównym zegarem. Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
 
-% \input{sections/modules/uart_rx}
-% \input{sections/modules/uart_tx}
-% \input{sections/modules/block_deserializer}
-% \input{sections/modules/block_serializer}
+\input{sections/modules/uart_rx}
+\input{sections/modules/uart_tx}
+\input{sections/modules/block_deserializer}
+\input{sections/modules/block_serializer}
 \input{sections/modules/crc16}
-% \input{sections/modules/aes}
-% \input{sections/modules/communicator}
-% \input{sections/modules/client}
+\input{sections/modules/aes}
+\input{sections/modules/communicator}
+\input{sections/modules/client}
 
 
 

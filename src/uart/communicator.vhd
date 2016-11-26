@@ -124,56 +124,56 @@ architecture communicator_impl of communicator is
     --ENTITY CONNECTIONS SIGNALS
 	signal rx0_byte                                        : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
 	signal rx0_start_listening                             : std_logic                                         := '0';
-	signal rx0_finished_listenig                           : std_logic                                         := '0';
+	signal rx0_finished_listening                          : std_logic                                         := '0';
 
-	signal deserializer0_rx_byt                            : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
-	signal deserializer0_rx_stat_listening                 : std_logic                                         := '0';
-	signal deserializer0_rx_finshed_listening              : std_logic                                         := '0';
+	signal deserializer0_rx_byte                           : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
+	signal deserializer0_rx_start_listening                : std_logic                                         := '0';
+	signal deserializer0_rx_finished_listening             : std_logic                                         := '0';
 	signal deserializer0_block                             : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
-	signal deserializer0_start_istening                    : std_logic                                         := '0';
-	signal deserializer0_finishd_listening                 : std_logic                                         := '0';
-	signal deserializer0_correc                            : std_logic                                         := '0';
+	signal deserializer0_start_listening                   : std_logic                                         := '0';
+	signal deserializer0_finished_listening                : std_logic                                         := '0';
+	signal deserializer0_correct                           : std_logic                                         := '0';
 
 	signal tx0_byte                                        : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
-	signal tx0_start_transmittig                           : std_logic                                         := '0';
-	signal tx0_finished_transmiting                        : std_logic                                         := '0';
+	signal tx0_start_transmitting                          : std_logic                                         := '0';
+	signal tx0_finished_transmitting                       : std_logic                                         := '0';
 
 	signal serializer0_tx_byte                             : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
-	signal serialzier0_tx_starttransmitting                : std_logic                                         := '0';
-	signal serialzier0_tx_finised_transmitting             : std_logic                                         := '0';
+	signal serialzier0_tx_start_transmitting               : std_logic                                         := '0';
+	signal serialzier0_tx_finished_transmitting            : std_logic                                         := '0';
 	signal serializer0_block                               : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
-	signal serializer0_start_trnsmitting                   : std_logic                                         := '0';
-	signal serializer0_finishedtransmitting                : std_logic                                         := '0';
+	signal serializer0_start_transmitting                  : std_logic                                         := '0';
+	signal serializer0_finished_transmitting               : std_logic                                         := '0';
 
 	--CUSTOM CONNECTION SIGNALS
 	signal custom0_rx_byte                                 : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
-	signal custom0_rx_start_lisening                       : std_logic                                         := '0';
-	signal custom0_rx_finished_istening                    : std_logic                                         := '0';
+	signal custom0_rx_start_listening                      : std_logic                                         := '0';
+	signal custom0_rx_finished_listening                   : std_logic                                         := '0';
 
 	signal custom0_tx_byte                                 : std_logic_vector(byte_bits - 1 downto 0)          := (others => '0');
-	signal custom0_tx_start_trasmitting                    : std_logic                                         := '0';
-	signal custom0_tx_finished_ransmitting                 : std_logic                                         := '0';
+	signal custom0_tx_start_transmitting                   : std_logic                                         := '0';
+	signal custom0_tx_finished_transmitting                : std_logic                                         := '0';
 
 	--RX TX SIGNAL MUX
 	signal mux_switch_pulse                                : std_logic                                         := '0';
  	signal mux_enable_custom                               : std_logic                                         := '1';
 	
 	signal next_ack_to_transmit                            : std_logic_vector(byte_bits  - 1 downto 0)         := (others => '0');
-	signal next_block_to_transmt                           : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
+	signal next_block_to_transmit                          : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
 	
-	signal trigger_mux_switch0_ction                       : std_logic                                         := '0';
-	signal trigger_mux_switch0_eaction                     : std_logic                                         := '0';
+	signal trigger_mux_switch0_action                      : std_logic                                         := '0';
+	signal trigger_mux_switch0_reaction                    : std_logic                                         := '0';
 
 	--START PULSE TRIGGERS
-	signal trigger_deserializer_start_listening_action     : std_logic                                         := '0';
-	signal trigger_deserializer_start_listening_reaction   : std_logic                                         := '0';
-	signal trigger_custom0_rx_sart_listening_action        : std_logic                                         := '0';
-	signal trigger_custom0_rx_sart_listening_reaction      : std_logic                                         := '0';
+	signal trigger_deserializer0_start_listening_action     : std_logic                                         := '0';
+	signal trigger_deserializer0_start_listening_reaction   : std_logic                                         := '0';
+	signal trigger_custom0_rx_start_listening_action       : std_logic                                         := '0';
+	signal trigger_custom0_rx_start_listening_reaction     : std_logic                                         := '0';
 	
-	signal trigger_serializer0_tart_transmitting_action    : std_logic                                         := '0';
-	signal trigger_serializer0_tart_transmitting_reaction  : std_logic                                         := '0';
-	signal trigger_custom0_tx_sart_transmitting_action     : std_logic                                         := '0';
-	signal trigger_custom0_tx_sart_transmitting_reaction   : std_logic                                         := '0';
+	signal trigger_serializer0_start_transmitting_action   : std_logic                                         := '0';
+	signal trigger_serializer0_start_transmitting_reaction : std_logic                                         := '0';
+	signal trigger_custom0_tx_start_transmitting_action    : std_logic                                         := '0';
+	signal trigger_custom0_tx_start_transmitting_reaction  : std_logic                                         := '0';
 
 	--ACK CONTROL SIGNALS
 	signal transmit_success                                : std_logic                                         := '0';

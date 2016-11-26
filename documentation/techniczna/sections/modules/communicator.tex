@@ -1,6 +1,17 @@
 \subsubsection{Communicator}
 
 Interfejs modułu \textit{block\_serializer}:
+
+\begin{figure}[!h]
+\begin{lstlisting}[style=vhdl]
+port (
+	clk_16  : in    std_logic;
+	reset_n : in    std_logic;
+	rx      : in    std_logic;
+	tx      : out   std_logic);
+\end{lstlisting}
+\end{figure}
+
 \begin{interface}{CLK\_16}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 	\item[\insignal{RX}] zsynchronizowany z zegarem \insignal{CLK\_16} sygnał UART RX wychodzący do układu konwertera USB-UART.

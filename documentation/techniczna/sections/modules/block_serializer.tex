@@ -1,5 +1,22 @@
 \subsubsection{Moduł serializujący bloki AES do bajtów UART}
 Interfejs modułu serializującego bloki AES do bajtów UART \textit{block\_serializer}:
+
+\begin{figure}[!h]
+\begin{lstlisting}[style=vhdl]
+port (
+	reset_n                  : in  std_logic;
+	clk_16                   : in  std_logic;
+
+	tx_byte                  : out std_logic_vector(byte_bits - 1 downto 0);
+	tx_start_transmitting    : out std_logic;
+	tx_finished_transmitting : in  std_logic;
+
+	aes_block                : in  std_logic_vector(block_bits - 1 downto 0);
+	start_transmitting       : in  std_logic;
+	finished_transmitting    : out std_logic);
+\end{lstlisting}
+\end{figure}
+
 \begin{interface}{RX\_FINISHED\_TRANSMITTING}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 
@@ -8,7 +25,7 @@ Interfejs modułu serializującego bloki AES do bajtów UART \textit{block\_seri
 	\item[\insignal{TX\_FINISHED\_TRANSMITTING}] sygnał wychodzący do komponentu \textit{uart\_tx}.
 
 	\item[\insignal{START\_TRANSMITTING}] sygnał rozpoczynający transmisję bloku.
-	\item[\insignal{BLOCK[127:0]}] blok AES do wysłania. Stabilność sygnału jest wymagana, gdy \outsignal{START\_TRANSMITTING} jest w stanie wysokim.
+	\item[\insignal{AES\_BLOCK[127:0]}] blok AES do wysłania. Stabilność sygnału jest wymagana, gdy \outsignal{START\_TRANSMITTING} jest w stanie wysokim.
 	\item[\outsignal{FINISHED\_TRANSMITTING}] sygnał informujący o zakończeniu wysyłania bloku AES oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_TRANSMITTING} podczas kolejnego zbocza rosnącego zegara \insignal{CLK\_16}.
 \end{interface}
 
@@ -21,7 +38,7 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 	\outsignal{TX\_START\_TRANS} & LH               15LH             15LH           L\\
 	\outsignal{TX\_BYTE[7:0]}    & LD{BLOCK[0]}     15LD{BLOCK[1]}   15LD{BLOCK[2]} L\\
 	\insignal{TX\_FIN\_TRANS}    & L                15LH             15LH           2L\\
-	\insignal{BLOCK[127:0]}      & LD{BLOCK[127:0]} 16L              16L            L\\
+	\insignal{AES\_BLOCK[127:0]} & LD{BLOCK[127:0]} 16L              16L            L\\
 	\insignal{START\_TRANS}      & LH               16L              16L            L\\
 	\extracode
 	\tablerules
@@ -32,7 +49,7 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 \begin{figure}[!h]
 	\centering
 	\begin{tikztimingtable}[timing/wscale=0.95]
-	\insignal{CLK\_16}         & 3{cc}           16{cc}       16{cc}  \\
+	\insignal{CLK\_16}           & 3{cc}           16{cc}       16{cc}  \\
 	\outsignal{TX\_START\_TRANS} & 2LH             15LH         16L     \\
 	\outsignal{TX\_BYTE[7:0]}    & 2LD{CRC[0]}     15LD{CRC[1]} 16L     \\
 	\insignal{TX\_FIN\_TRANS}    & LH              15LH         15LH    L\\
@@ -51,7 +68,7 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 	\outsignal{TX\_BYTE[7:0]}    & l     130{0.5lg}      1.5l \\
 	\insignal{TX\_FIN\_TRANS}    & 1.5l  130{0.5lg}         l \\
 	\insignal{START\_TRANS}      & l         0.5lg        66l \\
-	\insignal{BLOCK[127:0]}      & l         0.5lg        66l \\
+	\insignal{AES\_BLOCK[127:0]} & l         0.5lg        66l \\
 	\outsignal{FIN\_TRANS}       & 66.5l         g          l \\
 	\extracode
 	\tablerules
