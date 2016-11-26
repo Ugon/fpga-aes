@@ -32,7 +32,7 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 \begin{figure}[!h]
 	\centering
 	\begin{tikztimingtable}[timing/wscale=0.95]
-	\helpsignal{CLK\_16}         & 3{cc}           16{cc}       16{cc}  \\
+	\insignal{CLK\_16}         & 3{cc}           16{cc}       16{cc}  \\
 	\outsignal{TX\_START\_TRANS} & 2LH             15LH         16L     \\
 	\outsignal{TX\_BYTE[7:0]}    & 2LD{CRC[0]}     15LD{CRC[1]} 16L     \\
 	\insignal{TX\_FIN\_TRANS}    & LH              15LH         15LH    L\\

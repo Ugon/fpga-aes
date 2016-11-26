@@ -1,0 +1,42 @@
+\section{Architektura systemu}
+\label{sec:architektura-systemu}
+
+\subsection{Przebieg komunikacji}
+\label{sec:przebieg-komunikacji}
+Informacje przesyłane między klientem (komputerem) a układem FPGA w celu zaszyfrowania informacji:
+\begin{enumerate}[noitemsep]
+\item Klient wysyła bajt ENC lub DEC wskazujący, czy informacje mają być szyfrowane czy deszyfrowane.
+\item FPGA odpowiada bajtem ACK jeśli odebrał bajt o wartości ENC lub DEC, NACK w innym przypadku.
+\item Jeśli klient otrzymał NACK kończy działanie.
+\item Klient wysyła blok zawierający 128 młodszych bajtów klucza oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie(suma kontrolna CRC16 się zgadza), NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła blok zawierający 128 starszych bajtów klucza oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła blok zawierający wektor inicjalizacji oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item Klient wysyła pierwszy blok danych oraz 2 bajty CRC16.
+\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
+\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\item FPGA szyfruje otrzymany blok, wysyła go oraz 2 bajty CRC16. Jednocześnie Klient wysyła kolejny blok do zaszyfrowania.
+\item FPGA sprawdza CRC16 i wysyła bajt ACK jeśli blok został otrzymany poprawnie lub NACK w przeciwnym przypadku. Jednocześnie klient postępuje analogicznie.
+\item Jeśli FPGA odebrało blok poprawnie, oraz otrzymało od klienta bajt ACK, szyfruje otrzymany blok oraz odsyła go do klienta. W przeciwnym przypadku retransmituje poprzedni zaszyfrowany blok.
+\item Jeśli klient odebrał blok poprawnie, oraz otrzymał od FPGA bajt ACK, wysyła kolejny blok do zaszyfrowania. W przeciwnym wypadku retransmituje poprzedni blok.
+\item Wymiana bloków zachodzi dopóki wszystkie informacje nie zostaną zaszyfrowane. O końcu transmisji decyduje klient. Po wysłaniu ostatniego bloku i odebraniu przedostatniego zaszyfrowanego bloku, jeśli zaszyfrowany blok zastał odebrany poprawnie, zamiast ACK wysyła FIN.
+\item FPGA po odebraniu bajtu FIN szyfruje ostatni blok oraz odsyła go do klienta.
+\item Jeśli klient otrzymał ostatni blok poprawnie wysyła bajt ACK oraz kończy działanie, w przeciwnym wypadku wysyła NACK.
+\item Jeśli FPGA otrzymało bajt ACK przechodzi do stanu oczekiwania na rozpoczęcie kolejnego procesu szyfrowania. W przeciwnym wypadku retransmituje ostatni zaszyfrowany blok oraz czeka na potwierdzenie. Retransmisja wykonywana jest do skutku.
+\end{enumerate}
+
+\begin{figure}[!h]
+\centering
+\begin{tikztimingtable}[timing/wscale=2.9]
+  \textit{RX} & h d{ENC} h      1.5D{KEY\_LOW} h      1.5D{KEY\_HIGH} h      1.5D{INIT\_V} h      1.5D{D1\_PLAIN} h      1.5D{D2\_PLAIN}  d{FIN} 1.5H             d{ACK} h\\
+  \textit{TX} & h h      d{ACK} 1.5H           d{ACK} 1.5H            d{ACK} 1.5H          d{ACK} 1.5H            d{ACK} 1.5D{D1\_CYPHER} d{ACK} 1.5D{D2\_CYPHER} h      h\\
+\extracode
+\tablerules
+\end{tikztimingtable}
+\caption{Przebieg komunikacji w celu zaszyfrowania dwóch bloków}
+\end{figure}

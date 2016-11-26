@@ -48,6 +48,84 @@
 
 \graphicspath{ {figures/} }
 
+\lstdefinelanguage{VHDL}{
+    morekeywords=[1]{
+        and,
+        architecture,
+        array,
+        begin,
+        body,
+        case,
+        component,
+        configuration,
+        constant,
+        downto,
+        else,
+        elsif,
+        end,
+        entity,
+        for,
+        function,
+        generate,
+        generic,
+        if,
+        in,
+        inout,
+        is,
+        loop,
+        nand,
+        nor,
+        not,
+        of,
+        or,
+        others,
+        out,
+        package,
+        port,
+        procedure,
+        process,
+        range,
+        record,
+        register,
+        reject,
+        rem,
+        report,
+        return,
+        rol,
+        ror,
+        select,
+        severity,
+        signal,
+        then,
+        to,
+        transport,
+        type,
+        unaffected,
+        until,
+        use,
+        variable,
+        wait,
+        when,
+        while
+    },
+    morekeywords=[2]{
+        std_logic,
+        std_logic_vector,
+        Integer
+    },
+    morecomment=[l]--
+}
+
+\lstdefinestyle{vhdl}{
+   language     = VHDL,
+   basicstyle   = \footnotesize \ttfamily,
+   keywordstyle = [1]\color{blue!100!black!80}\bfseries,
+   keywordstyle = [2]\color{Lavender}\bfseries,
+   commentstyle = \color{green!80!black!90},
+   breaklines   = true,
+   tabsize      = 3
+}
+
 
 \author{Wojciech Pachuta}
 

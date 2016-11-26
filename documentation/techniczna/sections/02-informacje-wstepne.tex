@@ -14,25 +14,21 @@ Proces startowania płytki składa się z czterech faz \cite[p. 1068]{altera-vol
 \begin{enumerate}[noitemsep]
 \item BootROM -- przeprowadza minimalną konfigurację oraz ładuje preloader do zintegrowanej pamięci RAM.
 \item Preloader -- inicjalizacja SDRAM, konfiguracja multipleksacji pinów HPS I/O, załadowanie boot loadera do pamięci SDRAM.
-\item Boot Loader (U-Boot) -- wykonuje zdefiniowane przez użytkownika skrypty startowe, ładuje system operacyjny.
-\item Operating System
+\item Boot Loader (U-Boot) -- wykonuje zdefiniowane przez użytkownika skrypty startowe, inicjuje start systemu operacyjnego.
+\item Operating System -- uruchomienie oraz działanie systemu operacyjnego.
 \end{enumerate}
 
 
 \subsection{Transmisja UART}
-Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) jest protokołem umożliwiającym dwustronną szeregową transmisję danych. Wykorzystywany jest m.in. w standardzie RS-232. Najprostsza wersja składa się z dwóch sygnałów RX i TX, po jednym dla każdego z kierunków transmisji. UART umożliwia wybór parametrów transmisji. 
-\subsubsection{Parametry transmisji użyte w projekcie}
+Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) jest protokołem umożliwiającym dwustronną szeregową transmisję danych. Wykorzystywany jest m.in. w standardzie RS-232. Najprostsza wersja składa się z dwóch sygnałów RX i TX, po jednym dla każdego z kierunków transmisji. UART umożliwia wybór parametrów transmisji. W tym projekcie zostały użyte następujące parametry:
 \begin{enumerate}[noitemsep]
 \item Szybkość transmisji: 115200 baud
 \item 1 bit startu
 \item 1 bit stopu
-\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 całych bloków danych
+\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 (ang. \textit{cyclic redundancy check}) całych bloków danych (patrz rozdział \ref{crc}).
 \item Bity w bajcie przesyłane są od najmłodszego -- \textit{LSB first}
 \end{enumerate}
 
-
-\subsubsection{Ramka UART}
-Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format:
 \begin{figure}[!h]
 \centering
 \begin{tikztimingtable}[timing/wscale=3.3]
@@ -42,66 +38,30 @@ Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący forma
 \tablerules
 \end{tikztimingtable}
 \caption{Format ramki UART}
+\label{fig:uart-frame}
 \end{figure}
 
+Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format przedstawiony na rysunku \ref{fig:uart-frame}.
 
 \subsection{Kolejność bitów i bajtów}
 \begin{itemize}
 \item Podczas transmisji danych bity w bajcie przesyłane są od najmłodszego do najstarszego (\textit{LSB first}), ponieważ jest to domyślny sposób wykorzystywany przez sterownik UART w systemie operacyjnym Linux.
 \item Podczas transmisji danych bajty w bloku są przesyłane zgodnie z kolejnością ich odczytu i zapisu na dysku -- pierwszy odczytany (najstarszy) bajt jest przesyłany jako pierwszy. Taki sposób formowania bloków jest również używany przez program \textit{openssl}.
-\item Moduły szyfrujące i deszyfrujące AES operują na bajtach, w których najmłodszy (pierwszy odebrany lub wysłany) bit ma numer 0, co jest zgodne se standardem AES.
-\item Moduły szyfrujące i deszyfrujące AES operują na blokach, w których najstarszy (pierwszy odebrany lub wysłany) bajt ma numer 0, co jest zgodne se standardem AES.
+\item Moduły szyfrujące i deszyfrujące AES operują na bajtach, w których najmłodszy (pierwszy odebrany lub wysłany) bit ma numer 0, co jest zgodne ze standardem AES.
+\item Moduły szyfrujące i deszyfrujące AES operują na blokach, w których najstarszy (pierwszy odebrany lub wysłany) bajt ma numer 0, co jest zgodne ze standardem AES.
 \end{itemize}
-
-
-\subsection{Przebieg komunikacji}
-\label{przebieg-komunikacji}
-Informacje przesyłane między klientem (komputerem) a układem FPGA w celu zaszyfrowania informacji:
-\begin{enumerate}[noitemsep]
-\item Klient wysyła bajt ENC lub DEC wskazujący, czy informacje mają być szyfrowane czy deszyfrowane.
-\item FPGA odpowiada bajtem ACK jeśli odebrał bajt o wartości ENC lub DEC, NACK w innym przypadku.
-\item Jeśli klient otrzymał NACK kończy działanie.
-\item Klient wysyła blok zawierający 128 młodszych bajtów klucza oraz 2 bajty CRC16.
-\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie(suma kontrolna CRC16 się zgadza), NACK w przeciwnym przypadku.
-\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
-\item Klient wysyła blok zawierający 128 starszych bajtów klucza oraz 2 bajty CRC16.
-\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
-\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
-\item Klient wysyła blok zawierający wektor inicjalizacji oraz 2 bajty CRC16.
-\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
-\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
-\item Klient wysyła pierwszy blok danych oraz 2 bajty CRC16.
-\item FPGA odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
-\item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
-\item FPGA szyfruje otrzymany blok, wysyła go oraz 2 bajty CRC16. Jednocześnie Klient wysyła kolejny blok do zaszyfrowania.
-\item FPGA sprawdza CRC16 i wysyła bajt ACK jeśli blok został otrzymany poprawnie lub NACK w przeciwnym przypadku. Jednocześnie klient postępuje analogicznie.
-\item Jeśli FPGA odebrało blok poprawnie, oraz otrzymało od klienta bajt ACK, szyfruje otrzymany blok oraz odsyła go do klienta. W przeciwnym przypadku retransmituje poprzedni zaszyfrowany blok.
-\item Jeśli klient odebrał blok poprawnie, oraz otrzymał od FPGA bajt ACK, wysyła kolejny blok do zaszyfrowania. W przeciwnym wypadku retransmituje poprzedni blok.
-\item Wymiana bloków zachodzi dopóki wszystkie informacje nie zostaną zaszyfrowane. O końcu transmisji decyduje klient. Po wysłaniu ostatniego bloku i odebraniu przedostatniego zaszyfrowanego bloku, jeśli zaszyfrowany blok zastał odebrany poprawnie, zamiast ACK wysyła FIN.
-\item FPGA po odebraniu bajtu FIN szyfruje ostatni blok oraz odsyła go do klienta.
-\item Jeśli klient otrzymał ostatni blok poprawnie wysyła bajt ACK oraz kończy działanie, w przeciwnym wypadku wysyła NACK.
-\item Jeśli FPGA otrzymało bajt ACK przechodzi do stanu oczekiwania na rozpoczęcie kolejnego procesu szyfrowania. W przeciwnym wypadku retransmituje ostatni zaszyfrowany blok oraz czeka na potwierdzenie. Retransmisja wykonywana jest do skutku.
-\end{enumerate}
-
-\begin{figure}[!h]
-\centering
-\begin{tikztimingtable}[timing/wscale=2.9]
-  \textit{RX} & h d{ENC} h      1.5D{KEY\_LOW} h      1.5D{KEY\_HIGH} h      1.5D{INIT\_V} h      1.5D{D1\_PLAIN} h      1.5D{D2\_PLAIN}  d{FIN} 1.5H             d{ACK} h\\
-  \textit{TX} & h h      d{ACK} 1.5H           d{ACK} 1.5H            d{ACK} 1.5H          d{ACK} 1.5H            d{ACK} 1.5D{D1\_CYPHER} d{ACK} 1.5D{D2\_CYPHER} h      h\\
-\extracode
-\tablerules
-\end{tikztimingtable}
-\caption{Przebieg komunikacji w celu zaszyfrowania dwóch bloków}
-\end{figure}
 
 \subsection{Przyjęte konwencje}
 
-\subsubsection{Zegar \textit{CLK\_{UART}}}
-Ze względu na dużą szybkość zegara \textit{CLK\_16}, nie będzie on prezentowany na schematach. Będzie on zastąpiony umownym zegarem \textit{CLK\_UART} o częstotliwości
-\begin{equation}
+W celu poprawy czytelności rysunków przebiegów czasowych w dokumentacji będzie pojawiał się umowny zegar \textit{CLK\_UART}. Dla wygody czytelnika została również wprowadzona konwencja kolorystyczna sygnałów.
+
+\subsubsection{Zegar \textit{CLK\_UART}}
+Głównym sygnałem zegarowym układu jest \textit{CLK\_16} (patrz rozdział \ref{clk-16}). Ze względu na jego szybką zmienność przedstawienie go na niektórych przebiegach czasowych nie jest możliwe. W takich przypadkach będzie on zastąpiony umownym sygnałem \textit{CLK\_UART} o częstotliwości $f_{CLK\_UART}$.
+\begin{equation*}
 f_{CLK\_UART} = \frac{f_{CLK\_16}}{16} = UART\_BAUD\_RATE
-\end{equation}
-gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. Zbocza rosnące tego zegara będą pokrywać się ze zboczami sygnałów UART rozpoczynających transmitowane bity, a zarazem zboczami rosnącymi zegara \textit{CLK\_16} -- ponieważ sygnał UART jest zsynchronizowany z zegarem \textit{CLK\_16}.
+\label{eq:clk-uart-freq}
+\end{equation*}
+gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. Zbocza rosnące tego zegara będą pokrywać się ze zboczami sygnałów UART rozpoczynających transmitowane bity, a zarazem zboczami rosnącymi zegara \textit{CLK\_16} (patrz rysunek \ref{fig:clks-relation}). 
 
 \begin{figure}[!h]
 \centering
@@ -114,17 +74,19 @@ gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyra�
 \vertlines[red]{0.5}
 \end{tikztimingtable}
 \caption{Relacja między zegarami \textit{CLK\_16} i \textit{CLK\_UART}}
+\label{fig:clks-relation}
 \end{figure}
 
+Równoczesne występowanie zbocz sygnałów UART oraz zegara \textit{CLK\_16} wynika z faktu, że sygnały UART są zsynchronizowane z tym zegarem (patrz rozdział \ref{uart-sync}).
 
 \subsubsection{Konwencje kolorystyczne i nazewnicze sygnałów}
-W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą zaznaczane kolorem \insignal{czerwonym}, a wyjściowych kolorem \outsignal{zielonym}. Sygnał \textit{CLK\_UART}, który zawsze będzie występował jako sygnał wejściowy, będzie zaznaczany kolorem \helpsignal{pomarańczowym}.
+W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą zaznaczane kolorem \insignal{zielonym}, a wyjściowych kolorem \outsignal{czerwonym}. Sygnał \textit{CLK\_UART}, który zawsze będzie występował jako sygnał wejściowy, będzie zaznaczany kolorem \helpsignal{pomarańczowym}.
 
 
 Wektory sygnałów będą oznaczane poprzez dodanie ich zakresu w nawiasach kwadratowych na końcu nazwy, np. \textit{BYTE[7:0]} jest wektorem ośmiu sygnałów.
 
 
-Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \outsignal{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas 2048 razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
+Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \textit{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas 2048 razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
 
 
-Wszystkie moguły mają zaimplementowany asynchroniczny sygnał \insignal{RESET\_N}, jednak nie będzie on uwzględniany na przebiegach czasowych.
+Wszystkie moduły mają zaimplementowany asynchroniczny sygnał \insignal{RESET\_N}. W celu poprawy czytelności nie będzie on uwzględniany na przebiegach czasowych oraz schematach.

@@ -1,4 +1,5 @@
 \subsubsection{CRC16}
+\label{crc}
 Do sprawdzania poprawności przesyłanych bloków używana jest suma kontrolna CRC16 -- wariant z wielomianem \textit{x8005}. Moduły \textit{block\_serializer} oraz \textit{block\_deserializer} zawierają zmienne wielkości 16b będące akumulatorami przechowującymi aktualnie obliczoną sumę CRC16. Przed rozpoczęciem transmisji są one zerowane. Każdy odebrany/wysłany bajt bloku danych aktualizuje akumulator zgodnie ze sposobem działania CRC16. Moduł \textit{block\_serializer} po wysłaniu bloku danych wysyła 2 bajty akumulatora będące sumą kontrolną bloku. Moduł \textit{block\_serializer} po odebraniu bloku, odbiera 2 bajty sumy kontrolnej obliczonej przez klienta, oraz dodaje je do akumulatora w taki sam sposób jak pozostałe bajty. Poprawność jest określana poprzez sprawdzenie, czy wszystkie bity akumulatora są równe {'0'} -- jeśli są to znaczy, że blok został odebrany poprawnie.
 
 \begin{figure}[!h]
