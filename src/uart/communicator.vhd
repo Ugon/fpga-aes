@@ -157,6 +157,7 @@ architecture communicator_impl of communicator is
 	--RX TX SIGNAL MUX
 	signal mux_switch_pulse                                : std_logic                                         := '0';
  	signal mux_enable_custom                               : std_logic                                         := '1';
+ 	signal mux_enable_custom_vec                           : std_logic_vector(0 downto 0)                      := (others => '1');
 	
 	signal next_ack_to_transmit                            : std_logic_vector(byte_bits  - 1 downto 0)         := (others => '0');
 	signal next_block_to_transmit                          : std_logic_vector(block_bits - 1 downto 0)         := (others => '0');
@@ -226,6 +227,8 @@ dbg_next_serializer0_block                <= next_block_to_transmit;
 	serializer0_block  <= block_to_transmit;
 	custom0_tx_byte    <= ack_to_transmit;
 	block_zeros        <= (others => '0');
+
+	mux_enable_custom  <= mux_enable_custom_vec(0);
 
 	aes_enc0 : entity work.aes256enc
 		generic map (
@@ -344,31 +347,46 @@ dbg_next_serializer0_block                <= next_block_to_transmit;
 			pulse_signal => custom0_rx_start_listening
 		);
 
-	trigger2 : entity work.trigger
+	trigger2 : entity work.trigger_toggle
+		generic map (
+			size               => block_bits,
+			toggle_out_default => '0')
 		port map (
 			clk_16       => clk_16,
 			reset_n      => reset_n,
 			action       => trigger_serializer0_start_transmitting_action,
 			reaction     => trigger_serializer0_start_transmitting_reaction,
-			pulse_signal => serializer0_start_transmitting
+			pulse_signal => serializer0_start_transmitting,
+			toggle_in    => next_block_to_transmit,
+			toggle_out   => block_to_transmit
 		);
 
-	trigger3 : entity work.trigger
+	trigger3 : entity work.trigger_toggle
+		generic map (
+			size               => byte_bits,
+			toggle_out_default => '0')
 		port map (
 			clk_16       => clk_16,
 			reset_n      => reset_n,
 			action       => trigger_custom0_tx_start_transmitting_action,
 			reaction     => trigger_custom0_tx_start_transmitting_reaction,
-			pulse_signal => custom0_tx_start_transmitting
+			pulse_signal => custom0_tx_start_transmitting,
+			toggle_in    => next_ack_to_transmit,
+			toggle_out   => ack_to_transmit
 		);
 
-	trigger4 : entity work.trigger
+	trigger4 : entity work.trigger_toggle
+		generic map (
+			size               =>  1,
+			toggle_out_default => '1')
 		port map (
 			clk_16       => clk_16,
 			reset_n      => reset_n,
 			action       => trigger_mux_switch0_action,
 			reaction     => trigger_mux_switch0_reaction,
-			pulse_signal => mux_switch_pulse
+			pulse_signal => mux_switch_pulse,
+			toggle_in    => (others => not mux_enable_custom),
+			toggle_out   => mux_enable_custom_vec
 		);
 
 	mux_output : process (aes_enc_dec_choice, aes_enc_output, aes_dec_output) begin
@@ -406,30 +424,6 @@ dbg_next_serializer0_block                <= next_block_to_transmit;
 			tx0_start_transmitting               <= serialzier0_tx_start_transmitting;
 			serialzier0_tx_finished_transmitting <= tx0_finished_transmitting;
 			custom0_tx_finished_transmitting     <= '0';
-		end if;
-	end process;
-
-	mux_switch0 : process (reset_n, mux_switch_pulse) begin
-		if(reset_n = '0') then
-			mux_enable_custom <= '1';
-		elsif(rising_edge(mux_switch_pulse)) then
-			mux_enable_custom <= not mux_enable_custom;
-		end if;
-	end process;
-
-	tx_byte_set : process (reset_n, custom0_tx_start_transmitting) begin
-		if (reset_n = '0') then
-			ack_to_transmit <= (others => '0');
-		elsif (rising_edge(custom0_tx_start_transmitting)) then
-			ack_to_transmit <= next_ack_to_transmit;
-		end if;
-	end process;
-
-	serializer_byte_set : process (reset_n, serializer0_start_transmitting) begin
-		if (reset_n = '0') then
-			block_to_transmit <= (others => '0');
-		elsif (rising_edge(serializer0_start_transmitting)) then
-			block_to_transmit <= next_block_to_transmit;
 		end if;
 	end process;
 

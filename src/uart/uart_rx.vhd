@@ -51,23 +51,19 @@ begin
 
 	vote_result <= vote(oversample_buffer);
 
-	trigger0 : entity work.trigger
+	trigger0 : entity work.trigger_toggle
+		generic map (
+			size               => byte_bits,
+			toggle_out_default => '0')
 		port map (
 			clk_16        => clk_16,
 			reset_n       => reset_n,
 			action        => trigger_finished_action,
 			reaction      => trigger_finished_reaction,
-			pulse_signal  => finished_listening_internal
+			pulse_signal  => finished_listening_internal,
+			toggle_in     => byte_buffer,
+			toggle_out    => byte
 		);
-
-	process (reset_n, finished_listening_internal) begin
-		if (reset_n = '0') then
-			byte <= (others => '0');
-		elsif (rising_edge(finished_listening_internal)) then
-			byte <= byte_buffer;
-		end if;
-
-	end process;
 
 	process (clk_16, reset_n) 
 		variable bit_position      : Integer range 0 to byte_bits - 1 := 0;

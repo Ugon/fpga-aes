@@ -26,5 +26,7 @@
 
 *.pdf
 !common/agh.pdf
+!techniczna/2ff.pdf
 !techniczna/communicator.pdf
+
 

@@ -33,13 +33,14 @@ Aby skonfigurować projekt tak, aby układ FPGA miał dostęp do sygnałów UART
 
 \begin{enumerate}
 \item Otworzyć w edytorze QSys plik \textit{soc-system.qsys}
-\item Wybrać komponent \textit{hps\_0} oraz w zakładce \textit{Peripheral Pins} dokonać zmian:
+\item Wybrać komponent \textit{hps\_0} (rys. \ref{fig:qsys-hps} A) oraz w zakładce \textit{Peripheral Pins} (rys. \ref{fig:qsys-hps} B) dokonać zmian:
 	\begin{itemize}[noitemsep,nolistsep]
-	\item Zmienić wartość \textit{UART0 pin} na \textit{FPGA}
-	\item Zmienić wartość \textit{UART0 mode} na \textit{Full}
-	\item Zaznaczyć \textit{LOANIO 49} oraz \textit{LOANIO 50}
+	\item Zmienić wartość \textit{UART0 pin} na \textit{FPGA} (rys. \ref{fig:qsys-hps} C)
+	\item Zmienić wartość \textit{UART0 mode} na \textit{Full} (rys. \ref{fig:qsys-hps} C)
+	\item Zaznaczyć \textit{LOANIO 49} oraz \textit{LOANIO 50} (rys. \ref{fig:qsys-hps} D)
 	\end{itemize}
-\item Zapisać zmiany, oraz wygenerować kod VHDL klikając przycisk \textit{Generate HDL...}.
+\item Opcjonalnie można oczyścić projekt z komponentów, które zostały skonfigurowane w GHRD a nie zostaną wykorzystane: \textit{dipsw\_pio}, \textit{button\_pio}, \textit{led\_pio}.
+\item Zapisać zmiany, wygenerować kod VHDL klikając przycisk \textit{Generate HDL...} (rys. \ref{fig:qsys-hps} E) oraz opuścić edytor (rys. \ref{fig:qsys-hps} F).
 \item W głównym pliku projektu (ang. \textit{Top-Level Entity}) zmodyfikować komponent \textit{soc-system} tak, aby był zgodny z jego na nowo wygenerowaną wersją.
 \item Przypisać wartość \textit{'1'} sygnałom:
 	\begin{itemize}[noitemsep,nolistsep]
@@ -58,11 +59,18 @@ Aby skonfigurować projekt tak, aby układ FPGA miał dostęp do sygnałów UART
 	\end{itemize}
 \end{enumerate}
 
-Powyższe zmiany spowodują, że:
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{qsys.png}
+\caption{Konfiguracja komponentu HPS w edytorze QSys}
+\label{fig:qsys-hps}
+\end{figure}
+
+Wykonane zmiany spowodują, że:
 \begin{itemize}[noitemsep]
 \item Sygnał \textit{hps\_0\_h2f\_loan\_io\_out(49)} będzie odpowiadał sygnałowi UART RX oraz będzie poprawnie połączony z konwerterem USB-UART firmy FTDI.
 \item Sygnał \textit{hps\_0\_h2f\_loan\_io\_out(50)} będzie odpowiadał sygnałowi UART TX oraz będzie poprawnie połączony z konwerterem USB-UART firmy FTDI
 \end{itemize}
+
 
 \subsubsection{Przygotowanie preloadera}
 \label{sec:uart-preloader-gen}
@@ -143,10 +151,50 @@ Częstotliwość zegara \textit{CLK\_16} jest o wiele niższa niż dostępny w u
 
 Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja mająca miejsce w danym rosnącym zboczu zależy od wartości innego sygnału, to ma on stałą wartość co najmniej od poprzedzającego do następnego zbocza malejącego.
 
-
 \subsubsection{Synchronizacja sygnału UART RX}
 \label{uart-sync}
-Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec zsynchronizowałem sygnał RX, prowadząc go przez dwa przerzutniki typu D \cite{altera-metastability, 2ff-synchronization} wyzwalane głównym zegarem. Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
+Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec sygnał RX został zsynchronizowany przy pomocy dwóch przerzutników typu D wyzwalanych głównym zegarem \cite{altera-metastability, 2ff-synchronization}. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=100mm,scale=1.5]{2ff.pdf}
+\caption{Synchronizacja sygnału przy użyciu dwóch przerzutników typu D}
+\end{figure}
+
+Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
+
+\subsubsection{Ograniczenia czasowe}
+Aby mieć gwarancję, że projekt nie będzie zachowywał się niedeterministyczne ze względu na złe ułożenie ścieżek sygnałów w chipie FPGA powodujące zbyt długi czas propagacji, zdefiniowane zostały odpowiednie ograniczenia czasowe. Do tego celu posłużyła konsola w narzędziu TimeQuest Timing Analyzer będącym częścią środowiska programistycznego Quartus. Zdefiniowane ograniczenia to:
+
+\begin{itemize}
+\item Zewnętrzny zegar \textit{CLK\_50} o częstotliwości 50MHz
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_clock -name {CLK_50} -period 20.000 { CLOCK_50 }
+\end{lstlisting}
+
+\item Główny zegar projektu \textit{CLK\_16}
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {CLK_16} -source {CLOCK_50} 
+	-divide_by 26 { uart_prescaler0|clk|q }
+\end{lstlisting}
+
+\item Sygnał w module \textit{block\_serializer} (rozdz. \ref{??}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałem zakończenia wysyłania bloku -- \outsignal{FINISHED\_TRANSMITTING}.
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {SERIALIZER_CLK} 
+	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
+	{ communicator0|block_serializer0|forward_start|q }
+\end{lstlisting}
+
+\item Sygnał w module \textit{block\_deserializer} (rozdz. \ref{??}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałami odebranego bloku \outsignal{AES\_BLOCK[127:0]} oraz zakończenia odbierania \outsignal{FINISHED\_LISTENING}.
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {DESERIALIZER_CLK} \
+	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
+	{ communicator0|block_deserializer0|forward_finished|q }
+\end{lstlisting}
+
+\end{itemize}
+
+Są to wszystkie sygnały pełniące w tym projekcie rolę zegarów.
 
 \input{sections/modules/uart_rx}
 \input{sections/modules/uart_tx}
