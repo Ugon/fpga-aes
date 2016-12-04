@@ -1,8 +1,8 @@
 \subsubsection{Moduł odbierający bajty UART}
-Interfejs modułu odbierającego bajty UART \textit{uart\_rx}:
+Moduł \textit{uart\_tx} odbiera bajty nadawane przez klienta przez interfejs UART.
 
 \begin{figure}[!h]
-\begin{lstlisting}[style=vhdl]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{uart\_rx} -- interfejs modułu}]
 port (
 	reset_n            : in  std_logic;
 	clk_16             : in  std_logic;
@@ -14,6 +14,7 @@ port (
 \end{lstlisting}
 \end{figure}
 
+Opis sygnałów interfejsu modułu \textit{uart\_rx}:
 \begin{interface}{FINISHED\_LISTENING}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 	\item[\insignal{RX}] zsynchronizowany przy pomocy dwóch przerzutników typu D sygnał UART RX, wychodzący z konwertera USB-UART.

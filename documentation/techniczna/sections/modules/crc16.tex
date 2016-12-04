@@ -1,9 +1,8 @@
 \subsubsection{CRC16}
-\label{crc}
-Do sprawdzania poprawności przesyłanych bloków używana jest suma kontrolna CRC16 -- wariant z wielomianem \textit{x8005}. Moduły \textit{block\_serializer} oraz \textit{block\_deserializer} zawierają zmienne wielkości 16b będące akumulatorami przechowującymi aktualnie obliczoną sumę CRC16. Przed rozpoczęciem transmisji są one zerowane. Każdy odebrany/wysłany bajt bloku danych aktualizuje akumulator zgodnie ze sposobem działania CRC16. Moduł \textit{block\_serializer} po wysłaniu bloku danych wysyła 2 bajty akumulatora będące sumą kontrolną bloku. Moduł \textit{block\_serializer} po odebraniu bloku, odbiera 2 bajty sumy kontrolnej obliczonej przez klienta, oraz dodaje je do akumulatora w taki sam sposób jak pozostałe bajty. Poprawność jest określana poprzez sprawdzenie, czy wszystkie bity akumulatora są równe {'0'} -- jeśli są to znaczy, że blok został odebrany poprawnie.
+\label{sec:crc16}
+Do sprawdzania poprawności przesyłanych bloków używana jest suma kontrolna CRC16 -- wariant z wielomianem \textit{x8005}. Moduły \textit{block\_serializer} oraz \textit{block\_deserializer} zawierają zmienne wielkości 16b będące akumulatorami przechowującymi aktualnie obliczoną sumę CRC16. Przed rozpoczęciem transmisji są one zerowane. Każdy odebrany/wysłany bajt bloku danych aktualizuje akumulator zgodnie ze sposobem działania CRC16 (listing \ref{lst:crc16}). 
 
-\begin{figure}[!h]
-\begin{lstlisting}[language=Python, basicstyle=\ttfamily, autogobble=true, tabsize=3, morekeywords={downto, val, var}]
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily, autogobble=true, tabsize=3, morekeywords={downto, val, var}, captionpos=b, caption={Algorytm dodawania bajtu do akumulatora sumy kontrolnej CRC16}, label={lst:crc16}]
 val crc_poly[16:0] := "1'1000'0000'0000'0101" # wielomian x8005
 
 def crc_add(acc[15:0], data[7:0]):
@@ -18,5 +17,5 @@ def crc_add(acc[15:0], data[7:0]):
 
 	return tmp[15:0]
 \end{lstlisting}
-\caption{Algorytm dodawania bajtu do akumulatora sumy kontrolnej CRC16}
-\end{figure}
+
+Moduł \textit{block\_serializer} po wysłaniu bloku danych wysyła 2 bajty akumulatora będące sumą kontrolną bloku. Moduł \textit{block\_serializer} po odebraniu bloku, odbiera 2 bajty sumy kontrolnej obliczonej przez klienta, oraz dodaje je do akumulatora w taki sam sposób jak pozostałe bajty. Poprawność jest określana poprzez sprawdzenie, czy wszystkie bity akumulatora są równe {'0'} -- jeśli są to znaczy, że blok został odebrany poprawnie.

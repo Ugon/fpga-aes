@@ -1,9 +1,15 @@
-\subsubsection{Communicator}
-
-Interfejs modułu \textit{block\_serializer}:
+\subsubsection{Moduł zarządzający komunikacją z klientem}
+Moduł \textit{communicator} zarządza procesem komunikacji z klientem oraz kontroli poprawności przesyłanych danych. Zadaniem modułu jest realizacja serwerowej części ustalonego protokołu komunikacji z klientem (rozdz. \ref{sec:przebieg-komunikacji}), w szczególności:
+\begin{itemize}[noitemsep, nolistsep]
+\item zarządzanie procesem przesyłania bloków i potwierdzeń
+\item kontrola poprawności bloków
+\item obsługa retransmisji niepoprawnych bloków
+\item odebranie klucza szyfrującego, wektora inicjalizacji oraz informacji, czy bloki powinny być szyfrowane, czy deszyfrowane
+\item zarządzanie procesem szyfrowania, w tym za łączenie bloków zgodnie ze standardem CBC.
+\end{itemize}
 
 \begin{figure}[!h]
-\begin{lstlisting}[style=vhdl]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{communicator} -- interfejs modułu}]
 port (
 	clk_16  : in    std_logic;
 	reset_n : in    std_logic;
@@ -12,24 +18,16 @@ port (
 \end{lstlisting}
 \end{figure}
 
+Opis sygnałów interfejsu modułu \textit{communicator}:
 \begin{interface}{CLK\_16}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 	\item[\insignal{RX}] zsynchronizowany z zegarem \insignal{CLK\_16} sygnał UART RX wychodzący do układu konwertera USB-UART.
 	\item[\outsignal{TX}] sygnał UART TX pochodzący z układu konwertera USB-UART.
 \end{interface}
 
-Moduł \textit{communicator} odpowiada za:
-\begin{itemize}[noitemsep, nolistsep]
-\item zarządzanie procesem przesyłania bloków i potwierdzeń
-\item kontrolę poprawności bloków
-\item obsługę retransmisji niepoprawnych bloków
-\item odebranie klucza szyfrującego, wektora inicjalizacji oraz informacji, czy bloki powinny być szyfrowane, czy deszyfrowane
-\item zarządzanie procesem szyfrowania, w tym za łączenie bloków zgodnie ze standardem CBC.
-\end{itemize}
+Główną częścią modułu \textit{communicator} jest maszyna stanów sterująca wszystkimi realizowanymi zadaniami. Moduł zawiera również instancję innych zdefiniowanych komponentów, które dostarczają niezbędnych funkcjonalności. Na schemacie (rys. \ref{fig:communicator-schemat}) sygnały po lewej stronie wychodzą z maszyny stanów, a sygnały po prawej stronie stanowią jej wejścia. Wyjątkami są sygnały \insignal{RX} i \outsignal{TX}, które są interfejsem modułu i nie są bezpośrednio podłączone do maszyny. Schemat nie zawiera wszystkich sygnałów pojawiających się w implementacji. Pominięte zostały sygnały pomocnicze, które nie są niezbędne do zrozumienia działania układu. Również główny zegar nie został przedstawiony, jest on podłączony do wszystkich modułów poza \textit{key\_expansion}, \textit{aes\_enc}, \textit{aes\_dec}.
 
-Główną częścią modułu \textit{communicator} jest maszyna stanów sterująca wszystkimi realizowanymi zadaniami. Moduł zawiera również instancję innych zdefiniowanych komponentów, które dostarczają niezbędnych funkcjonalności. Na schemacie sygnały po lewej stronie wychodzą z maszyny stanów, a sygnały po prawej stronie stanowią jej wejścia. Wyjątkami są sygnały \insignal{RX} i \outsignal{TX}, które są interfejsem modułu i nie są bezpośrednio podłączone do maszyny. Schemat nie zawiera wszystkich sygnałów pojawiających się w implementacji. Pominięte zostały sygnały pomocnicze, które nie są niezbędne do zrozumienia działania układu. Również główny zegar nie został przedstawiony, jest on podłączony do wszystkich modułów poza \textit{key\_expansion}, \textit{aes\_enc}, \textit{aes\_dec}.
-
-Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych operacji. Maszyna stanów jest taktowana głównym zegarem \insignal{CLK\_16}, podczas każdego zbocza rosnącego wykonywany jest kod wewnątrz aktywnego stanu. Instrukcje pseudokodu to:
+Rysunki \ref{fig:communicator-state-machine-1} oraz \ref{fig:communicator-state-machine-2} przedstawiają wszystkie stany maszyny wraz z pseudokodem wykonywanych w nich operacji. Maszyna stanów jest taktowana głównym zegarem \insignal{CLK\_16}, podczas każdego zbocza rosnącego wykonywany jest kod wewnątrz aktywnego stanu. Instrukcje pseudokodu to:
 \begin{description}[noitemsep]
 	\item[\textbf{state \textit{x}}] -- przejście do stanu \textit{x}.
 	\item[\textbf{mux \textit{x}}] -- ustawienie odpowiedniego sygnału, w taki sposób aby selektory byte/block lub enc/dec znalazły się w odpowiednim stanie.
@@ -57,6 +55,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \centering
 \includegraphics{communicator.pdf}
 \caption{Schemat modułu \textit{communicator}}
+\label{fig:communicator-schemat}
 \end{figure}
 
 
@@ -227,7 +226,12 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\coordinate[below=of init_vector_ack] (first_block);
+
+\node[state, below=of init_vector_ack] (first_block) {
+\begin{tabular}{l}
+	\textbf{first\_block}
+\end{tabular}
+};
 
 \path[->] (start) edge node {} (choice);
 
@@ -248,7 +252,8 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \path[->] (init_vector_ack) edge [bend right] node {} (init_vector);
 
 \end{tikzpicture}
-\caption{Maszyna stanów modułu \textit{communicator}}
+\caption{Maszyna stanów modułu \textit{communicator} -- stany początkowe}
+\label{fig:communicator-state-machine-1}
 \end{figure}
 
 
@@ -281,7 +286,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of first_block] (blocks) {
+\node[state, below=0.7cm of first_block] (blocks) {
 \begin{tabular}{l}
 	\textbf{blocks}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -334,7 +339,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of blocks_r_finished_t_waiting] (blocks_r_waiting_t_finished) {
+\node[state, below=0.7cm of blocks_r_finished_t_waiting] (blocks_r_waiting_t_finished) {
 \begin{tabular}{l}
 	\textbf{blocks\_r\_waiting\_t\_finished}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -356,7 +361,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of blocks_r_waiting_t_finished] (blocks_ack) {
+\node[state, below=0.7cm of blocks_r_waiting_t_finished] (blocks_ack) {
 \begin{tabular}{l}
 	\textbf{blocks\_ack}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -402,7 +407,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of blocks] (acks_r_finished_t_waiting) {
+\node[state, below=0.7cm of blocks] (acks_r_finished_t_waiting) {
 \begin{tabular}{l}
 	\textbf{acks\_r\_finished\_t\_waiting}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -421,7 +426,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of acks_r_finished_t_waiting] (acks_r_waiting_t_finished) {
+\node[state, below=0.7cm of acks_r_finished_t_waiting] (acks_r_waiting_t_finished) {
 \begin{tabular}{l}
 	\textbf{acks\_r\_waiting\_t\_finished}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -446,7 +451,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of blocks_ack] (finishing) {
+\node[state, below=0.7cm of blocks_ack] (finishing) {
 \begin{tabular}{l}
 	\textbf{finishing}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -460,7 +465,7 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\node[state, below=of finishing] (finishing_ack) {
+\node[state, below=0.7cm of finishing] (finishing_ack) {
 \begin{tabular}{l}
 	\textbf{finishing\_ack}\\
 	\begin{lstlisting}[language=Python, basicstyle=\tiny\ttfamily, autogobble=true,
@@ -478,18 +483,41 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \end{tabular}
 };
 
-\coordinate[above=of first_block] (init_vector_ack);
+\node[state, above=0.7cm of first_block] (init_vector_ack) {
+\begin{tabular}{l}
+	\textbf{init\_vector\_ack}
+\end{tabular}
+};
 
-\coordinate[below=of finishing_ack] (choice);
+\node[state, below=0.7cm of finishing_ack] (choice) {
+\begin{tabular}{l}
+	\textbf{choice}
+\end{tabular}
+};
 
 \path[->] (init_vector_ack) edge node {} (first_block);
 
-\path[->] (first_block) edge node {} (blocks_ack);
+% \path[->] (first_block) edge node {} (blocks_ack);
+\draw[->] let \p{MIDX}=($(blocks.east)!0.33!(blocks_r_waiting_t_finished.west)$) in
+          let \p{MIDY}=($(first_block.south)!0.5!(blocks.north)$) in
+          let \p{DESTY}=($(blocks.east) - (0, 1)$) in
+          let \p{A} = ($(first_block.south -| first_block.east) - (0, 0.5)$) in
+          (\p{A}) -- (\x{MIDX}, \y{A}) -- (\x{MIDX}, \y{DESTY}) -- (\p{DESTY} -| blocks_ack.west);
 
 % \path[->] (blocks) edge node {} (blocks_ack);
-\draw[->] (blocks.1) to node {} (blocks_ack.140);
-\path[->] (blocks) edge node {} (blocks_r_finished_t_waiting);
-\path[->] (blocks) edge node {} (blocks_r_waiting_t_finished);
+\draw[->] (blocks.east) -- (blocks.east -| blocks_ack.west);
+
+% \path[->] (blocks) edge node {} (blocks_r_finished_t_waiting);
+\draw[->] let \p{MIDY}=($(blocks_r_waiting_t_finished.south)!0.66!(blocks.north)$) in
+          let \p{MIDX}=($(blocks.east)!0.66!(blocks_r_waiting_t_finished.west)$) in
+             (\p{MIDY} -| blocks.east) 
+          -- (\p{MIDX} |- \p{MIDY}) 
+          -- (\p{MIDX} |- blocks_r_finished_t_waiting.west) 
+          -- (blocks_r_finished_t_waiting.west);
+
+% \path[->] (blocks) edge node {} (blocks_r_waiting_t_finished);
+\draw[->] let \p{MID}=($(blocks_r_waiting_t_finished.south)!0.33!(blocks.north)$) in
+          (\p{MID} -| blocks.east) -- (\p{MID} -| blocks_r_waiting_t_finished.west);
 
 % \path[->] (blocks_r_finished_t_waiting) edge node {} (blocks_ack);
 \draw[->] let \p{A}=($(blocks_r_finished_t_waiting.east) + (2, 0)$) in
@@ -502,24 +530,47 @@ Rysunek przedstawia wszystkie stany maszyny wraz z pseudokodem wykonywanych oper
 \path[->] (blocks_r_waiting_t_finished) edge node {} (blocks_ack);
 
 % \path[->] (blocks_ack) edge node {} (blocks);
-\draw[->] (blocks_ack.154) to node {} (blocks.342);
+\draw[->] let \p{A}=($(blocks.east) + (0, 1)$) in 
+          (\p{A} -| blocks_ack.west) -- (\p{A});
+
 \path[->] (blocks_ack) edge node {} (finishing);
-\path[->] (blocks_ack) edge node {} (acks_r_finished_t_waiting);
-\path[->] (blocks_ack) edge node {} (acks_r_waiting_t_finished);
+
+% \path[->] (blocks_ack) edge node {} (acks_r_finished_t_waiting);
+\draw[->] let \p{A}=($(acks_r_finished_t_waiting.north -| acks_r_finished_t_waiting.east) + (0, 0.7)$) in
+          (\p{A} -| blocks_ack.west) -- (\p{A});
+
+% \path[->] (blocks_ack) edge node {} (acks_r_waiting_t_finished);
+\draw[->] let \p{A}=($(blocks_ack.south -| blocks_ack.west) - (0, 0.7)$) in
+          let \p{B}=($(acks_r_waiting_t_finished.north -| acks_r_waiting_t_finished.east) - (0.7, 0)$) in
+          (\p{A}) -- (\p{A} -| \p{B}) -- (\p{B});
 
 \path[->] (acks_r_finished_t_waiting) edge node {} (blocks);
-\path[->] (acks_r_finished_t_waiting) edge node {} (finishing);
 
-\draw[->] (acks_r_waiting_t_finished.142) to node {} (blocks.234);
-\path[->] (acks_r_waiting_t_finished) edge node {} (finishing);
+% \path[->] (acks_r_finished_t_waiting) edge node {} (finishing);
+\draw[->] let \p{MID}=($(acks_r_finished_t_waiting.south)!0.5!(finishing.north)$) in
+		  let \p{A}=($(acks_r_finished_t_waiting.south -| acks_r_finished_t_waiting.east) - (0.5, 0)$) in
+          let \p{B}=($(finishing.north -| finishing.west) + (0.5, 0)$) in
+          (\p{A}) -- (\p{A} |- \p{MID}) -- (\p{B} |- \p{MID}) -- (\p{B});
+
+
+% \path[->] (acks_r_waiting_t_finished) edge node {} (blocks);
+\draw[->] let \p{MID}=($(blocks.west)!0.5!(acks_r_finished_t_waiting.west)$) in
+          (\p{MID} |- acks_r_waiting_t_finished.north) -- (\p{MID} |- blocks.south);
+
+
+% \path[->] (acks_r_waiting_t_finished) edge node {} (finishing);
+\draw[->] (acks_r_waiting_t_finished.east |- finishing.west) -- (finishing.west);
 
 % \path[->] (finishing) edge [bend right] node {} (finishing_ack);
-\draw[->] (finishing.300) to node {} (finishing_ack.70);
+\draw[->] let \p{A}=($(finishing.south) + (0.5, 0)$) in (\p{A}) -- (\p{A} |- finishing_ack.north);
 
 \path[->] (finishing_ack) edge node {} (choice);
+
 % \path[->] (finishing_ack) edge [bend right] node {} (finishing);
-\draw[->] (finishing_ack.115) to node {} (finishing.234);
+\draw[->] let \p{A}=($(finishing.south) - (0.5, 0)$) in (\p{A} |- finishing_ack.north) -- (\p{A});
 
 \end{tikzpicture}
+\caption{Maszyna stanów modułu \textit{communicator} -- wymiana bloków danych}
+\label{fig:communicator-state-machine-2}
 \end{figure}
 

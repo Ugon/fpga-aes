@@ -14,6 +14,7 @@ Testy implementowanych komponentów były realizowane jako symulacje funkcyjne p
 
 
 \subsection{Przygotowanie oraz konfiguracja projektu}
+\label{sec:przygotowanie-projektu}
 
 Terasic -- producent wykorzystanej w tym projekcie płytki płytki DE1-SOC -- opracował i udostępnił na płycie CD dołączonej do zestawu \cite{??} projekt bazowy GHRD (ang. \textit{Golden Hardware Reference Design}). Jest to projekt skonfigurowany do poprawnego działania z płytką DE1-SOC, w którym ustawione są m.in.
 \begin{itemize}[noitemsep]
@@ -120,33 +121,33 @@ gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyra�
 Częstotliwość zegara \textit{CLK\_16} jest o wiele niższa niż dostępny w układzie FPGA zegar o częstotliwości 50MHz. Pozwoliło to na uzyskanie żądanej częstotliwości przy pomocy prostego dzielnika częstotliwości.
 
 \begin{figure}[!h]
-	\begin{lstlisting}[style=vhdl, caption={Dzielnik częstotliwości}, captionpos=b]
-	entity uart_prescaler is
-		port (
-			clk_in  : in  std_logic;  --50MHz
-			clk_out : out std_logic); --16 * 115200Hz
-	end uart_prescaler;
+\begin{lstlisting}[style=vhdl, caption={Dzielnik częstotliwości \textit{uart\_prescaler}}, captionpos=b]
+entity uart_prescaler is
+	port (
+		clk_in  : in  std_logic;  --50MHz
+		clk_out : out std_logic); --16 * 115200Hz
+end uart_prescaler;
+
+architecture uart_prescaler_impl of uart_prescaler is
+	signal clk : std_logic := '0';
+begin
+	clk_out <= clk;
 	
-	architecture uart_prescaler_impl of uart_prescaler is
-		signal clk : std_logic := '0';
-	begin
-		clk_out <= clk;
-		
-		process (clk_in) 
-			variable counter : Integer range 0 to 13 := 0;
-		begin	
-			if(rising_edge(clk_in)) then
-				case counter is
-					when 13 =>
-						clk <= not clk;
-						counter := 0;
-					when others =>
-						counter := counter + 1;
-				end case;
-			end if;
-		end process;
-	end uart_prescaler_impl;
-	\end{lstlisting}
+	process (clk_in) 
+		variable counter : Integer range 0 to 13 := 0;
+	begin	
+		if(rising_edge(clk_in)) then
+			case counter is
+				when 13 =>
+					clk <= not clk;
+					counter := 0;
+				when others =>
+					counter := counter + 1;
+			end case;
+		end if;
+	end process;
+end uart_prescaler_impl;
+\end{lstlisting}
 \end{figure}
 
 Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja mająca miejsce w danym rosnącym zboczu zależy od wartości innego sygnału, to ma on stałą wartość co najmniej od poprzedzającego do następnego zbocza malejącego.

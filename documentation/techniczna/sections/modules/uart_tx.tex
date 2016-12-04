@@ -1,8 +1,8 @@
-\subsubsection{Moduł odbierający bajty UART}
-Interfejs modułu wysyłającego bajty UART \textit{uart\_tx}:
+\subsubsection{Moduł wysyłający bajty UART}
+Moduł \textit{uart\_tx} wysyła bajty do klienta przez interfejs UART.
 
 \begin{figure}[!h]
-\begin{lstlisting}[style=vhdl]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{uart\_tx} -- interfejs modułu}]
 port (
 	reset_n               : in  std_logic;
 	clk_16                : in  std_logic;
@@ -14,6 +14,7 @@ port (
 \end{lstlisting}
 \end{figure}
 
+Opis sygnałów interfejsu modułu \textit{uart\_tx}:
 \begin{interface}{FINISHED\_TRANSMITTING}
 \item[\insignal{CLK\_16}] główny zegar układu.
 \item[\insignal{START\_TRANSMITTING}] sygnał rozpoczynający wysyłanie danych.
@@ -36,7 +37,7 @@ Moduł rozpoczyna transmisję po otrzymaniu sygnału \insignal{START\_TRANSMITTI
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{uart\_rx} -- wysłanie bitu stopu i startu}
+\caption{\textit{uart\_tx} -- wysłanie bitu stopu i startu}
 \end{figure}
 
 

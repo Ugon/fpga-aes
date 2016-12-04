@@ -1,8 +1,8 @@
 \subsubsection{Moduł deserializujący bajty UART do bloków AES}
-Interfejs modułu deserializującego bajty UART do bloków AES \textit{block\_deserializer}:
+Moduł \textit{block\_deserializer} na podstawie odebranych przez moduł \textit{uart\_rx} bajtów formuje bloki AES oraz sprawdza ich poprawność przy pomocy sumy kontrolnej \textit{CRC16}.
 
 \begin{figure}[!h]
-\begin{lstlisting}[style=vhdl]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{block\_deserializer} -- interfejs modułu}, label{lst:block-deserializer-interface}]
 port (
 	reset_n               : in  std_logic;
 	clk_16                : in  std_logic;
@@ -18,6 +18,7 @@ port (
 \end{lstlisting}
 \end{figure}
 
+Opis sygnałów interfejsu modułu \textit{block\_deserializer}:
 \begin{interface}{RX\_FINISHED\_LISTENING}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 
@@ -31,7 +32,7 @@ port (
 	\item[\outsignal{CORRECT}] sygnał określający, czy transmisja bloku AES przebiegła bez błędów. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
 \end{interface}
 
-Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Odbieranie bajtów bloku danych wykonywane jest przez przez moduł \textit{uart\_rx}. Kolejność ułożenia bajtów w bloku \outsignal{AES\_BLOCK[127:0]} jest zgodna ze standardem AES. W trakcie odbierania obliczana jest suma kontrolna \textit{CRC16}. Po 128 bajtach bloku danych przesyłane są 2 bajty zawierające oczekiwaną, obliczoną po stronie klienta sumę kontrolną. Jeśli jest ona zgodna z tą obliczaną na bieżąco przez moduł, sygnał \outsignal{CORRECT} przyjmuje wartość {'1'}, w przeciwnym wypadku wartość {'0'}. Po odebraniu 130 bajtów moduł zwraca blok \outsignal{AES\_BLOCK[127:0]} wraz z informacją o jego poprawności \outsignal{CORRECT} oraz sygnalizuje gotowość na rozpoczęcie nasłuchiwania na kolejne bloki \outsignal{FINISHED\_LISTENING}.
+Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Odbieranie bajtów bloku danych wykonywane jest przez przez moduł \textit{uart\_rx}. Kolejność ułożenia bajtów w bloku \outsignal{AES\_BLOCK[127:0]} jest zgodna ze standardem AES. W trakcie odbierania obliczana jest suma kontrolna \textit{CRC16} {\ref{sec:crc16}}. Po 128 bajtach bloku danych przesyłane są 2 bajty zawierające oczekiwaną, obliczoną po stronie klienta sumę kontrolną. Jeśli jest ona zgodna z tą obliczaną na bieżąco przez moduł, sygnał \outsignal{CORRECT} przyjmuje wartość {'1'}, w przeciwnym wypadku wartość {'0'}. Po odebraniu 130 bajtów moduł zwraca blok \outsignal{AES\_BLOCK[127:0]} wraz z informacją o jego poprawności \outsignal{CORRECT} oraz sygnalizuje gotowość na rozpoczęcie nasłuchiwania na kolejne bloki \outsignal{FINISHED\_LISTENING}.
 
 \begin{figure}[!h]
 	\centering

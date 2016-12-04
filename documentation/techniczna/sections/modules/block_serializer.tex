@@ -1,8 +1,8 @@
 \subsubsection{Moduł serializujący bloki AES do bajtów UART}
-Interfejs modułu serializującego bloki AES do bajtów UART \textit{block\_serializer}:
+Moduł \textit{block\_serializer} wysyła bajty bloków AES przy pomocy modułu \textit{uart\_rx} oraz oblicza i wysyła sumę kontrolną \textit{CRC16}.
 
 \begin{figure}[!h]
-\begin{lstlisting}[style=vhdl]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{block\_derializer} -- interfejs modułu}]
 port (
 	reset_n                  : in  std_logic;
 	clk_16                   : in  std_logic;
@@ -17,6 +17,7 @@ port (
 \end{lstlisting}
 \end{figure}
 
+Opis sygnałów interfejsu modułu \textit{block\_serializer}:
 \begin{interface}{RX\_FINISHED\_TRANSMITTING}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 
