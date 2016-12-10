@@ -3,17 +3,17 @@
 Projekt jest zbudowany w oparciu o architekturę klient-serwer (rys. \ref{fig:system-architecture-basic}, \ref{fig:system-architecture}). Rolę serwera pełni płytka Terasic DE1-SOC, a klientem jest komputer PC. Komunikacja odbywa się przez kabel USB, przez który tunelowany jest sygnał UART.
 
 \begin{figure}[!h]
-\label{fig:system-architecture-basic}
 \centering
-\includegraphics[width=6in]{system-architecture-basic.png}
+\includegraphics[width=6in]{pictures/system-architecture-basic.png}
 \caption{Architektura klient-serwer systemu}
+\label{fig:system-architecture-basic}
 \end{figure}
 
 \begin{figure}[!h]
-\label{fig:system-architecture}
 \centering
-\includegraphics{system-architecture.png}
+\includegraphics{pictures/system-architecture.png}
 \caption{Części składowe systemu}
+\label{fig:system-architecture}
 \end{figure}
 
 Serwer (płytka Terasic DE1-SOC) wyposażony jest w układ FPGA, który jest zaprogramowany tak, aby realizował komunikację UART oraz szyfrowanie i deszyfrowanie AES. W układzie FPGA znajdującym się na tej płytce jest zintegrowany procesor ARM (HPS - ang. \textit{hard processor system}), do którego podłączone są sygnały UART biegnące do układu konwertera URAT-USB. Ponieważ te sygnały nie są bezpośrednio podłączone do programowalnej części układu, komunikacja musi zachodzić przez piny HPS, które są skonfigurowane tak, aby FPGA miało do nich dostęp oraz kontrolę (rozdz. \ref{sec:uart-qsys}).
@@ -31,7 +31,7 @@ Komunikacja między komputerem (klientem) a układem FPGA (serwerem) w celu zasz
 \item Serwer odpowiada bajtem ACK jeśli odebrał bajt o wartości ENC lub DEC, NACK w innym przypadku.
 \item Jeśli klient otrzymał NACK kończy działanie.
 \item Klient wysyła blok zawierający 128 młodszych bajtów klucza oraz 2 bajty CRC16.
-\item Serwer odpowiada ACK jeśli blok został przesłany poprawnie(suma kontrolna CRC16 się zgadza), NACK w przeciwnym przypadku.
+\item Serwer odpowiada ACK jeśli blok został przesłany poprawnie (suma kontrolna CRC16 bloku jest równa wartości odebranej), NACK w przeciwnym przypadku.
 \item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
 \item Klient wysyła blok zawierający 128 starszych bajtów klucza oraz 2 bajty CRC16.
 \item Serwer odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
@@ -43,7 +43,7 @@ Komunikacja między komputerem (klientem) a układem FPGA (serwerem) w celu zasz
 \item Serwer odpowiada ACK jeśli blok został przesłany poprawnie, NACK w przeciwnym przypadku.
 \item Jeśli klient otrzymał NACK, retransmituje blok oraz oczekuje na potwierdzenie. Retransmisja wykonywana jest do skutku.
 \item Serwer szyfruje otrzymany blok, wysyła go oraz 2 bajty CRC16. Jednocześnie Klient wysyła kolejny blok do zaszyfrowania.
-\item Serwer sprawdza CRC16 i wysyła bajt ACK jeśli blok został otrzymany poprawnie lub NACK w przeciwnym przypadku. Jednocześnie klient postępuje analogicznie.
+\item Serwer sprawdza sumę kontrolną CRC16 otrzymanego bloku i wysyła bajt ACK jeśli blok został otrzymany poprawnie lub NACK w przeciwnym przypadku. Jednocześnie klient postępuje analogicznie.
 \item Jeśli odebrany przez serwer blok jest poprawny, oraz jeśli otrzymał od klienta bajt ACK, szyfruje otrzymany blok oraz odsyła go do klienta. W przeciwnym przypadku retransmituje poprzedni zaszyfrowany blok.
 \item Jeśli odebrany przez klienta blok jest poprawny, oraz jeśli otrzymał od serwera bajt ACK, wysyła kolejny blok do zaszyfrowania. W przeciwnym wypadku retransmituje poprzedni blok.
 \item Wymiana bloków zachodzi dopóki wszystkie informacje nie zostaną zaszyfrowane. O końcu transmisji decyduje klient. Po wysłaniu ostatniego bloku i odebraniu przedostatniego zaszyfrowanego bloku, jeśli zaszyfrowany blok zastał odebrany poprawnie, zamiast ACK wysyła FIN.
@@ -60,18 +60,18 @@ Komunikacja między komputerem (klientem) a układem FPGA (serwerem) w celu zasz
 \extracode
 \tablerules
 \end{tikztimingtable}
-\label{fig:communication-example}
 \caption{Przebieg komunikacji w celu zaszyfrowania dwóch bloków}
+\label{fig:communication-example}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics{communication-sequence.png}
-\label{fig:communication-sequence}
+\includegraphics{pictures/communication-sequence.png}
 \caption{Diagram sekwencji komunikacji między klientem a serwerem}
+\label{fig:communication-sequence}
 \end{figure}
 
-Schemat \ref{fig:communication-sequence} przestawia diagram sekwencji komunikacji między klientem a użytkownikiem, a rysunek \ref{fig:communication-example} demonstruje przebieg komunikacji w celu zaszyfrowania dwóch bloków danych.
+Przebieg \ref{fig:communication-example} demonstruje przykład komunikacji w celu zaszyfrowania dwóch bloków danych, a schemat \ref{fig:communication-sequence} przestawia diagram sekwencji komunikacji między klientem i serwerem.
 
 \newpage
 \subsection{Struktura projektu FPGA}
@@ -91,9 +91,9 @@ Projekt, którym posłuży do zaprogramowania układu FPGA serwera podzielony je
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=\textwidth]{modules.png}
-\label{fig:modules}
+\includegraphics[width=\textwidth]{pictures/modules.png}
 \caption{Schemat projektu FPGA}
+\label{fig:modules}
 \end{figure}
 
 Wszystkie moduły wchodzące w skład projektu (rys. \ref{fig:modules}) są szczegółowo opisane w rozdziale \ref{sec:szczegoly-implementacyjne}.

@@ -1,8 +1,20 @@
 \section{Informacje wstępne}
 \label{sec:infornacje-wstepne}
 
+Celem projektu jest sprzętowa implementacja algorytmu szyfrowania symetrycznego AES oraz jego praktyczne uruchomienie w układzie programowalnym FPGA.
+
 \subsection{Płytka Terasic DE1-SOC}
-Układ FPGA Altera Cyclone V na płytce Terasic DE1-SOC posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
+Do zrealizowania projektu została wybrana płytka prototypowa Terasic DE1-SOC (rys. \ref{fig:fpga-board}), która jest wyposażona w układ FPGA firmy Altera z serii Cyclone V.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth]{pictures/fpga-board.jpg}
+\caption{Płytka Terasic DE1-SOC}
+\label{fig:fpga-board}
+\end{figure}
+
+
+Układ FPGA znajdujący się na wybranej płytce posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
 \begin{enumerate}
 \item Nie wszystkie urządzenia peryferyjne są podłączone bezpośrednio do programowalnej części układu FPGA -- niektóre są podłączone do procesora ARM. Powoduje to, że aby uzyskać dostęp do ich sygnałów z FPGA, wymagana jest dodatkowa konfiguracja multipleksacji pinów przeprowadzona przez preloader podczas procedury startowej. Konwerter USB-UART firmy FTDI jest przykładem układu peryferyjnego, który jest podłączony do procesowa ARM i wymaga takie konfiguracji.
 \item Obecność procesora ARM umożliwia wykonanie przy starcie płytki skryptów zdefiniowanych przez użytkownika i umieszczonych na karcie SD. Przykładem zastosowania jest programowanie układu FPGA przy starcie układu.
@@ -25,7 +37,7 @@ Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) 
 \item Szybkość transmisji: 115200 baud
 \item 1 bit startu
 \item 1 bit stopu
-\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 (ang. \textit{cyclic redundancy check}) całych bloków danych (patrz rozdział \ref{crc}).
+\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 (ang. \textit{cyclic redundancy check}) całych bloków danych (patrz rozdział \ref{sec:crc16}).
 \item Bity w bajcie przesyłane są od najmłodszego -- \textit{LSB first}
 \end{enumerate}
 
@@ -41,7 +53,7 @@ Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) 
 \label{fig:uart-frame}
 \end{figure}
 
-Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format przedstawiony na rysunku \ref{fig:uart-frame}.
+Wybrana konfiguracja parametrów powoduje, że ramka UART ma format przedstawiony na rysunku \ref{fig:uart-frame}.
 
 \subsection{Kolejność bitów i bajtów}
 \begin{itemize}
@@ -56,7 +68,7 @@ Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący forma
 W celu poprawy czytelności rysunków przebiegów czasowych w dokumentacji będzie pojawiał się umowny zegar \textit{CLK\_UART}. Dla wygody czytelnika została również wprowadzona konwencja kolorystyczna sygnałów.
 
 \subsubsection{Zegar \textit{CLK\_UART}}
-Głównym sygnałem zegarowym układu jest \textit{CLK\_16} (patrz rozdział \ref{clk-16}). Ze względu na jego szybką zmienność przedstawienie go na niektórych przebiegach czasowych nie jest możliwe. W takich przypadkach będzie on zastąpiony umownym sygnałem \textit{CLK\_UART} o częstotliwości $f_{CLK\_UART}$.
+Głównym sygnałem zegarowym układu jest \textit{CLK\_16} (rozdz. \ref{clk-16}). Ze względu na jego szybką zmienność przedstawienie go na niektórych przebiegach czasowych nie jest możliwe. W takich przypadkach będzie on zastąpiony umownym sygnałem \textit{CLK\_UART} o częstotliwości $f_{CLK\_UART}$.
 \begin{equation*}
 f_{CLK\_UART} = \frac{f_{CLK\_16}}{16} = UART\_BAUD\_RATE
 \label{eq:clk-uart-freq}

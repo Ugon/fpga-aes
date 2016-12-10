@@ -1,4 +1,5 @@
 \subsubsection{Moduł serializujący bloki AES do bajtów UART}
+\label{sec:block-serializer}
 Moduł \textit{block\_serializer} wysyła bajty bloków AES przy pomocy modułu \textit{uart\_rx} oraz oblicza i wysyła sumę kontrolną \textit{CRC16}.
 
 \begin{figure}[!h]
@@ -30,10 +31,11 @@ Opis sygnałów interfejsu modułu \textit{block\_serializer}:
 	\item[\outsignal{FINISHED\_TRANSMITTING}] sygnał informujący o zakończeniu wysyłania bloku AES oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_TRANSMITTING} podczas kolejnego zbocza rosnącego zegara \insignal{CLK\_16}.
 \end{interface}
 
-Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmisję. Wysyłanie bajtów bloku danych wykonywane jest przez przez moduł \textit{uart\_tx}. Kolejność wysyłanych bajtów jest zgodna z kolejnością ich odbierania przez moduł \textit{block\_deserializer}. W trakcie wysyłania obliczana jest suma kontrolna \textit{CRC16}. Po 128 bajtach bloku danych wysyłane są 2 bajty zawierające obliczoną sumę kontrolną. Po wysłaniu 130 bajtów moduł sygnalizuje gotowość na rozpoczęcie transmisji kolejnego bloku \outsignal{FINISHED\_LISTENING}.
+Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmisję (rys. \ref{fig:block-serializer-start}). Wysyłanie bajtów bloku danych wykonywane jest przez moduł \textit{uart\_tx}. Kolejność wysyłanych bajtów jest zgodna z kolejnością ich odbierania przez moduł \textit{block\_deserializer}. W trakcie wysyłania obliczana jest suma kontrolna \textit{CRC16}. Po 128 bajtach bloku danych wysyłane są 2 bajty zawierające obliczoną sumę kontrolną (rys. \ref{fig:block-serializer-block}). Po wysłaniu 130 bajtów moduł sygnalizuje gotowość na rozpoczęcie transmisji kolejnego bloku \outsignal{FINISHED\_LISTENING} (rys. \ref{fig:block-serializer-finish}).
 
-\begin{figure}[!h]
-	\centering
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
 	\begin{tikztimingtable}[timing/wscale=0.95]
 	\insignal{CLK\_16}           & 3{cc}            16{cc}           16{cc}         \\
 	\outsignal{TX\_START\_TRANS} & LH               15LH             15LH           L\\
@@ -44,25 +46,14 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{block\_serializer} -- rozpoczęcie wysyłania}
-\end{figure}
+}
+\captionof{figure}{\textit{block\_serializer} -- rozpoczęcie wysyłania}
+\label{fig:block-serializer-start}
+\end{center}
 
-\begin{figure}[!h]
-	\centering
-	\begin{tikztimingtable}[timing/wscale=0.95]
-	\insignal{CLK\_16}           & 3{cc}           16{cc}       16{cc}  \\
-	\outsignal{TX\_START\_TRANS} & 2LH             15LH         16L     \\
-	\outsignal{TX\_BYTE[7:0]}    & 2LD{CRC[0]}     15LD{CRC[1]} 16L     \\
-	\insignal{TX\_FIN\_TRANS}    & LH              15LH         15LH    L\\
-	\outsignal{FIN\_TRANS}       & 2L              16L          15LH    L\\
-	\extracode
-	\tablerules
-	\end{tikztimingtable}
-\caption{\textit{block\_serializer} -- zakończenie wysyłania}
-\end{figure}
-
-\begin{figure}[!h]
-	\centering
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
 	\begin{tikztimingtable}
 	\helpsignal{CLK\_UART}       & 1.5l  130{0.25c0.25c}    l \\
 	\outsignal{TX\_START\_TRANS} & l     130{0.5lg}      1.5l \\
@@ -74,8 +65,28 @@ Po otrzymaniu sygnału \insignal{START\_TRANSMITTING} moduł rozpoczyna transmis
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{block\_serializer} -- transmisja całego bloku}
-\end{figure}
+}
+\captionof{figure}{\textit{block\_serializer} -- wysyłanie bloku oraz sumy kontrolnej CRC16}
+\label{fig:block-serializer-block}
+\end{center}
+
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
+	\begin{tikztimingtable}[timing/wscale=0.95]
+	\insignal{CLK\_16}           & 3{cc}           16{cc}       16{cc}  \\
+	\outsignal{TX\_START\_TRANS} & 2LH             15LH         16L     \\
+	\outsignal{TX\_BYTE[7:0]}    & 2LD{CRC[0]}     15LD{CRC[1]} 16L     \\
+	\insignal{TX\_FIN\_TRANS}    & LH              15LH         15LH    L\\
+	\outsignal{FIN\_TRANS}       & 2L              16L          15LH    L\\
+	\extracode
+	\tablerules
+	\end{tikztimingtable}
+}
+\captionof{figure}{\textit{block\_serializer} -- zakończenie wysyłania}
+\label{fig:block-serializer-finish}
+\end{center}
+
 
 
 

@@ -1,4 +1,5 @@
 \subsection{Możliwości rozwoju}
+Celem projektu była sprzętowa implementacja algorytmu szyfrowania AES oraz jego praktyczne uruchomienie na platformie FPGA. Zadanie to zostało zrealizowane, a powstały produkt można rozwijać i ulepszać.
 
 \subsubsection{Prędkość transmisji}
 Zastosowanie w projekcie protokołu UART do komunikacji ma negatywny wpływ na wydajność produktu. Zastosowane parametry transmisji (115200 baud, 1 bit stopu, brak bitu parzystości) oraz narzut na komunikację związany z koniecznością kontroli poprawności przesyłanych danych powoduje, że maksymalna prędkość transmisji danych wynosi jedynie 1MB/100s. Jest to ograniczenie wynikające wyłącznie z wybranego sposobu komunikacji. Wydajność modułu szyfrującego i deszyfrującego jest o wiele wyższa. Produkt można usprawnić stosując inny protokół komunikacji, który pozwoliłby na osiąganie wyższych prędkości transmisji danych.
@@ -16,7 +17,7 @@ Obecnie moja implementacja komunikacji obsługuje jedynie błędy związane z pr
 Błędy związane ze złym formatem ramki mogą wystąpić, jednak podczas testowania nie zostały zaobserwowane.
 
 \subsubsection{Integracja z procesorem}
-Obecnie popularne procesory są wyposażone w zestaw instrukcji przeznaczonych do szyfrowania AES. Propozycją polepszenia wydajności lub zmniejszenia poboru prądu podczas szyfrowania AES jest wyposażenie procesorów w zintegrowany sprzętowy układ szyfrujący, podobnie jak to ma miejsce ze zintegrowanymi GPU. Takie rozwiązanie wymagałoby jednak sprawdzenia, czy jest opłacalne. Możliwe jest, że zyski wynikające z takiego rozwiązania nie były by na tyle duże, aby uzasadnić koszty związane z zastosowaniem takiego rozwiązania.
+Obecnie popularne procesory są wyposażone w zestaw instrukcji AES-NI przeznaczonych do szyfrowania AES \cite{aes-processors}. Przykładem takich jednostek są procesory Intel (począwszy od architektury Westmere -- 2010r.) oraz AMD (począwszy od architektury Bulldozer -- 2011r.) Propozycją polepszenia wydajności lub zmniejszenia poboru prądu podczas szyfrowania AES jest wyposażenie procesorów w zintegrowany sprzętowy układ szyfrujący, podobnie jak to ma miejsce ze zintegrowanymi GPU. Takie rozwiązanie wymagałoby jednak sprawdzenia, czy jest opłacalne. Możliwe jest, że zyski wynikające z takiego rozwiązania nie były by na tyle duże, aby uzasadnić koszty związane z zastosowaniem takiego rozwiązania.
 
 \subsubsection{Zastosowanie w IoT}
 Obecnie jedną z szybko rozwijających się koncepcji jest Internet of Things. Sprzętowe szyfrowanie AES mogło by znaleźć w niej zastosowanie. Można by zaprojektować układ szyfrujący optymalizujący zużycie energii. Pozwoliłoby to na zastosowanie go w urządzeniach, które zasilane są przy pomocy baterii i od których oczekuje się, że będą działać przez długi okres czasu bez konieczności jej wymiany. Taki dedykowany układ  szyfrujący, w porównaniu do szyfrowania przy pomocy procesorów ogólnego przeznaczenia, mógłby pozwolić na dłuższy czas pracy urządzeń IoT.
