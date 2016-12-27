@@ -3,22 +3,22 @@
 
 \subsection{Motywacja projektu}
 Od wielu wieków istnieje potrzeba ochrony tajnych informacji przed przechwyceniem przez osoby niepowołane. Znane są przykłady takich czynności pochodzące już z czasów starożytnych. Pierwszym powszechnie znanym przykładem jest szyfr Cezara, który był używany przez rzymskiego wodza do ochrony poufnej korespondencji. Innym dobrze znanym przykładem jest szyfr Enigmy, który odegrał ważną rolę podczas II wojny światowej.
-\newline
-Początkowo szyfrowanie było używane w nielicznych przypadkach, obecnie towarzyszy ludziom każdego dnia. Największą domeną, w której stosowana jest kryptografia jest niewątpliwie ochrona danych cyfrowych. Wykorzystywana jest m.in. szyfrowania komunikacji i danych zapisanych na różnych nośnikach, do uwierzytelniania, jest podstawą walut elektronicznych itp.
-\newline
+
+Początkowo szyfrowanie było używane w nielicznych przypadkach, obecnie towarzyszy ludziom każdego dnia. Największą domeną, w której stosowana jest kryptografia jest niewątpliwie ochrona danych cyfrowych. Wykorzystywana jest m.in. dp szyfrowania komunikacji, danych zapisanych na różnych nośnikach, do uwierzytelniania, jest podstawą walut elektronicznych itp.
+
 Ze względu na postęp technologiczny, stare metody szyfrowania nie są już bezpieczne. Przykładem może być szyfr DES, który został zatwierdzony jako standard w 1976 roku. Od tamtej pory moc obliczeniowa komputerów na tyle się zwiększyła, że obecnie DES można złamać przy pomocy ataków \textit{brute force} i jest on obecnie uważany za algorytm niezapewniający odpowiedniego bezpieczeństwa.
-\newline
-W celu zapewnienia bezpieczeństwa stosowane współcześnie szyfry wymagają wykonania wielu operacji aby dane zaszyfrować oraz odszyfrować. W połączeniu z rosnąca popularnością kryptografii, jest to powodem dla przystosowywania istniejących procesorów do szybkiego wykonywania instrukcji szyfrujących, lub nawet tworzenia osobnych szyfrujących układów sprzętowych.
+
+W celu zapewnienia bezpieczeństwa stosowane współcześnie szyfry wymagają wykonania wielu operacji aby dane zaszyfrować oraz odszyfrować. W połączeniu z rosnąca popularnością kryptografii, jest to motywacją do poszukiwania wydajnych sposobów szyfrowania -- przystosowywania istniejących procesorów do szybkiego wykonywania instrukcji szyfrujących, lub nawet tworzenia osobnych szyfrujących układów sprzętowych. Ten projekt zajmuje się zagadnieniem szyfrowania AES przy pomocy układu sprzętowego zrealizowanego na platformie FPGA.
 
 \subsection{Cel projektu i wizja produktu}
-Celem mojego projektu inżynierskiego jest zaimplementowanie sprzętowego układu szyfrującego algorytmem AES na platformie FPGA, oraz praktyczne zaprezentowanie jego działania. Końcowy produkt powinien umożliwić użytkownikowi szyfrowanie i deszyfrowanie plików. Sposób szyfrowanie powinien być zgodny z właściwymi standardami oraz produkt powinien być kompatybilny z obecnie istniejącymi rozwiązaniami.
-\newline
-Produkt końcowy będzie program konsolowy przystosowany do uruchomienia na systemach operacyjnych Ubuntu, oraz karta SD zawierająca skrypt programujący układ FPGA. Do korzystania z produktu konieczne będzie połączenie komputera z płytką kablem USB. Produkt będzie współpracował z płytką Terasic DE1-SOC.
-\newline
-Płytka Terasic DE1-SOC będzie komunikować się z komputerem przez kabel USB. Protokołem komunikacji będzie UART tunelowany przez kabel USB. Na płytce zainstalowany jest konwerter umożliwiający konwersję USB-UART firmy FTDI. W systemach operacyjnych Ubuntu zintegrowany jest sterownik współpracujący z tym układem, który nie wymaga dodatkowej instalacji.
-\newline
-W celu zaszyfrowania pliku na komputerze będzie uruchamiany program będący częścią produktu, który będzie odczytywał z dysku kolejne bloki danych w postaci jawnej, wysyłał je do układu FPGA oraz odbierał bloki danych zaszyfrowanych i zapisywał je do innego pliku. Do układu FPGA będą doprowadzone sygnały RX i TX protokołu UART wyprowadzone z układu FTDI. Układ będzie odbierał bloki danych, szyfrował je i odsyłał ich zaszyfrowaną postać z powrotem. Deszyfrowanie będzie przebiegać analogicznie. Ze względu na możliwość wystąpienia błędów podczas komunikacji UART, zaimplementowana zostanie obsługa błędów oparta o sumy kontrolne CRC.
-\newline
-Programowanie układu FPGA będzie zrealizowanie w taki sposób, aby w celu uruchomienia produktu użytkownik nie musiał posiadać wiedzy technicznej. Włączenie płytki w taki sposób aby układ FPGA został odpowiednio zaprogramowany będzie wymagało przestawiania kilku przełączników oraz włożenia dostarczonej karty SD, która będzie zawierać odpowiedni skrypt startowy realizujący programowanie układu.
+Celem projektu inżynierskiego jest zaimplementowanie sprzętowego układu szyfrującego algorytmem AES na platformie FPGA, oraz praktyczne zaprezentowanie jego działania. Końcowy produkt powinien umożliwić użytkownikowi szyfrowanie i deszyfrowanie plików. Sposób szyfrowania AES powinien być zgodny ze standardem FIPF-197 \cite{aes-standard} oraz produkt powinien być kompatybilny z obecnie istniejącym rozwiązaniem -- programem \textit{openssl} \cite{openssl}.
+
+Produktem końcowym będzie program konsolowy przystosowany do uruchomienia na systemach operacyjnych Ubuntu, oraz karta SD zawierająca skrypt programujący układ FPGA. Do uruchomienia produktu potrzebna będzie płytką FPGA Terasic DE1-SOC podłączona do komputera.
+
+Płytka Terasic DE1-SOC będzie komunikować się z komputerem przez kabel USB. Protokołem komunikacji będzie UART tunelowany przez USB. Na płytce znajduje się konwerter umożliwiający konwersję USB-UART firmy FTDI. W systemach operacyjnych Ubuntu zintegrowany jest sterownik współpracujący z tym układem, który nie wymaga dodatkowej instalacji.
+
+W celu zaszyfrowania pliku, użytkownik komputera będzie musiał uruchomić skrypt będący częścią produktu, który będzie odczytywał z dysku kolejne bloki danych w postaci jawnej, wysyłał je do układu FPGA oraz odbierał bloki danych zaszyfrowanych i zapisywał je do innego pliku. Układ FPGA będzie odbierał bloki danych, szyfrował oraz je odsyłał w postaci zaszyfrowanej. Deszyfrowanie będzie przebiegać analogicznie. Szyfrowanie plików większych niż 128b będzie przebiegać w trybie wiązania bloków CBC. Ze względu na możliwość wystąpienia błędów podczas komunikacji UART, zaimplementowana zostanie obsługa błędów oparta o sumę kontrolną CRC16.
+
+Programowanie układu FPGA będzie zrealizowanie w sposób nie wymagający od użytkownika wiedzy technicznej -- będzie wykonywane automatycznie przy starcie płytki FPGA. Włączenie płytki w taki sposób aby układ FPGA został odpowiednio zaprogramowany będzie wymagało jedynie przestawiania kilku przełączników oraz włożenia dostarczonej karty SD do czytnika. 
 
 \newpage

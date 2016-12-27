@@ -1,0 +1,16 @@
+\section{Instrukcja obsługi systemu}
+Program komputerowy można uruchomić korzystając z terminala, a jego obsługa jest analogiczna do programu \textit{openssl}.
+
+Składnia polecenia:
+\begin{verbatim}
+sudo ./fpga-aes [-d] -in input_file -out output_file -K key -iv IV
+\end{verbatim}
+
+Program trzeba uruchomić z uprawnieniami użytkownika root, ponieważ korzysta z portu szeregowego. Program przyjmuje parametry:
+\begin{interface}{-out}
+\item[\textbf{-d}]Flaga oznaczająca działanie w trybie deszyfrowania. Jeśli nie jest podana to program działa w trybie szyfrowania.
+\item[\textbf{-in}]Nazwa pliku wejściowego
+\item[\textbf{-out}]Nazwa pliku wyjściowego
+\item[\textbf{-K}]Klucz szyfrowania
+\item[\textbf{-iv}]Wektor inicjalizacji
+\end{interface}

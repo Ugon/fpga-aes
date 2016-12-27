@@ -1,4 +1,5 @@
-\subsubsection{Moduł zarządzający komunikacją z klientem}
+\subsection{Moduł zarządzający komunikacją z klientem}
+\label{sec:comminicator}
 Moduł \textit{communicator} zarządza procesem komunikacji z klientem oraz kontroli poprawności przesyłanych danych. Zadaniem modułu jest realizacja serwerowej części ustalonego protokołu komunikacji z klientem (rozdz. \ref{sec:przebieg-komunikacji}), w szczególności:
 \begin{itemize}[noitemsep, nolistsep]
 \item zarządzanie procesem przesyłania bloków i potwierdzeń
@@ -48,17 +49,6 @@ Rysunki \ref{fig:communicator-state-machine-1} oraz \ref{fig:communicator-state-
            text centered,
            },
 }
-
-\begin{figure}
-\centering
-\includegraphics{pictures/communicator.pdf}
-\caption{Schemat modułu \textit{communicator}}
-\label{fig:communicator-schemat}
-\end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}
 \centering
@@ -569,4 +559,19 @@ Rysunki \ref{fig:communicator-state-machine-1} oraz \ref{fig:communicator-state-
 \caption{Maszyna stanów modułu \textit{communicator} -- wymiana bloków danych}
 \label{fig:communicator-state-machine-2}
 \end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics{pictures/communicator.pdf}
+\caption{Schemat modułu \textit{communicator}}
+\label{fig:communicator-schemat}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -15,6 +15,7 @@
 \usepackage{courier}
 \usepackage{svg}
 \usepackage{environ}
+\usepackage{verbatim}
 
 \usetikzlibrary{automata}
 \usetikzlibrary{arrows}
@@ -107,14 +108,17 @@
         variable,
         wait,
         when,
-        while
+        while,
+        xor
     },
     morekeywords=[2]{
         std_logic,
         std_logic_vector,
-        Integer
+        Integer,
+        aes_state
     },
-    morecomment=[l]--
+    morecomment=[l]{--},
+    morecomment=[s]{/*}{*/}
 }
 
 \lstdefinestyle{vhdl}{

@@ -119,8 +119,41 @@ Najłatwiejszym sposobem na stworzenie karty SD zawierającej potrzebne pliki je
 
 Aby przy starcie płytki programowanie FPGA przebiegło pomyślnie, należy umieścić kartę SD w czytniku oraz ustawić przełączniki MSEL[4:0] (rys. \ref{fig:msel}) w pozycji 00100.
 
-\subsubsection{Główny zegar}
-\label{clk-16}
+\subsubsection{Ograniczenia czasowe}
+Aby mieć gwarancję, że projekt nie będzie zachowywał się niedeterministyczne ze względu na złe ułożenie ścieżek sygnałów w chipie FPGA powodujące zbyt długi czas propagacji, zdefiniowane zostały odpowiednie ograniczenia czasowe. Do tego celu posłużyła konsola w narzędziu TimeQuest Timing Analyzer będącym częścią środowiska programistycznego Quartus. Zdefiniowane ograniczenia to:
+
+\begin{itemize}
+\item Zewnętrzny zegar \textit{CLK\_50} o częstotliwości 50MHz
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_clock -name {CLK_50} -period 20.000 { CLOCK_50 }
+\end{lstlisting}
+
+\item Główny zegar projektu \textit{CLK\_16} (rozdz. \ref{sec:clk-16})
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {CLK_16} -source {CLOCK_50} 
+	-divide_by 26 { uart_prescaler0|clk|q }
+\end{lstlisting}
+
+\item Sygnał w module \textit{block\_serializer} (rozdz. \ref{sec:block-serializer}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałem zakończenia wysyłania bloku -- \outsignal{FINISHED\_TRANSMITTING}.
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {SERIALIZER_CLK} 
+	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
+	{ communicator0|block_serializer0|forward_start|q }
+\end{lstlisting}
+
+\item Sygnał w module \textit{block\_deserializer} (rozdz. \ref{sec:block-deserializer}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałami odebranego bloku \outsignal{AES\_BLOCK[127:0]} oraz zakończenia odbierania \outsignal{FINISHED\_LISTENING}.
+\begin{lstlisting}[basicstyle=\footnotesize]
+create_generated_clock -name {DESERIALIZER_CLK} \
+	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
+	{ communicator0|block_deserializer0|forward_finished|q }
+\end{lstlisting}
+
+\end{itemize}
+
+Są to wszystkie sygnały pełniące w tym projekcie rolę zegarów.
+
+\subsection{Główny zegar}
+\label{sec:clk-16}
 Główny zegar \textit{CLK\_16}, którym taktowany będzie projektowany układ ma częstotliwość
 \begin{equation}
 f_{CLK\_16} = 16 * UART\_BAUD\_RATE
@@ -161,9 +194,9 @@ end uart_prescaler_impl;
 
 Układ jest wyzwalany rosnącymi zboczami zegara \textit{CLK\_16}. Jeśli akcja mająca miejsce w danym rosnącym zboczu zależy od wartości innego sygnału, to ma on stałą wartość co najmniej od poprzedzającego do następnego zbocza malejącego.
 
-\subsubsection{Synchronizacja sygnału UART RX}
+\subsection{Synchronizacja sygnału UART RX}
 \label{uart-sync}
-Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec sygnał RX został zsynchronizowany przy pomocy dwóch przerzutników typu D wyzwalanych głównym zegarem \cite{altera-metastability, 2ff-synchronization} (rys. \ref{fig:2ff}). 
+Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który jest w domenie innego zegara. Powoduje to, że w momencie wystąpienia zbocz rosnących lub malejących głównego zegara, sygnał RX może nie mieć dobrze określonej wartości (np. również być w trakcie zbocza). Może to prowadzić do wystąpienia stanów metastabilnych \cite{altera-metastability} i w efekcie doprowadzić do niedeterministycznego działania układu. Aby temu zapobiec sygnał RX został zsynchronizowany przy pomocy dwóch przerzutników typu D wyzwalanych głównym zegarem \cite{altera-metastability, 2ff-synchronization} (rys. \ref{fig:2ff}). Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
 
 \begin{figure}[!h]
 \centering
@@ -172,48 +205,21 @@ Sygnał UART RX pochodzi z peryferyjnego konwertera USB-UART firmy FTDI, który 
 \label{fig:2ff}
 \end{figure}
 
-Jest to standardowa technika, która powoduje drastyczne zmniejszenie prawdopodobieństwa wystąpienia stanów metastabilnych z powodu używania sygnałów pochodzących z domen innych zegarów.
+\begin{figure}[!h]
+\centering
+\begin{tikztimingtable}
+  \textit{CLK\_16}   & cc 16{cc}     16{cc}       7{c}       \\
+  \textit{RX}        & hh 16J{Start} 16D{DATA[0]} 7d{Data[1]}\\
+\extracode
+\tablerules
+\vertlines[red]{1}
+\vertlines[red]{17}
+\vertlines[red]{33}
+\end{tikztimingtable}
+\caption{Relacja między zegarem \textit{CLK\_16} i zsynchronizowanym sygnałem \textit{RX}}
+\label{fig:clk-rx-sync}
+\end{figure}
 
-\subsubsection{Ograniczenia czasowe}
-Aby mieć gwarancję, że projekt nie będzie zachowywał się niedeterministyczne ze względu na złe ułożenie ścieżek sygnałów w chipie FPGA powodujące zbyt długi czas propagacji, zdefiniowane zostały odpowiednie ograniczenia czasowe. Do tego celu posłużyła konsola w narzędziu TimeQuest Timing Analyzer będącym częścią środowiska programistycznego Quartus. Zdefiniowane ograniczenia to:
+Przerzutniki są wyzwalane zboczami malejącymi zegara \textit{CLK\_16}. Powoduje to, że sygnał \textit{RX} zmienia wartość podczas zbocz malejących oraz jest stabilny podczas zbocz rosnących tego zegara (rys. \ref{fig:clk-rx-sync}). Takie zachowanie sygnału jest wymagane przez moduł \textit{uart\_rx} (rozdz. \ref{sec:uart-rx}).
 
-\begin{itemize}
-\item Zewnętrzny zegar \textit{CLK\_50} o częstotliwości 50MHz
-\begin{lstlisting}[basicstyle=\footnotesize]
-create_clock -name {CLK_50} -period 20.000 { CLOCK_50 }
-\end{lstlisting}
 
-\item Główny zegar projektu \textit{CLK\_16}
-\begin{lstlisting}[basicstyle=\footnotesize]
-create_generated_clock -name {CLK_16} -source {CLOCK_50} 
-	-divide_by 26 { uart_prescaler0|clk|q }
-\end{lstlisting}
-
-\item Sygnał w module \textit{block\_serializer} (rozdz. \ref{sec:block-serializer}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałem zakończenia wysyłania bloku -- \outsignal{FINISHED\_TRANSMITTING}.
-\begin{lstlisting}[basicstyle=\footnotesize]
-create_generated_clock -name {SERIALIZER_CLK} 
-	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
-	{ communicator0|block_serializer0|forward_start|q }
-\end{lstlisting}
-
-\item Sygnał w module \textit{block\_deserializer} (rozdz. \ref{sec:block-deserializer}), na którego zbocze rosnące musiał być wrażliwy proces sterujący sygnałami odebranego bloku \outsignal{AES\_BLOCK[127:0]} oraz zakończenia odbierania \outsignal{FINISHED\_LISTENING}.
-\begin{lstlisting}[basicstyle=\footnotesize]
-create_generated_clock -name {DESERIALIZER_CLK} \
-	-source {uart_prescaler0|clk|q} -divide_by 2 -offset 260.000 
-	{ communicator0|block_deserializer0|forward_finished|q }
-\end{lstlisting}
-
-\end{itemize}
-
-Są to wszystkie sygnały pełniące w tym projekcie rolę zegarów.
-
-\input{sections/modules/uart_rx}
-\input{sections/modules/uart_tx}
-\input{sections/modules/block_deserializer}
-\input{sections/modules/block_serializer}
-\input{sections/modules/crc16}
-\input{sections/modules/aes}
-\input{sections/modules/communicator}
-\input{sections/modules/client}
-
-\newpage

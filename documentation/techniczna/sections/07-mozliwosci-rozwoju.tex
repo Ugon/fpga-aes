@@ -1,23 +1,23 @@
-\subsection{Możliwości rozwoju}
-Celem projektu była sprzętowa implementacja algorytmu szyfrowania AES oraz jego praktyczne uruchomienie na platformie FPGA. Zadanie to zostało zrealizowane, a powstały produkt można rozwijać i ulepszać.
+\section{Możliwości rozwoju}
+Otrzymany produkt końcowy może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Najważniejszym z proponowanych usprawnień jest zastąpienie tego protokołu komunikacji bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT.
 
-\subsubsection{Prędkość transmisji}
+\subsection{Prędkość transmisji}
 Zastosowanie w projekcie protokołu UART do komunikacji ma negatywny wpływ na wydajność produktu. Zastosowane parametry transmisji (115200 baud, 1 bit stopu, brak bitu parzystości) oraz narzut na komunikację związany z koniecznością kontroli poprawności przesyłanych danych powoduje, że maksymalna prędkość transmisji danych wynosi jedynie 1MB/100s. Jest to ograniczenie wynikające wyłącznie z wybranego sposobu komunikacji. Wydajność modułu szyfrującego i deszyfrującego jest o wiele wyższa. Produkt można usprawnić stosując inny protokół komunikacji, który pozwoliłby na osiąganie wyższych prędkości transmisji danych.
 
 Istnieją układy FPGA, które są zintegrowane z procesorem ARM (np. układ Altera Cyclone V na płytce Terasic DE1-SOC, która była użyta w tym projekcie). Posiadają one szybki interfejs między HPS a programowalną częścią układu. Przykładem zastosowania takiego połączenia jest uruchomienie systemu operacyjnego na procesorze ARM oraz zaprogramowanie i wykorzystanie części FPGA jako sprzętowego układu szyfrującego. Wydajność takiego rozwiązania niewątpliwie nie była by tak drastycznie ograniczona przez prędkość transmisji.
 
-\subsubsection{Implementacja modułu szyfrującego}
+\subsection{Implementacja modułu szyfrującego}
 W tym projekcie moduł szyfrujący jest asynchroniczny -- nie jest taktowany zegarem. Wydajność takiego rozwiązania można poprawić stosując potokowość (ang. \textit{pipelining}) -- zaprojektować układ synchroniczny, który w każdym takcie zegara wykonuje pewien fragment procesu szyfrowania, dla wielu bloków jednocześnie. Przykładem podziału procesu szyfrowania na etapy może być podział na rundy -- moduł szyfruje jednocześnie wiele bloków, każdy w innej rundzie.
 
 Można również rozważyć zaprojektowanie modułu, który byłby mniej skomplikowany i zużywał mniej programowalnych jednostek układu FPGA. Większość procesu szyfrowania AES to powtarzanie tej samej operacji (rundy). Można zaprojektować synchroniczny układ szyfrujący tak, aby szyfrowanie trwało wiele taktów zegara, oraz w każdym takcie stan był modyfikowany przez ten sam układ logiczny. Zmniejszyłoby to zapotrzebowanie na zasoby, ale mogłoby to pogorszyć szybkość szyfrowania.
 
-\subsubsection{Poprawa obsługi błędów}
+\subsection{Poprawa obsługi błędów}
 Obecnie moja implementacja komunikacji obsługuje jedynie błędy związane z przekłamaniem bitów danych podczas transmisji UART. Nie są obsługiwane błędy związane ze złym formatem ramki UART (ang. \textit{framing error}). Wystąpienie takich błędów może spowodować zawieszenie układu. Zaimplementowany został przycisk reset, który przywraca układ do stanu początkowego, który jest sposobem na wyprowadzenie układu z zawieszenia. Takie rozwiązanie można poprawić implementując obsługę błędów formatu ramki, np. timeout. Wyeliminowałoby by to konieczność ręcznego resetowania układu w przypadku wystąpienia błędu.
 
 Błędy związane ze złym formatem ramki mogą wystąpić, jednak podczas testowania nie zostały zaobserwowane.
 
-\subsubsection{Integracja z procesorem}
+\subsection{Integracja z procesorem}
 Obecnie popularne procesory są wyposażone w zestaw instrukcji AES-NI przeznaczonych do szyfrowania AES \cite{aes-processors}. Przykładem takich jednostek są procesory Intel (począwszy od architektury Westmere -- 2010r.) oraz AMD (począwszy od architektury Bulldozer -- 2011r.) Propozycją polepszenia wydajności lub zmniejszenia poboru prądu podczas szyfrowania AES jest wyposażenie procesorów w zintegrowany sprzętowy układ szyfrujący, podobnie jak to ma miejsce ze zintegrowanymi GPU. Takie rozwiązanie wymagałoby jednak sprawdzenia, czy jest opłacalne. Możliwe jest, że zyski wynikające z takiego rozwiązania nie były by na tyle duże, aby uzasadnić koszty związane z zastosowaniem takiego rozwiązania.
 
-\subsubsection{Zastosowanie w IoT}
+\subsection{Zastosowanie w IoT}
 Obecnie jedną z szybko rozwijających się koncepcji jest Internet of Things. Sprzętowe szyfrowanie AES mogło by znaleźć w niej zastosowanie. Można by zaprojektować układ szyfrujący optymalizujący zużycie energii. Pozwoliłoby to na zastosowanie go w urządzeniach, które zasilane są przy pomocy baterii i od których oczekuje się, że będą działać przez długi okres czasu bez konieczności jej wymiany. Taki dedykowany układ  szyfrujący, w porównaniu do szyfrowania przy pomocy procesorów ogólnego przeznaczenia, mógłby pozwolić na dłuższy czas pracy urządzeń IoT.
