@@ -6,9 +6,9 @@
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CSEMA5F31C6
 set_global_assignment -name TOP_LEVEL_ENTITY top
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13
 set_global_assignment -name LAST_QUARTUS_VERSION 15.1.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "Thu Jul 11 11:26:45 2013"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "THU JUL 11 11:26:45 2013"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 
 
@@ -741,8 +741,17 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_SYNC_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_VS
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name MIF_FILE ../src/benchmark/input.mif
-set_global_assignment -name MIF_FILE ../src/benchmark/output.mif
-set_global_assignment -name VHDL_FILE ../src/benchmark/top.vhd
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name SDC_FILE DE1_SOC_golden_top.sdc
+set_global_assignment -name SDC_FILE timing_constraints.sdc
+set_global_assignment -name CDF_FILE programmer_chain.cdf
+set_global_assignment -name VHDL_FILE ../src/aes/aes256enc.vhd
+set_global_assignment -name VHDL_FILE ../src/aes/aes256dec.vhd
+set_global_assignment -name VHDL_FILE ../src/aes/aes_utils.vhd
+set_global_assignment -name VHDL_FILE ../src/aes/aes_transformations.vhd
+set_global_assignment -name VHDL_FILE ../src/benchmark/top.vhd
+set_global_assignment -name QIP_FILE memory/inputmem.qip
+set_global_assignment -name QIP_FILE pll/pll.qip
+set_global_assignment -name SIP_FILE pll/pll.sip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
