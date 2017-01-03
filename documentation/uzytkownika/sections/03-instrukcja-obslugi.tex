@@ -11,6 +11,23 @@ Program trzeba uruchomić z uprawnieniami użytkownika root, ponieważ korzysta 
 \item[\textbf{-d}]Flaga oznaczająca działanie w trybie deszyfrowania. Jeśli nie jest podana to program działa w trybie szyfrowania.
 \item[\textbf{-in}]Nazwa pliku wejściowego
 \item[\textbf{-out}]Nazwa pliku wyjściowego
-\item[\textbf{-K}]Klucz szyfrowania
-\item[\textbf{-iv}]Wektor inicjalizacji
+\item[\textbf{-K}]Klucz szyfrowania zapisany jako liczba w systemie szesnastkowym (256 bitów, 64 cyfry szesnastkowe)
+\item[\textbf{-iv}]Wektor inicjalizacji zapisany jako liczba w systemie szesnastkowym (128 bitów, 32 cyfry szesnastkowe)
 \end{interface}
+
+\subsection{Przykłady uruchomienia}
+W celu zaszyfrowania pliku o nazwie \textit{plaintext-file.txt} do pliku \textit{cyphertext} kluczem \textit{000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f} oraz z wektorem inicjalizacji \textit{12345678901234567890123456789012} należy uruchomić program poleceniem:
+
+\begin{verbatim}
+sudo ./fpga-aes -in plaintext-file.txt -out cyphertext 
+-K 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 
+-iv 12345678901234567890123456789012
+\end{verbatim}
+
+Aby ten plik odszyfrować, należy użyć polecenia:
+
+\begin{verbatim}
+sudo ./fpga-aes -d -in cyphertext -out plaintext-file.txt 
+-K 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 
+-iv 12345678901234567890123456789012
+\end{verbatim}

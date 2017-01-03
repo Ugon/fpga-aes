@@ -38,13 +38,18 @@ W celu sprawdzenia poprawności działania implementowanych funkcjonalności na 
 
 \paragraph{Testy obciążeniowe} zostały przeprowadzone w celu sprawdzenia stabilności układu pod długotrwały obciążeniem. Polegały na szyfrowaniu i deszyfrowaniu dużych plików, których przetworzenie zajmowało wiele godzin. Testy wykazały, że produkt jest zdolny do długotrwałego, nieprzerwanego przetwarzania danych. 
 
-\paragraph{Testy wydajnościowe} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+\paragraph{Testy wydajnościowe produktu} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+
+\paragraph{Testy wydajnościowe modułu szyfrującego} -- ze względu na zastosowanie protokołu UART do komunikacji wydajność produktu ograniczona jest prędkością transmisji. Moduł szyfrujący AES może jednak działać znacznie szybciej. Testy wydajnościowe modułu szyfrującego miały na celu zmierzenie maksymalnej częstotliwości z jaką może działać.
+
+\subsection{Wydajność}
+Produkt jest zdolny szyfrować i deszyfrować pliki z prędkością 1MB/90s. Taka wartość jest spowodowana niską prędkością transmisji UART. Przeprowadzone testy wydajnościowe modułu szyfrującego wykazały, że jest on zdolny przetwarzać dane z prędkością 320MB/s. Nie jest to jednak limit możliwości szyfrowania AES na FPGA, wynik może zostać poprawiony przez optymalizację modułu szyfrującego np. poprzez zastosowanie przetwarzania potokowego.
 
 \subsection{Możliwości rozwoju}
 Otrzymany produkt końcowy może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Najważniejszym z proponowanych usprawnień jest zastąpienie tego protokołu komunikacji bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT.
 
 \subsubsection{Prędkość transmisji}
-Zastosowanie w projekcie protokołu UART do komunikacji ma negatywny wpływ na wydajność produktu. Zastosowane parametry transmisji (115200 baud, 1 bit stopu, brak bitu parzystości) oraz narzut na komunikację związany z koniecznością kontroli poprawności przesyłanych danych powoduje, że maksymalna prędkość transmisji danych wynosi jedynie 1MB/100s. Jest to ograniczenie wynikające wyłącznie z wybranego sposobu komunikacji. Wydajność modułu szyfrującego i deszyfrującego jest o wiele wyższa. Produkt można usprawnić stosując inny protokół komunikacji, który pozwoliłby na osiąganie wyższych prędkości transmisji danych.
+Zastosowanie w projekcie protokołu UART do komunikacji ma negatywny wpływ na wydajność produktu. Zastosowane parametry transmisji (115200 baud, 1 bit stopu, brak bitu parzystości) oraz narzut na komunikację związany z koniecznością kontroli poprawności przesyłanych danych powoduje, że maksymalna prędkość transmisji danych wynosi jedynie 1MB/90s. Jest to ograniczenie wynikające wyłącznie z wybranego sposobu komunikacji. Wydajność modułu szyfrującego i deszyfrującego jest o wiele wyższa. Produkt można usprawnić stosując inny protokół komunikacji, który pozwoliłby na osiąganie wyższych prędkości transmisji danych.
 
 Istnieją układy FPGA, które są zintegrowane z procesorem ARM (np. układ Altera Cyclone V na płytce Terasic DE1-SOC, która była użyta w tym projekcie). Posiadają one szybki interfejs między HPS a programowalną częścią układu. Przykładem zastosowania takiego połączenia jest uruchomienie systemu operacyjnego na procesorze ARM oraz zaprogramowanie i wykorzystanie części FPGA jako sprzętowego układu szyfrującego. Wydajność takiego rozwiązania niewątpliwie nie była by tak drastycznie ograniczona przez prędkość transmisji.
 

@@ -30,7 +30,7 @@ Płytka Terasic DE1-SOC będzie komunikować się z komputerem przez kabel USB (
 \begin{figure}[!h]
 \centering
 \includegraphics[width=6in]{pictures/system-architecture-basic.png}
-\caption{Architektura systemu}
+\caption{Architektura systemu (na zdjęciu laptop Dell XPS 13 \cite{laptop} oraz płytka Terasic DE1-SOC \cite{plytka})}
 \label{fig:system-architecture-basic}
 \end{figure}
 
@@ -53,7 +53,7 @@ Proces tworzenia produktu wiąże się z wieloma zagrożeniami. W fazie planowan
 	\item zmiana projektu modułów szyfrujących i deszyfrujących -- zastosowanie przetwarzania synchronicznego, w którym rundy szyfrowania wykonywane są w kolejnych cyklach zegara przez ten sam fragment układu
 	\item dostarczenie dwóch osobnych produktów - szyfrującego i deszyfrującego
 	\end{itemize}
-\item Brak możliwości użycia układu UART znajdującego się na płytce, co może prowadzić do konieczności wykorzystania osobnego konwertera USB-UART. Spowodowałoby to do utrudnienia dla użytkownika końcowego związane z potrzebą użycia zewnętrznego konwertera. W przypadku wystąpienia takiego scenariusza wszystkie konieczne do wykonania czynności zostaną dokładnie opisane w dokumentacji użytkownika.
+\item Brak możliwości użycia układu UART znajdującego się na płytce, co może prowadzić do konieczności wykorzystania osobnego konwertera USB-UART. Spowodowałoby to utrudnienia dla użytkownika końcowego związane z potrzebą użycia zewnętrznego konwertera. W przypadku wystąpienia takiego scenariusza wszystkie konieczne do wykonania czynności zostaną dokładnie opisane w dokumentacji użytkownika.
 \item Brak możliwości uruchomienia płytki w taki sposób, aby układ FPGA został automatycznie zaprogramowany przy starcie. Prowadziłoby to do utrudnienia dla użytkownika końcowego związanego z koniecznością ręcznego programowania płytki. W przypadku wystąpienia takiego scenariusza wszystkie konieczne do wykonania czynności zostaną dokładnie opisane w dokumentacji użytkownika.
 \item Problemy związane z niezerowym czasem propagacji sygnału oraz innymi właściwościami fizycznymi układu FPGA, powodującymi niedeterministyczne oraz trudne do wykrycia błędy. Aby temu zapobiec w projekcie zostaną skonfigurowane ograniczenia czasowe (ang. \textit{timing constraints}).
 \item Czynniki losowe opóźniające pracę lub uniemożliwiające ukończenie projektu na czas, np. choroba. W celu minimalizacji skutków takich sytuacji w harmonogramie prac zostanie przewidziany czas przeznaczony na nadrobienie zaległości.
