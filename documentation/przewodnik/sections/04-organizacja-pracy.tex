@@ -1,11 +1,60 @@
 \section{Organizacja pracy}
 \label{sec:organizacja-pracy}
 
-\emph{Struktura zespołu (role poszczególnych osób), krótki opis i
-  uzasadnienie przyjętej metodyki i/lub kolejności prac, planowane i
-  zrealizowane etapy prac ze wskazaniem udziału poszczególnych
-  członków zespołu, wykorzystane praktyki i narzędzia w zarządzaniu
-  projektem.}
+% \emph{Struktura zespołu (role poszczególnych osób), krótki opis i
+  % uzasadnienie przyjętej metodyki i/lub kolejności prac, planowane i
+  % zrealizowane etapy prac ze wskazaniem udziału poszczególnych
+  % członków zespołu, wykorzystane praktyki i narzędzia w zarządzaniu
+  % projektem.}
+Przed przystąpieniem do realizacji projektu przeprowadzono fazę planowania, w której został określony plan organizacji pracy.
+
+\subsection{Struktura zespołu -- role oraz odpowiedzialności}
+Zespół projektowy składa się z jednej osoby -- autora pracy inżynierskiej. Opierając się na wstępnej analizie problemu można wyróżnić następujące role i ich odpowiedzialności:
+\begin{description}
+\item[Kierownik projektu] -- stworzenie harmonogramu prac oraz kontrola jego realizacji
+\item[Lider techniczny] -- wybór technologii użytych przy realizacji systemu
+\item[Analityk] -- kontakt z klientem, uzgodnienie i sformalizowanie wymagań funkcjonalnych i niefunkcjonalnych produktu
+\item[Projektant] -- sporządzenie projektu technicznego systemu: dobór architektury systemu, projekt komponentów oraz interfejsów pomiędzy nimi
+\item[Programista] -- implementacja systemu
+\item[Tester] -- przetestowanie systemu
+\item[Twórca dokumentacji] -- stworzenie dokumentacji
+\end{description}
+
+\subsection{Metodyka pracy}
+Proces tworzenia projektu prowadzony był zgodnie z iteracyjnym modelem wytwarzania oprogramowania. Prace zostały podzielone na szereg iteracji, z których każda miała na celu rozbudowę poprzedniej wersji o nowe funkcjonalności. Efekt każdego przyrostu miał być funkcjonalny oraz przetestowany.
 
 
-\newpage
+Zdecydowano się na wykorzystanie przyrostowego modelu wytwarzania oprogramowania, ponieważ wstępna analiza problemu pokazała, że da się go w naturalny sposób podzielić na kilka iteracji o porównywalnej ilości prac do wykonania. Ponadto zespół projektowy miał już okazję pracować zgodnie z takim modelem, co pokazało że podział pracy na etapy ułatwia pracę nad projektem.
+
+\subsection{Harmonogram prac}
+Przed przystąpieniem do prac opracowano harmonogram. Ze względu na trudności w oszacowaniu, jak długo mogą zająć kolejne iteracje, wyszczególnione zostały dwa duże etapy agregujące po kilka przyrostów. Każdy z tych etapów ma nieprzekraczalny termin. Drugi etap ma na celu dostarczenie gotowego produktu oraz po jego zakończeniu przewidziany jest długi okres czasu na ewentualne poprawki, oraz finalizację projektu.
+
+Prace przebiegały zgodnie z zaplanowanym harmonogramem. Pierwszy etap implementacji udało się zakończyć przed planowanym terminem, w wyniku czego pozostało więcej czasu na realizację etapu drugiego. Szczegółowy terminarz prac można znaleźć w dokumentacji procesowej.
+
+\subsubsection{Pierwszy etap projektu}
+Pierwszy etap ma na celu implementację komunikacji między komputerem a płytką FPGA wraz z obsługą błędów. Po jego zakończeniu układ FPGA ma być zdolny odbierać strumień bloków oraz odsyłać je z powrotem bez żadnych modyfikacji. Błędy transmisji powinny być wykrywane i obsługiwane. Implementacja ma być przystosowana do łatwego zintegrowania z modułem szyfrującym AES oraz sposobem wiązania bloków CBC. Etap pierwszy kończy się 30.06.2016r (koniec VI semestru).
+
+\paragraph{Iteracje pierwszego etapu projektu}
+\begin{enumerate}
+\item Zebranie informacji na temat konwertera USB-UART firmy FTDI i jego sterownikach, sprawdzenie czy jego wykorzystanie do realizacji komunikacji między komputerem a płytką będzie możliwe.
+\item Założenie projektu Quartus, skonfigurowanie pinów, wyprowadzenie sygnałów z układu FTDI do układu FPGA (przy użyciu narzędzia Qsys). Zaimplementowanie modułu odbierającego znaki i odsyłającego je z powrotem.
+\item Zaimplementowanie modułów odpowiedzialnych za serializację i deserializację pomiędzy sygnałem UART a blokiem danych o wielkości 128b.
+\item Zaimplementowanie pierwszej wersji maszyny stanów odpowiedzialnej za sterowanie procesem odbierania i przesyłania bloków.
+\item Dodanie kontroli błędów przy użyciu sumy kontrolnej CRC16.
+\end{enumerate}
+
+\subsubsection{Drugi etap projektu}
+Drugi etap ma na celu implementację szyfrowania i deszyfrowania AES, sposobu wiązania bloków CBC oraz dostarczenie gotowego produktu.Kończy się 30.09.2016r (koniec wakacji).
+\paragraph{Iteracje drugiego etapu projektu}
+\begin{enumerate}
+\item Implementacja modułu szyfrującego blok AES.
+\item Integracja modułu szyfrującego AES oraz implementacja i integracja sposobu łączenia bloków CBC.
+\item Implementacja modułu deszyfrującego blok AES.
+\item Integracja modułu deszyfrującego AES z uwzględnieniem sposobu łączenia bloków CBC.
+\item Przygotowanie karty SD zawierającej skrypt startowy programujący układ FPGA.
+\end{enumerate}
+
+\subsection{Narzędia użyte do zarządzania projektem}
+Do przechowywonia i wersjoniwania kodu źródłowego użyto systemu kontroli wersji Git oraz publicznego repozytorium kodu na stronie \textit{www.github.com}. Pozwoliło to na wygodne zarządzanie kodem źródłowym, wgląd w historię oraz inspekcję po wprowadzeniu zmian do repozytorium. Takie rozwiązanie daje również możliwość łatwego wglądu w kod dla promotora oraz opiekuna projektu.
+
+Ze względu na fakt, że zespół projektowy był jednoosobowy, nie było konieczności używania innych narzędzi do zarządzania i wspomagania procesu wytwarzania oprogramowania. Wszelkie notatki, schematy oraz plany były tworzone odręcznie lub przy pomocy prostych edytorów tekstowych oraz narzędzi graficznych. Takie informacje były przechowywane lokalnie, oraz w razie konieczności były udostępnianie w repozytorium kodu lub wysyłane pocztą elektroniczną.

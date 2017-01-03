@@ -1,5 +1,6 @@
-\subsubsection{Skrypt klienta}
-Skrypt klienta jest implementacją algorytmu przedstawionego w sekcji \ref{przebieg-komunikacji}. Jest napisany w języku python, oraz korzysta z bibliotek:
+\newpage
+\subsection{Skrypt klienta}
+Skrypt klienta jest implementacją algorytmu komunikacji z serwerem szyfrującym (płytką Terasic DE1-SOC) przedstawionego w sekcji \ref{sec:przebieg-komunikacji}. Program przyjmuje od użytkownika tryb działania (szyfrowanie lub deszyfrowanie), klucz szyfrowania, wektor inicjalizacji oraz nazwy plików wejściowego i wyjściowego. Program odczytuje z dysku dane wejściowe, wysyła je do serwera oraz odbiera dane przetworzone i zapisuje je do pliku wynikowego. Jest napisany w języku python, oraz korzysta z bibliotek:
 \begin{description}[noitemsep]
 \item[serial] -- komunikacja przez port szeregowy UART
 \item[threading] -- wielowątkowość związana z jednoczesnym wysyłaniem i odbieraniem bloków
@@ -8,3 +9,8 @@ Skrypt klienta jest implementacją algorytmu przedstawionego w sekcji \ref{przeb
 \item[argparse] -- parsowanie argumentów programu
 \item[re] -- obsługa wyrażeń regularnych
 \end{description}
+
+\subsubsection{Padding}
+Algorytm AES działa na blokach o wielkości 128b. W celu przetwarzania danych o wielkości nie będącej wielokrotnością rozmiaru bloku stosowany jest padding. W tym projekcie należy to do zadań klienta. Używany jest padding metodą dopełniania bloków do rozmiarów 128b bajtami o wartości równej brakującej liczbie bajtów. W celu uniknięcia niejednoznaczności przy usuwaniu wypełnienia, do wiadomości o wielkości będącej wielokrotnością 128b dodawany jest cały blok bajtów o wartości 16. W ten sposób ostatni bajt wiadomości zawsze zawiera liczbę bajtów dopełnienia, co pozwala na jednoznaczne usunięcie paddingu. 
+
+Zastosowana metoda jest jedną ze standardowych praktyk. Została wybrana ze względu na fakt, że jest używana przez program \textit{openssl}, z którym produkt końcowy ma być kompatybilny. Jest zaimplementowana w sposób zgodny ze standardem RFC-2315 \cite{padding-rfc}.

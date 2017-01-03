@@ -1,12 +1,20 @@
 \section{Analiza ryzyka}
 \label{sec:analiza-ryzyka}
+Jedną z czynności przeprowadzonych w fazie przygotowawczej była analiza ryzyka. Zostały określone potencjalne źródła ryzyka oraz opracowane strategie radzenia sobie z nimi.
+
 Proces tworzenia produktu wiąże się z następującymi zagrożeniami:
 \begin{itemize}
-\item Zbyt mała liczba jednostek logicznych w układzie FPGA. Moduły szyfrowania i deszyfrowania AES mogą się okazać zbyt złożone, aby mogły się zmieścić w wybranym układzie FPGA. W takim przypadku konieczne będzie zmniejszenie długości klucza, lub dostarczenie dwóch osobnych produktów - szyfrującego i deszyfrującego.
-\item Brak możliwości użycia układu UART znajdującego się na płytce, które mogą prowadzić do konieczności wykorzystania osobnego konwertera USB-UART. Prowadziłoby to do utrudnienia dla użytkownika końcowego związane z brakiem możliwości połączenia płytki z komputerem przy pomocy jednego kabla USB.
-\item Brak możliwości uruchomienia płytki w taki sposób, aby układ FPGA został skonfigurowany przy starcie. Prowadziłoby to do utrudnienia dla użytkownika końcowego związanego z koniecznością ręcznego programowania płytki.
-\item Problemy związane z niezerowym czasem propagacji sygnału oraz innymi właściwościami fizycznymi układu FPGA, powodującymi niedeterministyczne oraz trudne do wykrycia błędy.
-\item Czynniki losowe opóźniające pracę lub uniemożliwiające ukończenie projektu na czas, np. choroba.
+
+\item Zbyt mała liczba jednostek logicznych w układzie FPGA. Moduły szyfrowania i deszyfrowania AES mogą się okazać zbyt złożone, aby mogły się zmieścić w wybranym układzie FPGA. W takim przypadku w celu zmniejszenia złożoności projektu można będzie podjąć następujące kroki:
+	\begin{itemize}
+	\item zmniejszenie długości klucza szyfrowania
+	\item zmiana projektu modułów szyfrujących i deszyfrujących -- zastosowanie przetwarzania synchronicznego, w którym rundy szyfrowania wykonywane są w kolejnych cyklach zegara przez ten sam fragment układu
+	\item dostarczenie dwóch osobnych produktów - szyfrującego i deszyfrującego
+	\end{itemize}
+\item Brak możliwości użycia układu UART znajdującego się na płytce, co może prowadzić do konieczności wykorzystania osobnego konwertera USB-UART. Spowodowałoby to do utrudnienia dla użytkownika końcowego związane z koniecznością użycia zewnętrznego konwertera. W przypadku wystąpienia takiego scenariusza wszystkie konieczne do wykonania czynności zostaną dokładnie opisane w dokumentacji użytkownika.
+\item Brak możliwości uruchomienia płytki w taki sposób, aby układ FPGA został automatycznie zaprogramowany przy starcie. Prowadziłoby to do utrudnienia dla użytkownika końcowego związanego z koniecznością ręcznego programowania płytki. W przypadku wystąpienia takiego scenariusza wszystkie konieczne do wykonania czynności zostaną dokładnie opisane w dokumentacji użytkownika.
+\item Problemy związane z niezerowym czasem propagacji sygnału oraz innymi właściwościami fizycznymi układu FPGA, powodującymi niedeterministyczne oraz trudne do wykrycia błędy. Aby temu zapobiec w projekcie zostaną skonfigurowane ograniczenia czasowe (ang. \textit{timing constraints}).
+\item Czynniki losowe opóźniające pracę lub uniemożliwiające ukończenie projektu na czas, np. choroba. W celu minimalizacji skutków takich sytuacji w harmonogramie prac zostanie przewidziany czas przeznaczony na nadrobienie zaległości.
 \item Uszkodzenie sprzętu ze względu na wadę produkcyjną lub niekompetencję zespołu projektowego.
 \end{itemize}
 

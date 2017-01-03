@@ -1,8 +1,20 @@
 \section{Informacje wstępne}
 \label{sec:infornacje-wstepne}
 
+Celem projektu jest sprzętowa implementacja algorytmu szyfrowania symetrycznego AES oraz jego praktyczne uruchomienie w układzie programowalnym FPGA.
+
 \subsection{Płytka Terasic DE1-SOC}
-Układ FPGA Altera Cyclone V na płytce Terasic DE1-SOC posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
+Do zrealizowania projektu została wybrana płytka prototypowa Terasic DE1-SOC (rys. \ref{fig:fpga-board}), która jest wyposażona w układ FPGA firmy Altera z serii Cyclone V.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth]{pictures/fpga-board.jpg}
+\caption{Płytka Terasic DE1-SOC}
+\label{fig:fpga-board}
+\end{figure}
+
+
+Układ FPGA znajdujący się na wybranej płytce posiada zintegrowany procesor ARM (HPS, ang. \textit{Hard Processor System}). Dzięki temu możliwe jest m.in. uruchomienie systemu operacyjnego Linux. Między programowalną częścią układu a procesorem ARM jest interfejs umożliwiający szybką komunikacją. Pozwala to m.in. na skonfigurowanie układu FPGA jako karty graficznej i korzystania z systemu operacyjnego w trybie graficznym. Istotnymi dla tego projektu właściwościami takiego połączenia są:
 \begin{enumerate}
 \item Nie wszystkie urządzenia peryferyjne są podłączone bezpośrednio do programowalnej części układu FPGA -- niektóre są podłączone do procesora ARM. Powoduje to, że aby uzyskać dostęp do ich sygnałów z FPGA, wymagana jest dodatkowa konfiguracja multipleksacji pinów przeprowadzona przez preloader podczas procedury startowej. Konwerter USB-UART firmy FTDI jest przykładem układu peryferyjnego, który jest podłączony do procesowa ARM i wymaga takie konfiguracji.
 \item Obecność procesora ARM umożliwia wykonanie przy starcie płytki skryptów zdefiniowanych przez użytkownika i umieszczonych na karcie SD. Przykładem zastosowania jest programowanie układu FPGA przy starcie układu.
@@ -20,12 +32,13 @@ Proces startowania płytki składa się z czterech faz \cite[p. 1068]{altera-vol
 
 
 \subsection{Transmisja UART}
+\label{sec:uart-parametry}
 Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) jest protokołem umożliwiającym dwustronną szeregową transmisję danych. Wykorzystywany jest m.in. w standardzie RS-232. Najprostsza wersja składa się z dwóch sygnałów RX i TX, po jednym dla każdego z kierunków transmisji. UART umożliwia wybór parametrów transmisji. W tym projekcie zostały użyte następujące parametry:
 \begin{enumerate}[noitemsep]
 \item Szybkość transmisji: 115200 baud
 \item 1 bit startu
 \item 1 bit stopu
-\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 (ang. \textit{cyclic redundancy check}) całych bloków danych (patrz rozdział \ref{crc}).
+\item Brak kontroli bitu parzystości -- kontrola poprawności odebranych danych realizowana jest przy pomocy obliczania sumy kontrolnej CRC16 (ang. \textit{cyclic redundancy check}) całych bloków danych (patrz rozdział \ref{sec:crc16}).
 \item Bity w bajcie przesyłane są od najmłodszego -- \textit{LSB first}
 \end{enumerate}
 
@@ -41,7 +54,20 @@ Protokół UART (ang. \textit{Universal Asynchronous Receiver and Transmitter}) 
 \label{fig:uart-frame}
 \end{figure}
 
-Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący format przedstawiony na rysunku \ref{fig:uart-frame}.
+\newpage
+Wybrana konfiguracja parametrów powoduje, że ramka UART ma format przedstawiony na rysunku \ref{fig:uart-frame}. Pozwala ona również na transmisję z prędkością:
+
+\begin{equation*}
+115200 BAUD * 8 / 10 = 92160 b/sek
+\end{equation*}
+
+Po uwzględnieniu narzutu związanego z kontrolą poprawniści CRC16 (2 bajty CRC + 1 bajt ACK na każdy 128-bajtowy blok danych, rozdz. \ref{sec:crc16}), kanał komunikacyjny będzie w stanie przesyłać dane z prędkością:
+
+\begin{equation*}
+92160 b/sek * 128 / 131 = 90049 b/sek \approx 11,2 KB/sek 
+\end{equation*}
+
+Taka prędkość transmisji pozwoli na zaszyfrowanie pliku o wielkości 1MB w czasie 90 sekund. Występujące błędy transmisji dodatkowo spowolnią szyfrowanie.
 
 \subsection{Kolejność bitów i bajtów}
 \begin{itemize}
@@ -56,28 +82,31 @@ Wybrana konfiguracja parametrów powoduje, że ramka UART ma następujący forma
 W celu poprawy czytelności rysunków przebiegów czasowych w dokumentacji będzie pojawiał się umowny zegar \textit{CLK\_UART}. Dla wygody czytelnika została również wprowadzona konwencja kolorystyczna sygnałów.
 
 \subsubsection{Zegar \textit{CLK\_UART}}
-Głównym sygnałem zegarowym układu jest \textit{CLK\_16} (patrz rozdział \ref{clk-16}). Ze względu na jego szybką zmienność przedstawienie go na niektórych przebiegach czasowych nie jest możliwe. W takich przypadkach będzie on zastąpiony umownym sygnałem \textit{CLK\_UART} o częstotliwości $f_{CLK\_UART}$.
+Głównym sygnałem zegarowym układu jest \textit{CLK\_16} (rozdz. \ref{sec:clk-16}). Ze względu na jego szybką zmienność przedstawienie go na niektórych przebiegach czasowych nie jest możliwe. W takich przypadkach będzie on zastąpiony umownym sygnałem \textit{CLK\_UART} o częstotliwości $f_{CLK\_UART}$.
 \begin{equation*}
 f_{CLK\_UART} = \frac{f_{CLK\_16}}{16} = UART\_BAUD\_RATE
 \label{eq:clk-uart-freq}
 \end{equation*}
-gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. Zbocza rosnące tego zegara będą pokrywać się ze zboczami sygnałów UART rozpoczynających transmitowane bity, a zarazem zboczami rosnącymi zegara \textit{CLK\_16} (patrz rysunek \ref{fig:clks-relation}). 
+gdzie \textit{UART\_BAUD\_RATE} jest szybkością transmisji sygnału UART wyrażoną w baudach. 
 
 \begin{figure}[!h]
 \centering
 \begin{tikztimingtable}
   \textit{CLK\_16}   & c 16{cc}     16{cc}       7{c}       \\
   \textit{CLK\_UART} & c 2{16c}     2{16c}       7c         \\
-  \textit{RX}        & h 16J{Start} 16D{DATA[0]} 7d{Data[1]}\\
 \extracode
 \tablerules
 \vertlines[red]{0.5}
+\vertlines[red]{8.5}
+\vertlines[red]{16.5}
+\vertlines[red]{24.5}
+\vertlines[red]{32.5}
 \end{tikztimingtable}
 \caption{Relacja między zegarami \textit{CLK\_16} i \textit{CLK\_UART}}
 \label{fig:clks-relation}
 \end{figure}
 
-Równoczesne występowanie zbocz sygnałów UART oraz zegara \textit{CLK\_16} wynika z faktu, że sygnały UART są zsynchronizowane z tym zegarem (patrz rozdział \ref{uart-sync}).
+Zbocza rosnące i malejące zegara \textit{CLK\_UART} będą się pokrywać ze zboczami rosnącymi zegara \textit{CLK\_16} (rys. \ref{fig:clks-relation}). 
 
 \subsubsection{Konwencje kolorystyczne i nazewnicze sygnałów}
 W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą zaznaczane kolorem \insignal{zielonym}, a wyjściowych kolorem \outsignal{czerwonym}. Sygnał \textit{CLK\_UART}, który zawsze będzie występował jako sygnał wejściowy, będzie zaznaczany kolorem \helpsignal{pomarańczowym}.
@@ -86,7 +115,7 @@ W tekscie dokumentacji oraz na przebiegach nazwy sygnałów wejściowych będą 
 Wektory sygnałów będą oznaczane poprzez dodanie ich zakresu w nawiasach kwadratowych na końcu nazwy, np. \textit{BYTE[7:0]} jest wektorem ośmiu sygnałów.
 
 
-Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \textit{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas 2048 razy mniejszy niż czas w którym sygnał \textit{BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
+Ze względu na fakt, że niektóre sygnały zmieniają się o wiele szybciej od innych, poprawne zachowanie wszystkich proporcji czasowych na rysunkach jest niemożliwe. Przykładem jest sygnał \textit{BYTE[7:0]}, który przyjmuje wartość {'1'} na czas 2048 razy mniejszy niż czas w którym sygnał \textit{AES\_BLOCK[127:0]} pozostaje niezmienny. W takich sytuacjach, proporcje czasowe przedstawione na przebiegach mogą być zaburzone. Kolejność występowania zdarzeń (zmian wartości sygnałów) będzie bezwzględnie zachowana.
 
 
 Wszystkie moduły mają zaimplementowany asynchroniczny sygnał \insignal{RESET\_N}. W celu poprawy czytelności nie będzie on uwzględniany na przebiegach czasowych oraz schematach.

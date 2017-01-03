@@ -1,5 +1,25 @@
-\subsubsection{Moduł deserializujący bajty UART do bloków AES}
-Interfejs modułu deserializującego bajty UART do bloków AES \textit{block\_deserializer}:
+\subsection{Moduł deserializujący bajty UART do bloków AES}
+\label{sec:block-deserializer}
+Moduł \textit{block\_deserializer} na podstawie odebranych przez moduł \textit{uart\_rx} bajtów formuje bloki AES oraz sprawdza ich poprawność przy pomocy sumy kontrolnej \textit{CRC16}.
+
+\begin{figure}[!h]
+\begin{lstlisting}[style=vhdl, captionpos=b, caption={\textit{block\_deserializer} -- interfejs modułu}]
+port (
+	reset_n               : in  std_logic;
+	clk_16                : in  std_logic;
+
+	rx_byte               : in  std_logic_vector(byte_bits - 1 downto 0);
+	rx_start_listening    : out std_logic;
+	rx_finished_listening : in  std_logic;
+
+	aes_block             : out std_logic_vector(block_bits - 1 downto 0);
+	start_listening       : in  std_logic;
+	finished_listening    : out std_logic;
+	correct               : out std_logic);
+\end{lstlisting}
+\end{figure}
+
+Opis sygnałów interfejsu modułu \textit{block\_deserializer}:
 \begin{interface}{RX\_FINISHED\_LISTENING}
 	\item[\insignal{CLK\_16}] główny zegar układu.
 
@@ -8,15 +28,16 @@ Interfejs modułu deserializującego bajty UART do bloków AES \textit{block\_de
 	\item[\insignal{RX\_FINISHED\_LISTENING}] sygnał pochodzący z komponentu \textit{uart\_rx}.
 
 	\item[\insignal{START\_LISTENING}] sygnał wprowadzający komponent w stan oczekiwania na blok.
-	\item[\outsignal{BLOCK[127:0]}] odebrany blok AES. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
+	\item[\outsignal{AES\_BLOCK[127:0]}] odebrany blok AES. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
 	\item[\outsignal{FINISHED\_LISTENING}] sygnał informujący o zakończeniu odbierania bloku AES oraz gotowość na otrzymanie kolejnego sygnału \insignal{START\_LISTENING} podczas następnego zbocza rosnącego zegara \insignal{CLK\_16}.
 	\item[\outsignal{CORRECT}] sygnał określający, czy transmisja bloku AES przebiegła bez błędów. Stabilność sygnału jest gwarantowana, gdy \outsignal{FINISHED\_LISTENING} jest w stanie wysokim.
 \end{interface}
 
-Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie na transmisję. Odbieranie bajtów bloku danych wykonywane jest przez przez moduł \textit{uart\_rx}. Kolejność ułożenia bajtów w bloku \outsignal{BLOCK[127:0]} jest zgodna ze standardem AES. W trakcie odbierania obliczana jest suma kontrolna \textit{CRC16}. Po 128 bajtach bloku danych przesyłane są 2 bajty zawierające oczekiwaną, obliczoną po stronie klienta sumę kontrolną. Jeśli jest ona zgodna z tą obliczaną na bieżąco przez moduł, sygnał \outsignal{CORRECT} przyjmuje wartość {'1'}, w przeciwnym wypadku wartość {'0'}. Po odebraniu 130 bajtów moduł zwraca blok \outsignal{BLOCK[127:0]} wraz z informacją o jego poprawności \outsignal{CORRECT} oraz sygnalizuje gotowość na rozpoczęcie nasłuchiwania na kolejne bloki \outsignal{FINISHED\_LISTENING}.
+Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwanie początku transmisji (rys. \ref{fig:block-deserializer-start}). Odbieranie bajtów bloku danych wykonywane jest przez moduł \textit{uart\_rx}. Kolejność ułożenia bajtów w bloku \outsignal{AES\_BLOCK[127:0]} jest zgodna ze standardem AES. W trakcie odbierania obliczana jest suma kontrolna \textit{CRC16} (rozdz. \ref{sec:crc16}). Po 128 bajtach bloku danych odbierane są 2 bajty zawierające oczekiwaną, obliczoną po stronie klienta sumę kontrolną (rys. \ref{fig:block-deserializer-block}). Jeśli jest ona zgodna z tą obliczaną na bieżąco przez moduł, sygnał \outsignal{CORRECT} przyjmuje wartość {'1'}, w przeciwnym wypadku wartość {'0'}. Po odebraniu 130 bajtów moduł zwraca blok \outsignal{AES\_BLOCK[127:0]} wraz z informacją o jego poprawności \outsignal{CORRECT} oraz sygnalizuje gotowość na rozpoczęcie nasłuchiwania na kolejne bloki \outsignal{FINISHED\_LISTENING} (rys. \ref{fig:block-deserializer-finish}).
 
-\begin{figure}[!h]
-	\centering
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
 	\begin{tikztimingtable}[timing/wscale=0.95]
 	\insignal{CLK\_16}          & 3{cc}  16{cc}           16{cc}         \\
 	\outsignal{RX\_START\_LIST} & LH     15LH             15LH           L\\
@@ -26,40 +47,48 @@ Po otrzymaniu sygnału \insignal{START\_LISTENING} moduł rozpoczyna nasłuchiwa
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{block\_deserializer} -- rozpoczęcie odbierania}
-\end{figure}
+}
+\captionof{figure}{\textit{block\_deserializer} -- rozpoczęcie odbierania}
+\label{fig:block-deserializer-start}
+\end{center}
 
-\begin{figure}[!h]
-	\centering
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
 	\begin{tikztimingtable}[timing/wscale=0.95]
-	\insignal{CLK\_16}          & 3{cc}          16{cc}       16{cc}             \\
-	\outsignal{RX\_START\_LIST} & 2LH            15LH         16L                \\
-	\insignal{RX\_BYTE[7:0]}    & LD{BLOCK[127]} 15LD{CRC[0]} 15LD{CRC[1]}       L\\
-	\insignal{RX\_FIN\_LIST}    & LH             15LH         15LH               L\\
-	\outsignal{BLOCK[127:0]}    & 3L             15L          15LD{BLOCK[127:0]} L\\
-	\outsignal{FIN\_LIST}       & 3L             15L          15LH               L\\
-	\outsignal{CORRECT}         & 3L             15L          15LH               L\\
+	\insignal{CLK\_16}            & 3{cc}          16{cc}       16{cc}             \\
+	\outsignal{RX\_START\_LIST}   & 2LH            15LH         16L                \\
+	\insignal{RX\_BYTE[7:0]}      & LD{BLOCK[127]} 15LD{CRC[0]} 15LD{CRC[1]}       L\\
+	\insignal{RX\_FIN\_LIST}      & LH             15LH         15LH               L\\
+	\outsignal{AES\_BLOCK[127:0]} & 3L             15L          15LD{BLOCK[127:0]} L\\
+	\outsignal{FIN\_LIST}         & 3L             15L          15LH               L\\
+	\outsignal{CORRECT}           & 3L             15L          15LH               L\\
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{block\_deserializer} -- zakończenie odbierania}
-\end{figure}
+}
+\captionof{figure}{\textit{block\_deserializer} -- zakończenie odbierania}
+\label{fig:block-deserializer-finish}
+\end{center}
 
-\begin{figure}[!h]
-	\centering
+\begin{center}
+\centering
+\resizebox{\textwidth}{!}{
 	\begin{tikztimingtable}
-	\helpsignal{CLK\_UART}      & 1.5l  130{0.25c0.25c}    l \\
-	\outsignal{RX\_START\_LIST} & l     130{0.5lg}      1.5l \\
-	\insignal{RX\_BYTE[7:0]}    & 1.5l  130{0.5lg}         l \\
-	\insignal{RX\_FIN\_LIST}    & 1.5l  130{0.5lg}         l \\
-	\insignal{START\_LIST}      & l         0.5lg        66l \\
-	\outsignal{BLOCK[127:0]}    & 66.5l         g          l \\
-	\outsignal{FIN\_LIST}       & 66.5l         g          l \\
-	\outsignal{CORRECT}         & 66.5l         g          l \\
+	\helpsignal{CLK\_UART}           & 1.5l  130{0.25c0.25c}    l \\
+	\outsignal{RX\_START\_LIST}      & l     130{0.5lg}      1.5l \\
+	\insignal{RX\_BYTE[7:0]}         & 1.5l  130{0.5lg}         l \\
+	\insignal{RX\_FIN\_LIST}         & 1.5l  130{0.5lg}         l \\
+	\insignal{START\_LIST}           & l         0.5lg        66l \\
+	\outsignal{AES\_BLOCK[127:0]}    & 66.5l         g          l \\
+	\outsignal{FIN\_LIST}            & 66.5l         g          l \\
+	\outsignal{CORRECT}              & 66.5l         g          l \\
 	\extracode
 	\tablerules
 	\end{tikztimingtable}
-\caption{\textit{block\_deserializer} -- odbieranie całego bloku}
-\end{figure}
+}
+\captionof{figure}{\textit{block\_deserializer} -- odbieranie bloku oraz sumy kontrolnej CRC16}
+\label{fig:block-deserializer-block}
+\end{center}
 
 

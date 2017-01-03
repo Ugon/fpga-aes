@@ -1,8 +1,29 @@
 \section{Zakres funkcjonalności}
 \label{sec:zakres-funkcjonalnosci}
 
-\emph{Kontekst użytkowania produktu (aktorzy, współpracujące systemy)
-  oraz najważniejsze wymagania funkcjonalne i niefunkcjonalne.}
+Produkt jest przeznaczony dla użytkowników komputerów chcących zabezpieczyć swoje pliki przed odczytaniem przez niepowołane osoby. System dostarczy możliwości szyfrowania danych algorytmem AES przy użyciu klucza o długości 256b podanego przez użytkownika. Program będzie łatwy w użyciu.
+
+Jedynym \textbf{aktorem} w kontekście systemu jest użytkownik końcowy chcący zaszyfrować swój plik. Produkt nie wchodzi w interakcję z żadnym zewnętrznym systemem.
+
+\subsection{Wymagania funkcjonalne}
+\begin{enumerate}
+\item System umożliwia szyfrowanie i deszyfrowanie plików
+\item Szyfrowanie bloków zgodne ze standardem NIST FIPS-197 \cite{aes-standard}
+\item Szyfrowanie kluczem o długości 256b
+\item Tryb wiązania bloków zaszyfrowanych CBC zgodny ze standardem NIST SP 800-38A \cite{cbc-standard}
+\item Sposób szyfrowania powinien być kompatybilny z programem \textit{openssl aes-256-cbc} 
+\item Transmisja danych między komputerem a układem FPGA powinna być realizowana w sposób wolny od błędów
+\end{enumerate}
+
+\subsection{Wymagania niefunkcjonalne}
+\begin{enumerate}
+\item System jest łatwy w obsłudze
+\item Program współpracuje z systemem operacyjnym Ubuntu
+\item Sposób uruchomienia programu analogiczny do programu \textit{openssl}
+\item Dostarczenie dokumentacji technicznej, procesowej i użytkownika
+
+\end{enumerate}
+
 
 
 \newpage

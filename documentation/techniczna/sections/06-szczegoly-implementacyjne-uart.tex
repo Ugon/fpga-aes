@@ -1,0 +1,11 @@
+\section{Szczegóły implementacyjne -- komunikacja}
+\label{sec:szczegoly-implementacyjne-uart}
+Komunikacja między klientem (komputerem PC) a serwerem (płytką z układem FPGA) jest realizowana zgodnie z protokołem UART. Zaimplementowane zostały moduły odpowiadające za obsługę takiej komunikacji. Stworzone zostały również moduły odbierające i wysyłające bloki AES, oraz sterujące procesem komunikacji, kontroli błędów oraz szyfrowania i deszyfrowania.
+
+\input{sections/modules/uart_rx}
+\input{sections/modules/uart_tx}
+\input{sections/modules/block_deserializer}
+\input{sections/modules/block_serializer}
+\input{sections/modules/crc16}
+\input{sections/modules/communicator}
+\input{sections/modules/client}

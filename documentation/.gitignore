@@ -23,8 +23,11 @@
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+*.lol
 
 *.pdf
 !common/agh.pdf
-!techniczna/communicator.pdf
+!techniczna/pictures/2ff.pdf
+!techniczna/pictures/communicator.pdf
+
 

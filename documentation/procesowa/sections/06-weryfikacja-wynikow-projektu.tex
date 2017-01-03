@@ -1,0 +1,36 @@
+\section{Weryfikacja wyników projektu}
+\label{sec:weryfikacja-wynikow-projektu}
+Celem projektu było zaimplementowanie sprzętowego układu szyfrującego algorytmem AES na platformie FPGA, oraz praktyczne zaprezentowanie jego działania. Realizacja zadania zakończyła się sukcesem.
+
+\subsection{Przeprowadzone testy}
+W celu sprawdzenia poprawności działania implementowanych funkcjonalności na etapie rozwoju oraz po zakończeniu prac prowadzone zostały szczegółowe testy.
+
+\paragraph{Testy jednostkowe} polegające na wykonywaniu symulacji działania układu były wykonywane na etapie implementacji. Pozwalały na monitorowaniu zachowania modułów w izolacji przy pomocy symulacji funkcyjnych. Pozwalały na weryfikację poprawności implementowanych funkcjonalności oraz umożliwiały szybkie znajdowanie i naprawę błędów.
+
+\paragraph{Testy integracyjne} sprawdzały działanie całego systemu (programu komputerowego, transmisji danych oraz układu FPGA). Przeprowadzane były na płytce Terasic DE1-SOC, której FPGA był zaprogramowany testowanym układem. Polegały na uruchamianiu na komputerze skryptu klienta, który wysyłał do FPGA porcje danych oraz odbierał ich przetworzoną wersję. Weryfikacja wyników polegała na porównaniu zaszyfrowanych danych z wartościami oczekiwanymi. Testy integracyjne były przeprowadzane:
+\begin{itemize}
+\item Na etapie implementacji podczas iteracji pierwszego etapu projektu w celu znalezienia i naprawy błędów związanych z transmisją danych i obsługą błędów
+\item Na etapie implementacji podczas iteracji drugiego etapu projektu w celu znalezienia i naprawy błędów związanych z szyfrowaniem, deszyfrowaniem oraz trybem wiązania bloków CBC
+\item Po zakończeniu każdej iteracji w celu sprawdzenia, czy efekt końcowy przyrostu spełnia wszystkie oczekiwania
+\end{itemize}
+
+\paragraph{Testy akceptacyjne} miały na celu sprawdzenie zgodności gotowego produktu z wymaganiami. Weryfikowały, czy szyfrowanie oraz deszyfrowanie przebiega bezbłędnie poprzez porównywanie wyników działania produktu z wynikami zwracanymi przez program \textit{openssl}. Szyfrowane i deszyfrowane były pliki losowych danych o różnej długości. Testy akceptacyjne wykazały, że  produkt końcowy spełnia wszystkie wymagania i jest wolny od błędów.
+
+\paragraph{Testy obciążeniowe} zostały przeprowadzone w celu sprawdzenia stabilności układu pod długotrwały obciążeniem. Polegały na szyfrowaniu i deszyfrowaniu dużych plików, których przetworzenie zajmowało wiele godzin. Testy wykazały, że produkt jest zdolny do długotrwałego, nieprzerwanego przetwarzania danych.
+
+\paragraph{Testy wydajnościowe} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+
+\subsection{Ocena produktu}
+Produkt końcowy spełnia wszystkie postawione wymagania:
+\begin{itemize}
+\item Szyfrowanie bloków kluczem o długości 256b jest zaimplementowane i działa zgodnie ze standardem NIST FIPS-197 \cite{aes-standard}
+\item Używany jest tryb wiązania bloków CBC zgodny ze standardem NIST SP 800-38A \cite{cbc-standard}
+\item Program konsolowy jest przystosowany do działania w środowisku Linux oraz sposób jego uruchomienia jest analogiczny do programu \textit{openssl}
+\item Sposób szyfrowania jest kompatybilny z programem \textit{openssl aes-256-cbc} 
+\item Transmisja danych między komputerem a układem FPGA jest realizowana w sposób wolny od błędów
+\item Produkt końcowy jest łatwy w obsłudze
+\end{itemize}
+
+Projekt jest w pełni funkcjonalny oraz może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Jednym z proponowanych usprawnień jest zastąpienie tego protokołu komunikacji bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT. Proponowane sposoby rozwoju są bardziej szczegółowo opisane w dokumentacji technicznej.
+
+\newpage

@@ -14,6 +14,8 @@
 \usepackage{algorithm2e} 
 \usepackage{courier}
 \usepackage{svg}
+\usepackage{environ}
+\usepackage{verbatim}
 
 \usetikzlibrary{automata}
 \usetikzlibrary{arrows}
@@ -106,26 +108,30 @@
         variable,
         wait,
         when,
-        while
+        while,
+        xor
     },
     morekeywords=[2]{
         std_logic,
         std_logic_vector,
-        Integer
+        Integer,
+        aes_state
     },
-    morecomment=[l]--
+    morecomment=[l]{--},
+    morecomment=[s]{/*}{*/}
 }
 
 \lstdefinestyle{vhdl}{
    language     = VHDL,
    basicstyle   = \footnotesize \ttfamily,
    keywordstyle = [1]\color{blue!100!black!80}\bfseries,
-   keywordstyle = [2]\color{Lavender}\bfseries,
+   keywordstyle = [2]\color{Red}\bfseries,
    commentstyle = \color{green!80!black!90},
    breaklines   = true,
    tabsize      = 3
 }
 
+\renewcommand\lstlistlistingname{Spis listingów}
 
 \author{Wojciech Pachuta}
 

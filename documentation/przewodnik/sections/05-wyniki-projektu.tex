@@ -1,12 +1,70 @@
 \section{Wyniki projektu}
 \label{sec:wyniki-projektu}
 
-\emph{Najważniejsze wyniki (co konkretnie udało się uzyskać:
-  oprogramowanie, dokumentacja, raporty z testów/wdrożenia, itd.)
-  i ocena ich użyteczności (jak zostało to zweryfikowane --- np.\ wnioski
-  klienta/użytkownika, zrealizowane testy wydajnościowe, itd.),
-  istniejące ograniczenia i propozycje dalszych prac.}
+% \emph{Najważniejsze wyniki (co konkretnie udało się uzyskać:
+  % oprogramowanie, dokumentacja, raporty z testów/wdrożenia, itd.)
+  % i ocena ich użyteczności (jak zostało to zweryfikowane --- np.\ wnioski
+  % klienta/użytkownika, zrealizowane testy wydajnościowe, itd.),
+  % istniejące ograniczenia i propozycje dalszych prac.}
+
+Celem projektu było zaimplementowanie sprzętowego układu szyfrującego algorytmem AES na platformie FPGA, oraz praktyczne zaprezentowanie jego działania. Realizacja zadania zakończyła się sukcesem.
+
+\subsection{Ocena produktu}
+Produkt końcowy spełnia wszystkie postawione wymagania:
+\begin{itemize}
+\item Szyfrowanie bloków kluczem o długości 256b jest zaimplementowane i działa zgodnie ze standardem NIST FIPS-197 \cite{aes-standard}
+\item Używany jest tryb wiązania bloków CBC zgodny ze standardem NIST SP 800-38A \cite{cbc-standard}
+\item Program konsolowy jest przystosowany do działania w środowisku Linux oraz sposób jego uruchomienia jest analogiczny do programu \textit{openssl}
+\item Sposób szyfrowania jest kompatybilny z programem \textit{openssl aes-256-cbc} 
+\item Transmisja danych między komputerem a układem FPGA jest realizowana w sposób wolny od błędów
+\item Produkt końcowy jest łatwy w obsłudze
+\end{itemize}
+
+Przedsięwzięcie projektowe zostało zakończone sukcesem. W trakcie realizacji udało się rozwiązać wszystkie napotkane problemy, dzięki czemu wszystkie postawione wymagania zostały w pełni zrealizowane.
+
+\subsection{Przeprowadzone testy}
+W celu sprawdzenia poprawności działania implementowanych funkcjonalności na etapie rozwoju oraz po zakończeniu prac prowadzone zostałyszczegółowe testy.
+
+\paragraph{Testy jednostkowe} polegające na wykonywaniu symulacji działania układu były wykonywane na etapie implementacji. Pozwalały na monitorowaniu zachowania modułów w izolacji przy pomocy symulacji funkcyjnych. Pozwalały na weryfikację poprawności implementowanych funkcjonalności oraz umożliwiały szybkie znajdowanie i naprawę błędów.
+
+\paragraph{Testy integracyjne} sprawdzały działanie całego systemu (programu komputerowego, transmisji danych oraz układu FPGA). Przeprowadzane były na płytce Terasic DE1-SOC, której FPGA był zaprogramowany testowanym układem. Polegały na uruchamianiu na komputerze skryptu klienta, który wysyłał do FPGA porcje danych oraz odbierał ich przetworzoną wersję. Weryfikacja wyników polegała na porównaniu zaszyfrowanych danych z wartościami oczekiwanymi. Testy integracyjne były przeprowadzane:
+\begin{itemize}
+\item Na etapie implementacji podczas iteracji pierwszego etapu projektu w celu znalezienia i naprawy błędów związanych z transmisją danych i obsługą błędów
+\item Na etapie implementacji podczas iteracji drugiego etapu projektu w celu znalezienia i naprawy błędów związanych z szyfrowaniem, deszyfrowaniem oraz trybem wiązania bloków CBC
+\item Po zakończeniu każdej iteracji w celu sprawdzenia, czy efekt końcowy przyrostu spełnia wszystkie oczekiwania
+\end{itemize}
+
+\paragraph{Testy akceptacyjne} miały na celu sprawdzenie zgodności gotowego produktu z wymaganiami. Weryfikowały, czy szyfrowanie oraz deszyfrowanie przebiega bezbłędnie poprzez porównywanie wyników działania produktu z wynikami zwracanymi przez program \textit{openssl}. Szyfrowane i deszyfrowane były pliki losowych danych o różnej długości. Testy akceptacyjne wykazały, że  produkt końcowy spełnia wszystkie wymagania i jest wolny od błędów.
+
+\paragraph{Testy obciążeniowe} zostały przeprowadzone w celu sprawdzenia stabilności układu pod długotrwały obciążeniem. Polegały na szyfrowaniu i deszyfrowaniu dużych plików, których przetworzenie zajmowało wiele godzin. Testy wykazały, że produkt jest zdolny do długotrwałego, nieprzerwanego przetwarzania danych. 
+
+\paragraph{Testy wydajnościowe} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+
+\subsection{Możliwości rozwoju}
+Otrzymany produkt końcowy może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Najważniejszym z proponowanych usprawnień jest zastąpienie tego protokołu komunikacji bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT.
+
+\subsubsection{Prędkość transmisji}
+Zastosowanie w projekcie protokołu UART do komunikacji ma negatywny wpływ na wydajność produktu. Zastosowane parametry transmisji (115200 baud, 1 bit stopu, brak bitu parzystości) oraz narzut na komunikację związany z koniecznością kontroli poprawności przesyłanych danych powoduje, że maksymalna prędkość transmisji danych wynosi jedynie 1MB/100s. Jest to ograniczenie wynikające wyłącznie z wybranego sposobu komunikacji. Wydajność modułu szyfrującego i deszyfrującego jest o wiele wyższa. Produkt można usprawnić stosując inny protokół komunikacji, który pozwoliłby na osiąganie wyższych prędkości transmisji danych.
+
+Istnieją układy FPGA, które są zintegrowane z procesorem ARM (np. układ Altera Cyclone V na płytce Terasic DE1-SOC, która była użyta w tym projekcie). Posiadają one szybki interfejs między HPS a programowalną częścią układu. Przykładem zastosowania takiego połączenia jest uruchomienie systemu operacyjnego na procesorze ARM oraz zaprogramowanie i wykorzystanie części FPGA jako sprzętowego układu szyfrującego. Wydajność takiego rozwiązania niewątpliwie nie była by tak drastycznie ograniczona przez prędkość transmisji.
+
+\subsubsection{Implementacja modułu szyfrującego}
+W tym projekcie moduł szyfrujący jest asynchroniczny -- nie jest taktowany zegarem. Wydajność takiego rozwiązania można poprawić stosując potokowość (ang. \textit{pipelining}) -- zaprojektować układ synchroniczny, który w każdym takcie zegara wykonuje pewien fragment procesu szyfrowania, dla wielu bloków jednocześnie. Przykładem podziału procesu szyfrowania na etapy może być podział na rundy -- moduł szyfruje jednocześnie wiele bloków, każdy w innej rundzie.
+
+Można również rozważyć zaprojektowanie modułu, który byłby mniej skomplikowany i zużywał mniej programowalnych jednostek układu FPGA. Większość procesu szyfrowania AES to powtarzanie tej samej operacji (rundy). Można zaprojektować synchroniczny układ szyfrujący tak, aby szyfrowanie trwało wiele taktów zegara, oraz w każdym takcie stan był modyfikowany przez ten sam układ logiczny. Zmniejszyłoby to zapotrzebowanie na zasoby, ale mogłoby to pogorszyć szybkość szyfrowania.
+
+\subsubsection{Poprawa obsługi błędów}
+Obecnie moja implementacja komunikacji obsługuje jedynie błędy związane z przekłamaniem bitów danych podczas transmisji UART. Nie są obsługiwane błędy związane ze złym formatem ramki UART (ang. \textit{framing error}). Wystąpienie takich błędów może spowodować zawieszenie układu. Zaimplementowany został przycisk reset, który przywraca układ do stanu początkowego, który jest sposobem na wyprowadzenie układu z zawieszenia. Takie rozwiązanie można poprawić implementując obsługę błędów formatu ramki, np. timeout. Wyeliminowałoby by to konieczność ręcznego resetowania układu w przypadku wystąpienia błędu.
+
+Błędy związane ze złym formatem ramki mogą wystąpić, jednak podczas testowania nie zostały zaobserwowane.
+
+\subsubsection{Integracja z procesorem}
+Obecnie popularne procesory są wyposażone w zestaw instrukcji AES-NI przeznaczonych do szyfrowania AES \cite{aes-processors}. Przykładem takich jednostek są procesory Intel (począwszy od architektury Westmere -- 2010r.) oraz AMD (począwszy od architektury Bulldozer -- 2011r.) Propozycją polepszenia wydajności lub zmniejszenia poboru prądu podczas szyfrowania AES jest wyposażenie procesorów w zintegrowany sprzętowy układ szyfrujący, podobnie jak to ma miejsce ze zintegrowanymi GPU. Takie rozwiązanie wymagałoby jednak sprawdzenia, czy jest opłacalne. Możliwe jest, że zyski wynikające z takiego rozwiązania nie były by na tyle duże, aby uzasadnić koszty związane z zastosowaniem takiego rozwiązania.
+
+\subsubsection{Zastosowanie w IoT}
+Obecnie jedną z szybko rozwijających się koncepcji jest Internet of Things. Sprzętowe szyfrowanie AES mogło by znaleźć w niej zastosowanie. Można by zaprojektować układ szyfrujący optymalizujący zużycie energii. Pozwoliłoby to na zastosowanie go w urządzeniach, które zasilane są przy pomocy baterii i od których oczekuje się, że będą działać przez długi okres czasu bez konieczności jej wymiany. Taki dedykowany układ  szyfrujący, w porównaniu do szyfrowania przy pomocy procesorów ogólnego przeznaczenia, mógłby pozwolić na dłuższy czas pracy urządzeń IoT.
 
 
-\cite{artykul2011,ksiazka2011,narzedzie2011,projekt2011}
+
+
 \newpage

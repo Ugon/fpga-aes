@@ -171,14 +171,10 @@ architecture rtl of top is
 			clk_clk                                : in    std_logic                     := 'X';
 			reset_reset_n                          : in    std_logic                     := 'X';
 	
-			button_pio_external_connection_export  : in    std_logic_vector(3 downto 0)  := (others => 'X');
-			dipsw_pio_external_connection_export   : in    std_logic_vector(9 downto 0)  := (others => 'X');
-			led_pio_external_connection_export     : out   std_logic_vector(9 downto 0);
 			hps_0_f2h_cold_reset_req_reset_n       : in    std_logic                     := 'X';
 			hps_0_f2h_debug_reset_req_reset_n      : in    std_logic                     := 'X';
 			hps_0_f2h_stm_hw_events_stm_hwevents   : in    std_logic_vector(27 downto 0) := (others => 'X');
 			hps_0_f2h_warm_reset_req_reset_n       : in    std_logic                     := 'X';
-			hps_0_h2f_reset_reset_n                : out   std_logic;
 				
 			--HPS DDR3
 			memory_mem_a                           : out   std_logic_vector(14 downto 0);
@@ -266,6 +262,7 @@ architecture rtl of top is
 			hps_0_h2f_loan_io_in                   : out   std_logic_vector(66 downto 0);
 			hps_0_h2f_loan_io_out                  : in    std_logic_vector(66 downto 0) := (others => 'X');
 			hps_0_h2f_loan_io_oe                   : in    std_logic_vector(66 downto 0) := (others => 'X');
+			hps_0_h2f_reset_reset_n                : out   std_logic;
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic                     := 'X';
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic                     := 'X';
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO53 : inout std_logic                     := 'X';
@@ -305,14 +302,10 @@ begin
 			clk_clk                                => CLOCK_50,
 			reset_reset_n                          => '1',
 
-			button_pio_external_connection_export  => (others => '1'),
-			dipsw_pio_external_connection_export   => (others => '1'),
 			hps_0_f2h_cold_reset_req_reset_n       => '1',
 			hps_0_f2h_debug_reset_req_reset_n      => '1',
 			hps_0_f2h_stm_hw_events_stm_hwevents   => (others => '1'),
 			--hps_0_f2h_warm_reset_req_reset_n        => CONNECTED_TO_hps_0_f2h_warm_reset_req_reset_n,
-			--hps_0_h2f_reset_reset_n                 => CONNECTED_TO_hps_0_h2f_reset_reset_n,
-			--led_pio_external_connection_export      => CONNECTED_TO_led_pio_external_connection_export,
 
 			--HPS DDR3
 			memory_mem_a                           => HPS_DDR3_ADDR,
@@ -400,6 +393,7 @@ begin
 			hps_0_h2f_loan_io_in                   => CONNECTED_TO_hps_0_h2f_loan_io_in,
 			hps_0_h2f_loan_io_out                  => CONNECTED_TO_hps_0_h2f_loan_io_out,
 			hps_0_h2f_loan_io_oe                   => CONNECTED_TO_hps_0_h2f_loan_io_oe,
+			--hps_0_h2f_reset_reset_n                 => CONNECTED_TO_hps_0_h2f_reset_reset_n,
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO49 => HPS_UART_RX,
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO50 => HPS_UART_TX,
 			hps_0_hps_io_hps_io_gpio_inst_LOANIO53 => HPS_LED,

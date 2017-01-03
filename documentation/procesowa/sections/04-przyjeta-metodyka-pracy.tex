@@ -1,8 +1,10 @@
 \section{Przyjęta metodyka pracy}
 \label{sec:przyjeta-metodyka-pracy}
 Proces tworzenia projektu prowadzony był zgodnie z iteracyjnym modelem wytwarzania oprogramowania. Prace zostały podzielone na szereg iteracji, z których każda miała na celu rozbudowę poprzedniej wersji o nowe funkcjonalności. Efekt każdego przyrostu miał być funkcjonalny oraz przetestowany.
-\newline
-Ze względu na trudności w oszacowaniu, jak długo mogą zająć kolejne iteracje, wyszczególnione zostały dwa duże etapy agregujące po kilka iteracji. Każdy z tych etapów ma nieprzekraczalny termin. Drugi etap ma na celu dostarczeniem gotowego produktu oraz po jego zakończeniu przewidziany jest długi okres czasu na ewentualne poprawki, oraz finalizację projektu.
+
+Ze względu na trudności w oszacowaniu, jak długo mogą zająć kolejne iteracje, wyszczególnione zostały dwa duże etapy agregujące po kilka iteracji. Każdy z tych etapów ma nieprzekraczalny termin. Drugi etap ma na celu dostarczenie gotowego produktu oraz po jego zakończeniu przewidziany jest długi okres czasu na ewentualne poprawki, oraz finalizację projektu.
+
+Zdecydowano się na wykorzystanie przyrostowego modelu wytwarzania oprogramowania, ponieważ wstępna analiza problemu pokazała, że da się go w naturalny sposób podzielić na kilka iteracji o porównywalnej ilości prac do wykonania. Ponadto zespół projektowy miał już okazję pracować zgodnie z takim modelem, co pokazało że podział pracy na etapy ułatwia pracę nad projektem.
 
 \subsection{Pierwszy etap projektu}
 Pierwszy etap ma na celu implementację komunikacji między komputerem a płytką FPGA wraz z obsługą błędów. Po jego zakończeniu układ FPGA ma być zdolny odbierać strumień bloków oraz odsyłać je z powrotem bez żadnych modyfikacji. Błędy transmisji powinny być wykrywane i obsługiwane. Implementacja ma być przystosowana do łatwego zintegrowania z modułem szyfrującym AES oraz sposobem wiązania bloków CBC. Etap pierwszy kończy się 30.06.2016r (koniec VI semestru).
@@ -13,11 +15,11 @@ Pierwszy etap ma na celu implementację komunikacji między komputerem a płytk�
 \item Założenie projektu Quartus, skonfigurowanie pinów, wyprowadzenie sygnałów z układu FTDI do układu FPGA (przy użyciu programu Qsys). Zaimplementowanie modułu odbierającego znaki i odsyłającego je z powrotem.
 \item Zaimplementowanie modułów odpowiedzialnych za serializację i deserializację pomiędzy sygnałem UART a blokiem danych o wielkości 128b.
 \item Zaimplementowanie pierwszej wersji maszyny stanów odpowiedzialnej za sterowanie procesem odbierania i przesyłania bloków.
-\item Dodanie kontroli błędów przy użyciu sumy kontrolnej CRC.
+\item Dodanie kontroli błędów przy użyciu sumy kontrolnej CRC16.
 \end{itemize}
 
 \subsection{Drugi etap projektu}
-Drugi etap ma na celu dostarczenie gotowego produktu. Kończy się 30.09.2016r (koniec wakacji).
+Drugi etap ma na celu implementację szyfrowania i deszyfrowania AES, sposobu wiązania bloków CBC oraz dostarczenie gotowego produktu. Kończy się 30.09.2016r (koniec wakacji).
 \subsubsection{Planowane iteracje drugiego etapu projektu}
 \begin{itemize}
 \item Implementacja modułu szyfrującego blok AES.
@@ -28,8 +30,8 @@ Drugi etap ma na celu dostarczenie gotowego produktu. Kończy się 30.09.2016r (
 \end{itemize}
 
 \subsection{Narzędia użyte do zarządzania projektem}
-Do przechowywonia i wersjoniwania kodu źródłowego użyto systemu kontroli wersji Git oraz publicznego repozytorium kodu na stronie \textit{www.github.com}. Pozwoliło to na wygodne zarządzanie kodem źródłowym, wgląd w historię oraz inspekcję po wprowadzeniu zmian do repozytorium. Takie rozwiązanie daje również możliwość łatwego wglądu w kod dla promotora oraz managera projektu.
-\break
+Do przechowywonia i wersjoniwania kodu źródłowego użyto systemu kontroli wersji Git oraz publicznego repozytorium kodu na stronie \textit{www.github.com}. Pozwoliło to na wygodne zarządzanie kodem źródłowym, wgląd w historię oraz inspekcję po wprowadzeniu zmian do repozytorium. Takie rozwiązanie daje również możliwość łatwego wglądu w kod dla promotora oraz opiekuna projektu.
+
 Ze względu na fakt, że zespół projektowy był jednoosobowy, nie było konieczności używania innych narzędzi do zarządzania i wspomagania procesu wytwarzania oprogramowania. Wszelkie notatki, schematy oraz plany były tworzone odręcznie lub przy pomocy prostych edytorów tekstowych oraz narzędzi graficznych. Takie informacje były przechowywane lokalnie, oraz w razie konieczności były udostępnianie w repozytorium kodu lub wysyłane pocztą elektroniczną.
 
 
