@@ -3,7 +3,8 @@ Program komputerowy można uruchomić korzystając z terminala, a jego obsługa 
 
 Składnia polecenia:
 \begin{verbatim}
-sudo ./fpga-aes [-d] -in input_file -out output_file -K key -iv IV
+sudo python ./fpga-aes [-d] -in input_file -out output_file 
+                            -K key -iv IV
 \end{verbatim}
 
 Program trzeba uruchomić z uprawnieniami użytkownika root, ponieważ korzysta z portu szeregowego. Program przyjmuje parametry:
@@ -19,7 +20,7 @@ Program trzeba uruchomić z uprawnieniami użytkownika root, ponieważ korzysta 
 W celu zaszyfrowania pliku o nazwie \textit{plaintext-file.txt} do pliku \textit{cyphertext} kluczem \textit{000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f} oraz z wektorem inicjalizacji \textit{12345678901234567890123456789012} należy uruchomić program poleceniem:
 
 \begin{verbatim}
-sudo ./fpga-aes -in plaintext-file.txt -out cyphertext 
+sudo python ./fpga-aes -in plaintext-file.txt -out cyphertext 
 -K 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 
 -iv 12345678901234567890123456789012
 \end{verbatim}
@@ -27,7 +28,7 @@ sudo ./fpga-aes -in plaintext-file.txt -out cyphertext
 Aby ten plik odszyfrować, należy użyć polecenia:
 
 \begin{verbatim}
-sudo ./fpga-aes -d -in cyphertext -out plaintext-file.txt 
+sudo python ./fpga-aes -d -in cyphertext -out plaintext-file.txt 
 -K 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 
 -iv 12345678901234567890123456789012
 \end{verbatim}
