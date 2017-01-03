@@ -120,7 +120,7 @@ Najłatwiejszym sposobem na stworzenie karty SD zawierającej potrzebne pliki je
 Aby przy starcie płytki programowanie FPGA przebiegło pomyślnie, należy umieścić kartę SD w czytniku oraz ustawić przełączniki MSEL[4:0] (rys. \ref{fig:msel}) w pozycji 00100.
 
 \subsubsection{Ograniczenia czasowe}
-Aby mieć gwarancję, że projekt nie będzie zachowywał się niedeterministyczne ze względu na złe ułożenie ścieżek sygnałów w chipie FPGA powodujące zbyt długi czas propagacji, zdefiniowane zostały odpowiednie ograniczenia czasowe. Do tego celu posłużyła konsola w narzędziu TimeQuest Timing Analyzer będącym częścią środowiska programistycznego Quartus. Zdefiniowane ograniczenia to:
+Aby mieć gwarancję, że projekt nie będzie zachowywał się niedeterministyczne ze względu na złe ułożenie ścieżek sygnałów w chipie FPGA powodujące zbyt długi czas propagacji, zdefiniowane zostały odpowiednie ograniczenia czasowe. Do tego celu posłużyła konsola w narzędziu TimeQuest Timing Analyzer będącym częścią środowiska programistycznego Quartus. Zdefiniowane ograniczenia oraz komendy, które posłużyły do ich wprowadzenia to:
 
 \begin{itemize}
 \item Zewnętrzny zegar \textit{CLK\_50} o częstotliwości 50MHz
@@ -150,7 +150,7 @@ create_generated_clock -name {DESERIALIZER_CLK} \
 
 \end{itemize}
 
-Są to wszystkie sygnały pełniące w tym projekcie rolę zegarów.
+Są to wszystkie sygnały pełniące w tym projekcie rolę zegarów. Jednostką parametrów \textit{period} oraz \textit{offset} jest nanosekunda (np. okres 20ns odpowiada częstotliwości 50MHz).
 
 \subsection{Główny zegar}
 \label{sec:clk-16}

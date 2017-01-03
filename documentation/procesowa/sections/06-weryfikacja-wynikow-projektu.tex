@@ -18,7 +18,9 @@ W celu sprawdzenia poprawności działania implementowanych funkcjonalności na 
 
 \paragraph{Testy obciążeniowe} zostały przeprowadzone w celu sprawdzenia stabilności układu pod długotrwały obciążeniem. Polegały na szyfrowaniu i deszyfrowaniu dużych plików, których przetworzenie zajmowało wiele godzin. Testy wykazały, że produkt jest zdolny do długotrwałego, nieprzerwanego przetwarzania danych.
 
-\paragraph{Testy wydajnościowe} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+\paragraph{Testy wydajnościowe produktu} miały na celu sprawdzenie szybkości przetwarzania danych. Polegały na zmierzeniu czasu szyfrowania dużych plików oraz obliczenie prędkości przetwarzania. Ich wyniki były zgodne z obliczoną teoretyczną przepustowością kanału komunikacyjnego, wynoszącą 1MB/90sek.
+
+\paragraph{Testy wydajnościowe modułu szyfrującego} -- ze względu na zastosowanie protokołu UART do komunikacji wydajność produktu ograniczona jest prędkością transmisji. Moduł szyfrujący AES może jednak działać znacznie szybciej. Testy wydajnościowe modułu szyfrującego miały na celu zmierzenie maksymalnej częstotliwości z jaką może działać.
 
 \subsection{Ocena produktu}
 Produkt końcowy spełnia wszystkie postawione wymagania:
@@ -31,6 +33,6 @@ Produkt końcowy spełnia wszystkie postawione wymagania:
 \item Produkt końcowy jest łatwy w obsłudze
 \end{itemize}
 
-Projekt jest w pełni funkcjonalny oraz może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Jednym z proponowanych usprawnień jest zastąpienie tego protokołu komunikacji bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT. Proponowane sposoby rozwoju są bardziej szczegółowo opisane w dokumentacji technicznej.
+Projekt jest w pełni funkcjonalny oraz może stanowić bazę dla optymalizacji i ulepszeń. W obecnej wersji, ze względu na ograniczenia transmisji UART możliwe jest przesyłanie danych z prędkością jedynie 1MB/90sek. Nie jest to jednak maksymalna wydajność zaimplementowanego modułu szyfrującego -- wynosi ona 320MB/s. Jednym z proponowanych usprawnień jest zastąpienie protokołu komunikacji UART bardziej wydajnym. Można również rozważyć optymalizacje związane z implementacją logiki szyfrującej w bardziej wydajny sposób, lub integrację układów szyfrujących z procesorami CPU lub innymi układami wykorzystywanymi np. w IoT. Proponowane sposoby rozwoju są bardziej szczegółowo opisane w dokumentacji technicznej.
 
 \newpage

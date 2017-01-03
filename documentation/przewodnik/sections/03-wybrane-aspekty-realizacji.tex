@@ -8,7 +8,13 @@
 Głównym celem produktu końcowego jest udostępnienie użytkownikowi funkcjonalności szyfrowania i deszyfrowania plików. Celem pobocznym przedsięwzięcia projektowego jest eksploracja zagadnienia wykorzystania układów logiki programowalnej FPGA do rozwiązywania problemów dziedziny kryptografii na przykładzie algorytmu AES.
 
 \subsection {Struktura i zasada działania systemu}
-Projekt jest zbudowany w oparciu o architekturę klient-serwer (rys. \ref{fig:system-architecture-basic}). Rolę serwera pełni płytka Terasic DE1-SOC, a klientem jest komputer PC. Komunikacja odbywa się przez kabel USB, przez który tunelowany jest sygnał UART.
+Projekt jest zbudowany w oparciu o architekturę klient-serwer (rys. \ref{fig:system-architecture}). Rolę serwera pełni płytka Terasic DE1-SOC, a klientem jest komputer PC. Komunikacja odbywa się przez kabel USB, przez który tunelowany jest sygnał UART.
+
+\begin{figure}[!h]
+\includegraphics{pictures/system-architecture.png}
+\caption{Części składowe systemu}
+\label{fig:system-architecture}
+\end{figure}
 
 Serwer (płytka Terasic DE1-SOC) wyposażony jest w układ FPGA, którego zadaniami są:
 \begin{itemize}
@@ -17,14 +23,14 @@ Serwer (płytka Terasic DE1-SOC) wyposażony jest w układ FPGA, którego zadani
 \item szyfrowanie i deszyfrowanie odbieranych bloków algorytmem AES w trybie łączenia bloków CBC
 \end{itemize}
 
-Klientem jest komputer PC z systemem operacyjnym Ubuntu. Programem udostępniającym użytkownikowi funkcjonalność szyfrowania i deszyfrowania plików jest jest skrypt, który:
+Klientem jest komputer PC z systemem operacyjnym Ubuntu. Programem udostępniającym użytkownikowi funkcjonalność szyfrowania i deszyfrowania plików jest skrypt, który:
 \begin{itemize}
 \item odczytuje z dysku pliki do zaszyfrowania
 \item dzieli je na bloki, które wysyła do serwera w celu zaszyfrowania lub odszyfrowania
 \item odbiera przetworzone bloki danych oraz zapisuje je na dysku 
 \end{itemize}
 
-Komunikacja między klientem a serwerem odbywa się przez kabel USB, którym tunelowany jest sygnał UART. Końcówką tunelu po stronie serwera jest konwerter UART-USB firmy FTDI. Po stronie klienta tunel obsługiwany jest przez wbudowany w system operacyjny sterownik, który umożliwia realizację komunikacji w sposób analogiczny do zwykłego portu szeregowego.
+Komunikacja między klientem a serwerem odbywa się przez kabel USB, którym tunelowany jest sygnał UART. Końcówką tunelu po stronie serwera jest konwerter UART-USB firmy FTDI. Po stronie klienta tunel obsługiwany jest przez wbudowany w system operacyjny sterownik, który umożliwia realizację komunikacji w sposób analogiczny do zwykłego portu szeregowego. Wykorzystany układ Altera Cyclone V zawiera zintegrowany procesor HPS do którego podłączone są sygnały UART, w wyniku czego muszą one przechodzić przez piny HPS. Procesor nie wykonuje żadnych obliczeń ani nie modyfikuje sygnałów UART.
 
 \subsection{Wykorzystane rozwiązania technologiczne}
 Projekt jest realizowany na platformie FPGA. Układy FPGA, w przeciwieństwie do procesorów CPU, nie mają z góry ustalonej struktury -- schemat układu jest programowalny. Daje to możliwość projektowania wysoce wyspecjalizowanych układów, które będą miały strukturę zoptymalizowaną pod kątem wykonywania konkretnego zadania. Takie podejście jest znacząco różne od procesorów CPU, które są w stanie wykonywać jedynie z góry określone zestawy instrukcji ogólnego przeznaczenia. Stanowi do duże ograniczenie procesorów oraz powoduje, że dobrze zaprojektowane i zoptymalizowane układy zrealizowane na FPGA mogą być znacząco bardziej wydajne niż programy będące ich odpowiednikami wykonywane na CPU.
@@ -32,7 +38,7 @@ Projekt jest realizowany na platformie FPGA. Układy FPGA, w przeciwieństwie do
 \begin{figure}[!h]
 \centering
 \includegraphics[width=\textwidth]{pictures/fpga-board.jpg}
-\caption{Płytka Terasic DE1-SOC}
+\caption{Płytka Terasic DE1-SOC \cite{plytka}}
 \label{fig:fpga-board}
 \end{figure}
 

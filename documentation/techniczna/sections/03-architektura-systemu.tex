@@ -5,7 +5,7 @@ Projekt jest zbudowany w oparciu o architekturę klient-serwer (rys. \ref{fig:sy
 \begin{figure}[!h]
 \centering
 \includegraphics[width=6in]{pictures/system-architecture-basic.png}
-\caption{Architektura klient-serwer systemu}
+\caption{Architektura klient-serwer systemu (na zdjęciu laptop Dell XPS 13 \cite{laptop} oraz płytka Terasic DE1-SOC \cite{plytka})}
 \label{fig:system-architecture-basic}
 \end{figure}
 
@@ -16,9 +16,9 @@ Projekt jest zbudowany w oparciu o architekturę klient-serwer (rys. \ref{fig:sy
 \label{fig:system-architecture}
 \end{figure}
 
-Serwer (płytka Terasic DE1-SOC) wyposażony jest w układ FPGA, który jest zaprogramowany tak, aby realizował komunikację UART oraz szyfrowanie i deszyfrowanie AES. W układzie FPGA znajdującym się na tej płytce jest zintegrowany procesor ARM (HPS - ang. \textit{hard processor system}), do którego podłączone są sygnały UART biegnące do układu konwertera URAT-USB. Ponieważ te sygnały nie są bezpośrednio podłączone do programowalnej części układu, komunikacja musi zachodzić przez piny HPS, które są skonfigurowane tak, aby FPGA miało do nich dostęp oraz kontrolę (rozdz. \ref{sec:uart-qsys}).
+Serwer (płytka Terasic DE1-SOC) wyposażony jest w układ Altera Cyclone V SoC 5CSEMA5F31C6, który zawiera programowalną część FPGA oraz posiada zintegrowany procesor ARM (HPS - ang. \textit{hard processor system}). FPGA jest zaprogramowany tak, aby realizował komunikację UART oraz szyfrowanie i deszyfrowanie AES. Sygnały UART biegnące do układu konwertera USB-UART są podłączone do części HPS, w wyniku czego komunikacja między FPGA a konwerterem USB-UART musi zachodzić przez piny HPS, które zostały skonfigurowane tak aby było to możliwe (rozdz. \ref{sec:uart-qsys}).
 
-Klientem jest komputer PC z systemem operacyjnym Ubuntu. Programem udostępniającym użytkownikowi funkcjonalność szyfrowania i deszyfrowania plików jest jest skrypt, który odpowiada za komunikację z serwerem wykonującym zlecona zadania.
+Klientem jest komputer PC z systemem operacyjnym Ubuntu. Programem udostępniającym użytkownikowi funkcjonalność szyfrowania i deszyfrowania plików jest skrypt, który odpowiada za komunikację z serwerem wykonującym zlecona zadania.
 
 Komunikacja między klientem a serwerem odbywa się przez kabel USB, którym tunelowany jest sygnał UART. Końcówką tunelu po stronie serwera jest konwerter UART-USB firmy FTDI. Po stronie klienta tunel obsługiwany jest przez wbudowany w system operacyjny sterownik, który umożliwia realizację komunikacji w sposób analogiczny do zwykłego portu szeregowego.
 

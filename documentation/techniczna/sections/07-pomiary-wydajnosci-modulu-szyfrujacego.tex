@@ -1,0 +1,30 @@
+\section{Pomiary wydajności modułu szyfrującego}
+Ze względu na zastosowanie protokołu UART do komunikacji wydajność produktu ograniczona jest prędkością transmisji. Moduł szyfrujący AES może jednak działać z szybszą prędkością. W celu zmierzenia wydajności szyfrowania przeprowadzono test wydajnościowy.
+
+\subsection{Metodyka testów}
+W celu ustalenia wydajności modułu szyfrującego utworzono nowy projekt. Zaimplementowano układ taktowany zegarem, który na każdym rosnącym zboczu podawał na wejście modułu szyfrującego blok losowych danych oraz porównywał wyjście tego modułu (poprzedni blok w zaszyfrowanej formie) z oczekiwaną wartością. Jeśli przez długi okres czasu (ok. 1 godziny) wszystkie wyniki były poprawne to uznawano, że moduł jest zdolny szyfrować bloki z aktualną częstotliwością zegara.
+
+Do testów użyto 16 różnych par losowych danych wejściowych i ich oczekiwanej postaci zaszyfrowanej. Aby zagwarantować, że kompilator nie zoptymalizuje projektu poprzez uproszczenie modułu szyfrującego lub przeprowadzenie częściowych obliczeń w czasie kompilacji, dane zostały umieszczone w pamięci ROM w układzie FPGA (ang. \textit{on-chip memory}). W czasie działania układu kolejne bloki i wartości oczekiwane są pobierane z pamięci. Użyta została pamięć M10K, która jest w stanie działać z częstotliwością 315MHz (\cite[rozdz. 2]{altera-vol1}). Jest to wartość znacznie większa niż zmierzona maksymalna częstotliwość pracy modułu szyfrującego, więc pamięć nie stanowi wąskiego gardła systemu pomiarowego.
+
+Przyjęto założenie, że klucz w trakcie szyfrowania jest stały -- wszystkie bloki szyfrowane są jednym kluczem, a przy jego zmianie można poświęcić kilka cykli zegara na ustabilizowanie się układu przed przystąpieniem do szyfrowania. Użyty został losowo wygenerowany klucz, który w celu uniknięcia optymalizacji kompilatora również został umieszczony w pamięci i jest wczytywany przez układ przy starcie.
+
+Poprawność szyfrowanych bloków sprawdzana jest przez porównanie wyników z wartościami oczekiwanymi. W przypadku wystąpienia pierwszego błędu zapalana jest dioda LED na płytce Terasic DE1-SOC, co oznacza, że układ nie działa stabilnie przy aktualnej częstotliwości zegara. Zegar o żądanej częstotliwości generowany jest przez układ PLL.
+
+\subsection{Wyniki testów}
+Analiza opóźnień przeprowadzona przez narzędzie \textit{TimeQuest Timing Analyzer} będące częścią środowiska Quartus wykazała, że dla najgorszego modelu (\textit{Slow 1100mV 85C Model}\footnote{Slow/Fast -- jakość egzemplarza układu, 1100mV -- napięcie zasilające, 0C/85C -- temperatura działania}) układ może działać poprawnie z częstotliwością 16,13MHz. Przeprowadzone testy na rzeczywistym urządzeniu (układzie FPGA na płytce Terasic DE1-SoC) pokazały, że moduł szyfrujący działa stabilnie przy częstotliwości 20MHz. Dla takiej częstotliwości narzędzie \textit{TimeQuest Timing Analyzer} informuje, że dla najgorszych modeli (\textit{Slow 1100mV 85C Model} oraz \textit{Slow 1100mV 0C Model}) naruszony jest czas ustalania (ang. \textit{setup time}), ale dla modeli szybkich (\textit{Fast 1100mV 85C Model} oraz \textit{Fast 1100mV 0C Model}) analiza czasowa jest bez zastrzeżeń.
+
+Działanie modułu z częstotliwością 20MHz pozwala na zaszyfrowanie z prędkością
+\begin{equation*}
+20MHz * 128b = 2560b/s = \textbf{320MB/s}
+\end{equation*}
+
+\subsection{Interpretacja wyników}
+Dla porównania przeprowadzono testy wydajności szyfrowania na komputerze PC wyposażonym w procesor Intel i7 6700K taktowany zegarem 4GHz. Użyto benchmarku w programie VeraCrypt, który dał następujące wyniki:
+\begin{description}
+\item[243MB/s] Przy wyłączonej akceleracji sprzętowej (szyfrowanie bez użycia instrukcji AES-NI \cite{aes-processors}) przy użyciu jednego wątku
+\item[1,1GB/s] Przy włączonej akceleracji sprzętowej (szyfrowanie z użyciem instrukcji AES-NI \cite{aes-processors}) przy użyciu jednego wątku
+\end{description}
+
+Zaimplementowany w układzie FPGA moduł szyfrujący jest więc o 30\% szybszy od procesora Intel i7 najnowszej generacji działającego bez użycia instrukcji AES-NI, oraz o 70\% wolniejszy od tego samego procesora wykorzystującego instrukcje AES-NI.
+
+Projekt modułu szyfrującego można jednak optymalizować, np. poprzez zastosowanie przetwarzania potokowego (ang. \textit{pipelining}). Przy podziale modułu na 14  części, po jednej dla każdej rundy szyfrowania, moduł mógłby szyfrować z prędkością nawet czterokrotnie szybszą od współczesnego procesora Intel wykorzystującego sprzętową akcelerację szyfrowania (przy założeniu, że narzut związany z podziałem modułu byłby mały). Badanie wpływu pipeliningu na wydajność modułu szyfrującego nie zostało przeprowadzone -- może być przedmiotem dodatkowych badań.
