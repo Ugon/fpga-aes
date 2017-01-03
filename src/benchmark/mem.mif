@@ -1,0 +1,27 @@
+DEPTH = 17;                   -- The size of memory in words
+WIDTH = 256;                  -- The size of data in bits
+ADDRESS_RADIX = HEX;          -- The radix for address values
+DATA_RADIX = HEX;             -- The radix for data values
+CONTENT                       -- start of (address : data pairs)
+BEGIN
+
+-- memory address : data
+00 : b794294fbeb5f878ba75d404ef3cdd4dc5ba89ef568698d408bb2e2f58871a47; --00-0F - test data
+01 : 9cd326a11503d81a03aaf50f5c82c2ff103adf41924d38645782a6664a20d886;
+02 : a7fdfcca41f0c2588c3b34a3990d74a7e2ec51eda13613fe5270dd8b0f55ca49;
+03 : e6a974ad0b072c1283ad8bcf0da3d35ac3850e04deab3d396b9f4d207f74fa35;
+05 : ec47e5f3d890dddc22ca550bc0a2162280c7dbbd70087d44e5a126c3e935ef34;
+04 : 49b8d827f38a0418968eee4bcc73b20354acade33e5afad908a262c21a26fbcc;
+06 : 044191f7d7f8ca2d4cd1d738544a2e28264ed4f46de18ad93881feda1568d735;
+07 : 4055ec8b2e4706a6c9efcaac528da706b432fc07aaa87be5bf7c3110ea334a5a;
+08 : b7636472c5aea220128ae026c197da0a03ffb264ff9467a5abeaf4e27c4e68e8;
+09 : 7785307ea167e0ccd3caeb68fbf23c946a6fcb41bfda84a99159a6f1729bd3d8;
+0A : 423639422c2b65282cf2909baf4a01298bf1dc5f80c7b828ea4c379823cebc37;
+0B : 97446d4dd9f3655ba12f278aad02eaaba925becc186201496611f5d4e17e4f6d;
+0C : b7283c4df95b37f57987e4e47d62c6b11966d88816a1a8181b312577a780fce5;
+0D : 126fbd68b2f0fb2ba2e83adaaa7d0dfa57a8bb409daec8fc6a929276183534f7;
+0E : ac61ff1fe539264142ff6cbac840e6786d375dea190fc399ffcf8471e4fd01fd;
+0F : 4f7a3494b82a4032a17baa7f5ce59f5de3142779bdd3b021142f8d17cf5a1ed7;
+10 : 4c7dae3426f8f73eefb7ba50111b26e482d168fac542e38ec7e7fb59d89a9812; --key
+
+END;
